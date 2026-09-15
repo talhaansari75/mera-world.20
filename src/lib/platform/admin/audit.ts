@@ -1,0 +1,2 @@
+export type AuditEntry = { actorId: string; action: string; target: string; at: number; metadata?: Record<string,string|number|boolean> };
+export class AuditLog { private entries: AuditEntry[] = []; write(entry: AuditEntry): void { if (!entry.actorId || !entry.action || !entry.target) throw new Error('invalid_audit'); this.entries.push({ ...entry }); } list(): readonly AuditEntry[] { return this.entries.slice(); } }

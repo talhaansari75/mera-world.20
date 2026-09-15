@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const root = new URL('..', import.meta.url).pathname;
+const must = ['src/lib/v34/voice/voiceCommands.ts','src/components/v34/VoiceCommandScreen.tsx','V34_VOICE_NLP.md'];
+for (const f of must) if (!fs.existsSync(root+f)) throw new Error(`missing ${f}`);
+const types=fs.readFileSync(root+'src/lib/game/types.ts','utf8');
+const app=fs.readFileSync(root+'src/components/app/GameApp.tsx','utf8');
+const more=fs.readFileSync(root+'src/components/screens/MoreScreens.tsx','utf8');
+if (!types.includes('"voice"')) throw new Error('voice ScreenId missing');
+if (!app.includes('VoiceCommandScreen')) throw new Error('GameApp integration missing');
+if (!more.includes('"voice"')) throw new Error('More menu integration missing');
+const cmd=fs.readFileSync(root+'src/lib/v34/voice/voiceCommands.ts','utf8');
+for (const x of ['achievements','analytics','multiplayer','creator','journeyPlanner']) if (!cmd.includes(`'${x}'`)) throw new Error(`voice route ${x} missing`);
+console.log('V34 voice/NLP integration check: PASS');

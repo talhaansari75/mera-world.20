@@ -1,0 +1,2 @@
+export type QueueEntry={userId:string,region:string,rating:number,joinedAt:number};
+export function match(entries:QueueEntry[],maxDiff=200){const sorted=[...entries].sort((a,b)=>a.joinedAt-b.joinedAt);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length;j++)if(sorted[i].region===sorted[j].region&&Math.abs(sorted[i].rating-sorted[j].rating)<=maxDiff)return [sorted[i],sorted[j]];return null}

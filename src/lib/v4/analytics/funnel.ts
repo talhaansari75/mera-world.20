@@ -1,0 +1,1 @@
+export function funnel(events:{userId:string,name:string}[],steps:string[]){const users=new Set(events.map(e=>e.userId));return steps.map(step=>{const ids=new Set(events.filter(e=>e.name===step).map(e=>e.userId));return {step,users:ids.size,rate:users.size?ids.size/users.size:0}})}

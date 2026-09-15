@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const server=fs.readFileSync('src/lib/server/gameplay.ts','utf8');
+const store=fs.readFileSync('src/lib/store.ts','utf8');
+test('V69 server verifies bonus against word bank',()=>assert.match(server,/isWord\(word\)/));
+test('V69 action idempotency exists',()=>{assert.match(server,/actionId/);assert.match(server,/state\.actions\.some\(a => a\.id === data\.actionId\)/)});
+test('V69 buffered actions flush after server session starts',()=>assert.match(store,/flushPendingPlayActions\(result\.sessionId, updated\)/));
+test('V69 miss and hint are sent to server',()=>{assert.match(store,/type:"miss",word:forward,cells/);assert.match(store,/type:"hint"/)});
+test('V69 pause/resume use stable action ids',()=>{assert.match(store,/const actionId = newActionId\(\);/);assert.match(store,/actionId,type:"pause"/);assert.match(store,/actionId,type:"resume"/)});

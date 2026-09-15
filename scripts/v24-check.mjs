@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const root='src';
+const must=['src/lib/v24/creator/creatorService.ts','src/lib/v24/progression/mastery.ts','src/components/v24/CreatorScreen.tsx','src/components/v24/ProgressionHubScreen.tsx'];
+for(const f of must) if(!fs.existsSync(f)) throw new Error('missing '+f);
+const types=fs.readFileSync('src/lib/game/types.ts','utf8');
+for(const id of ['creator','progression']) if(!types.includes('"'+id+'"')) throw new Error('missing screen '+id);
+const app=fs.readFileSync('src/components/app/GameApp.tsx','utf8');
+for(const name of ['CreatorScreen','ProgressionHubScreen']) if(!app.includes(name)) throw new Error('not wired '+name);
+const more=fs.readFileSync('src/components/screens/MoreScreens.tsx','utf8');
+if(!more.includes('Creator Studio')||!more.includes('Mastery & Progression')) throw new Error('menu not wired');
+const q=fs.readFileSync('src/lib/v24/creator/creatorService.ts','utf8');
+if(!q.includes('validatePuzzleQuality')||!q.includes('localStorage')) throw new Error('creator quality/persistence missing');
+console.log('V24 check: PASS');

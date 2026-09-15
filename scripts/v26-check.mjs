@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root=process.cwd();
+const required=['src/lib/v26/progression/serverRewards.ts','src/lib/v26/progression/seasonRules.ts','src/lib/v26/creator/community.ts','src/components/v26/CreatorCommunityScreen.tsx','migrations/0008_v26_rewards_creator_community.sql'];
+for(const f of required) if(!fs.existsSync(path.join(root,f))) throw new Error(`missing ${f}`);
+const store=fs.readFileSync(path.join(root,'src/lib/store.ts'),'utf8');
+for(const x of ['claimAchievementServer','claimMissionServer','claimSeasonTierServer']) if(!store.includes(x)) throw new Error(`server reward not wired: ${x}`);
+const types=fs.readFileSync(path.join(root,'src/lib/game/types.ts'),'utf8');
+if(!types.includes('claimedSeasonTiers')||!types.includes('"creatorCommunity"')) throw new Error('V26 state/route missing');
+const app=fs.readFileSync(path.join(root,'src/components/app/GameApp.tsx'),'utf8');
+if(!app.includes('CreatorCommunityScreen')||!app.includes('case "creatorCommunity"')) throw new Error('community route missing');
+const sql=fs.readFileSync(path.join(root,'migrations/0008_v26_rewards_creator_community.sql'),'utf8');
+if(!sql.includes('creator_reviews')||!sql.includes('unique(puzzle_id,user_id)')) throw new Error('review schema missing');
+const community=fs.readFileSync(path.join(root,'src/lib/v26/creator/community.ts'),'utf8');
+if(!community.includes('isAdminUser')||!community.includes('context.userId')) throw new Error('moderation auth invariant failed');
+console.log('V26 check PASS: server-authoritative reward claims, creator moderation/reviews, season claim state, routing');

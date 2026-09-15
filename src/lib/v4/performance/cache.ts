@@ -1,0 +1,1 @@
+export class TTLCache<T>{private m=new Map<string,{v:T,e:number}>();set(k:string,v:T,ttl=60000){this.m.set(k,{v,e:Date.now()+ttl})}get(k:string){const x=this.m.get(k);if(!x||x.e<Date.now()){this.m.delete(k);return undefined}return x.v}}

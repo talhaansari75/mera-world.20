@@ -1,0 +1,2 @@
+export type Level={id:number;world:number;size:number;words:string[];difficulty:number};
+export function validateLevel(l:Level):string[]{const e:string[]=[];if(l.id<1||l.id>2000)e.push("level id");if(l.size<4||l.size>20)e.push("grid size");if(l.words.length<1||l.words.length>50)e.push("word count");if(l.difficulty<1||l.difficulty>10)e.push("difficulty");if(new Set(l.words.map(w=>w.toLowerCase())).size!==l.words.length)e.push("duplicate words");return e;}

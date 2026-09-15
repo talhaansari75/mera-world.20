@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { PrismaClient } from '@prisma/client';
+const expected=JSON.parse(await readFile('artifacts/prisma-adoption/data-snapshot.json','utf8')); const db=new PrismaClient();
+const specs=[['user',['id','email','updatedAt']],['account',['id','userId','providerId','accountId']],['playerSave',['userId','version','revision','updatedAt']],['purchaseReceipt',['id','userId','provider','externalId','productId','amountMinor','currency','status']],['rewardLedgerV5',['id','userId','idempotencyKey']],['creatorPuzzle',['id','userId','version','updatedAt']],['creatorReview',['id','puzzleId','userId','rating']],['entitlement',['userId','productId','active']]];
+let bad=0; try{for(const [model,fields] of specs){const rows=await db[model].findMany({select:Object.fromEntries(fields.map(f=>[f,true]))});rows.sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));const hash=createHash('sha256').update(JSON.stringify(rows,(_,v)=>typeof v==='bigint'?`${v}n`:v)).digest('hex');const e=expected.tables[model];if(!e||e.count!==rows.length||e.sha256!==hash){console.error(`[prisma-data-verify] FAIL ${model}: expected ${e?.count}/${e?.sha256}, got ${rows.length}/${hash}`);bad++;}}}finally{await db.$disconnect()};if(bad)process.exit(1);console.log('[prisma-data-verify] PASS — critical row counts and hashes unchanged.');

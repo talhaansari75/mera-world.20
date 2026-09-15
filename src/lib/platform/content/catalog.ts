@@ -1,0 +1,2 @@
+export type ContentEntry = { id: string; version: number; enabled: boolean; tags: string[] };
+export class ContentCatalog { private entries = new Map<string, ContentEntry>(); register(entry: ContentEntry): void { if (!entry.id || entry.version < 1) throw new Error('invalid_content'); this.entries.set(entry.id, { ...entry, tags: [...new Set(entry.tags)] }); } get(id: string): ContentEntry | undefined { return this.entries.get(id); } enabled(): ContentEntry[] { return [...this.entries.values()].filter(x => x.enabled); } }

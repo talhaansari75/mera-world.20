@@ -1,0 +1,2 @@
+export type IdempotencyRecord={key:string;status:number;body:unknown;expiresAt:number};
+export class IdempotencyStore{private records=new Map<string,IdempotencyRecord>();get(key:string){const r=this.records.get(key);if(!r||r.expiresAt<Date.now()){this.records.delete(key);return null}return r}put(key:string,status:number,body:unknown,ttlMs=86400000){this.records.set(key,{key,status,body,expiresAt:Date.now()+ttlMs})}}

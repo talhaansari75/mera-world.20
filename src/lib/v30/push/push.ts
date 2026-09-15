@@ -1,0 +1,7 @@
+// user_id is the database ownership key (Prisma field: userId).
+import { createServerFn } from "@tanstack/react-start";
+import { getPrisma } from "@/lib/db";
+import { authMiddleware } from "@/lib/auth/middleware";
+export const getPushConfig=createServerFn({method:"GET"}).middleware([authMiddleware]).handler(async()=>({ok:true as const,publicKey:import.meta.env.VITE_VAPID_PUBLIC_KEY??null}));
+export const savePushSubscription=createServerFn({method:"POST"}).middleware([authMiddleware]).validator((d:{subscription:unknown})=>({subscription:d.subscription})).handler(async({context,data})=>{const sub=data.subscription as Record<string,unknown>;if(!sub||typeof sub.endpoint!=="string"||sub.endpoint.length<20||sub.endpoint.length>2048)return{ok:false as const,error:"Invalid push subscription"};await getPrisma().pushSubscription.upsert({where:{userId_endpoint:{userId:context.userId,endpoint:sub.endpoint}},create:{userId:context.userId,endpoint:sub.endpoint,subscriptionJson:JSON.stringify(sub).slice(0,12000)},update:{subscriptionJson:JSON.stringify(sub).slice(0,12000)}});return{ok:true as const}});
+export const removePushSubscription=createServerFn({method:"POST"}).middleware([authMiddleware]).validator((d:{endpoint:string})=>({endpoint:String(d.endpoint??"").slice(0,2048)})).handler(async({context,data})=>{if(!data.endpoint)return{ok:false as const,error:"Missing endpoint"};await getPrisma().pushSubscription.deleteMany({where:{userId:context.userId,endpoint:data.endpoint}});return{ok:true as const}});

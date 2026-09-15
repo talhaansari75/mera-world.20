@@ -1,0 +1,2 @@
+export type Streak={current:number;best:number;lastActiveDate?:string};
+export function updateStreak(s:Streak,date:string):Streak{if(s.lastActiveDate===date)return s;const prev=s.lastActiveDate?new Date(s.lastActiveDate):null;const cur=new Date(date);const diff=prev?Math.round((cur.getTime()-prev.getTime())/86400000):2;const current=diff===1?s.current+1:1;return {current,best:Math.max(s.best,current),lastActiveDate:date};}
