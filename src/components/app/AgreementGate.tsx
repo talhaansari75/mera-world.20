@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   acceptLegalConsent,
   getLegalConsent,
-} from "@/lib/legal/consent.server";
+} from "@/lib/legal/consent";
 
 export function AgreementGate({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
