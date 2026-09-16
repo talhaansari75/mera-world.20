@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HmacPaymentProvider } from "@/lib/payments/providerBoundary";
 import { getPrisma } from "@/lib/db";
-import { Currency } from "@prisma/client";
 
 export const Route = createFileRoute("/api/payments/webhook")({
   server: {
@@ -39,7 +38,10 @@ export const Route = createFileRoute("/api/payments/webhook")({
             });
             return;
           }
-          const currency = (Object.prototype.hasOwnProperty.call(Currency, verified.currency) ? verified.currency : "USD") as Currency;
+          const allowedCurrencies = ["USD","EUR","GBP","PKR"];
+const currency = allowedCurrencies.includes(verified.currency)
+  ? verified.currency
+  : "USD";
           await tx.purchaseReceipt.upsert({
             where: { provider_externalId: { provider: verified.provider, externalId: verified.externalId } },
             create: {
