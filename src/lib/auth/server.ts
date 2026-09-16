@@ -30,7 +30,7 @@
  * a verified id via `@/lib/auth/middleware`.
  */
 import { betterAuth } from "better-auth";
-import { bearer, genericOAuth } from "better-auth/plugins";
+import { bearer, genericOAuth, username } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { getCookie } from "@tanstack/react-start/server";
 import { randomBytes } from "node:crypto";
@@ -232,6 +232,10 @@ export const auth = betterAuth({
   },
 
   plugins: [
+    username({
+      minUsernameLength: 3,
+      maxUsernameLength: 30,
+    }),
     gateIdentitySessions(),
 
     // One genericOAuth provider per upstream (when auth is on), all federating
