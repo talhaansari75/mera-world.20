@@ -1,5 +1,5 @@
-import { ENERGY_REFILL_MS, MAX_ENERGY, PLAYER_XP_PER_LEVEL } from "./constants.ts";
-import type { PlayerSave } from "./types.ts";
+import { ENERGY_REFILL_MS, MAX_ENERGY, PLAYER_XP_PER_LEVEL } from "../constants.ts";
+import type { PlayerSave } from "../types.ts";
 
 export function refillEnergy(save: PlayerSave, now = Date.now()): PlayerSave {
   if (save.energy >= MAX_ENERGY) {
