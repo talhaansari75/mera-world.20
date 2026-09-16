@@ -10,66 +10,228 @@ import { BookOpen, BarChart3, Languages, Map, Scale, Sparkles, Swords, Trophy, U
 export function MoreScreen() {
   const t = useT();
   const go = useGame.getState().go;
-  const items = [
-    { id: "profile" as const, label: t("cta.profile"), icon: User },
-    { id: "settings" as const, label: t("cta.settings"), icon: Wrench },
-    { id: "stats" as const, label: t("cta.stats"), icon: BarChart3 },
-    { id: "skills" as const, label: t("cta.skills"), icon: Sparkles },
-    { id: "inventory" as const, label: t("cta.inventory"), icon: BookOpen },
-    { id: "base" as const, label: "Camp", icon: Home },
-    { id: "equipment" as const, label: "Forge", icon: Hammer },
-    { id: "combat" as const, label: "Guardians", icon: Swords },
-    { id: "worldMap" as const, label: "Atlas", icon: Map },
-    { id: "npcs" as const, label: "Travelers", icon: MessageCircle },
-    { id: "missions" as const, label: "Missions", icon: Flag },
-    { id: "storyQuests" as const, label: "Story quests", icon: ScrollText },
-    { id: "dictionary" as const, label: t("cta.dictionary"), icon: Languages },
-    { id: "leaderboard" as const, label: t("cta.leaderboard"), icon: Trophy },
-    { id: "social" as const, label: "Friends & Clans", icon: Users },
-    { id: "multiplayer" as const, label: "Online Multiplayer", icon: Users },
-    { id: "liveOps" as const, label: "Events & Challenges", icon: CalendarDays },
-    { id: "content" as const, label: "Languages & Content", icon: Globe2 },
-    { id: "systems" as const, label: "Systems & Diagnostics", icon: Activity },
-    { id: "payments" as const, label: "Purchases & Entitlements", icon: CreditCard },
-    { id: "admin" as const, label: "Admin Control", icon: ShieldCheck },
-    { id: "saveSlots" as const, label: "Save Slots & Recovery", icon: HardDrive },
-    { id: "creator" as const, label: "Creator Studio", icon: PenTool },
-    { id: "progression" as const, label: "Mastery & Progression", icon: Crown },
-    { id: "seasonProgress" as const, label: "Season Progress", icon: CalendarRange, LineChart },
-    { id: "creatorCommunity" as const, label: "Creator Community", icon: PenTool },
-    { id: "analytics" as const, label: "Player Analytics", icon: LineChart },
-    { id: "accessibility" as const, label: "Accessibility Pro", icon: Accessibility },
-    { id: "pwa" as const, label: "Offline, Install & Updates", icon: Smartphone },
-    { id: "pushSettings" as const, label: "Push Delivery", icon: Bell },
-    { id: "coach" as const, label: "Smart Coach", icon: BrainCircuit },
-    { id: "adaptive" as const, label: "Adaptive Challenge", icon: Gauge },
-    { id: "journeyPlanner" as const, label: "Journey Planner", icon: Route },
-    { id: "voice" as const, label: "Voice Command Center", icon: Mic },
-    { id: "aiPuzzleLab" as const, label: "AI Puzzle Lab", icon: WandSparkles },
-    { id: "puzzleAudit" as const, label: "Puzzle QA Lab", icon: ShieldCheck },
-    { id: "playablePreview" as const, label: "Playable Preview Studio", icon: Eye },
-    { id: "creatorPlaytest" as const, label: "Creator Playtest", icon: Trophy },
-    { id: "publishReadiness" as const, label: "Publish Readiness", icon: ClipboardCheck },
-    { id: "releasePackage" as const, label: "Release Package", icon: PackageCheck },
-    { id: "releaseVerifier" as const, label: "Release Verifier", icon: FileCheck2 },
-    { id: "releaseArchive" as const, label: "Release Archive", icon: Archive },
-    { id: "legal" as const, label: t("cta.legal"), icon: Scale },
+  const [category, setCategory] = useState<string | null>(null);
+
+  const categories = [
+    {
+      id: "profile",
+      title: "Profile",
+      description: "Your player profile, stats and skills",
+      icon: User,
+      items: [
+        { id: "profile" as const, label: t("cta.profile"), icon: User },
+        { id: "stats" as const, label: t("cta.stats"), icon: BarChart3 },
+        { id: "skills" as const, label: t("cta.skills"), icon: Sparkles },
+      ],
+    },
+    {
+      id: "journey",
+      title: "Journey",
+      description: "Explore the world and continue your adventure",
+      icon: Map,
+      items: [
+        { id: "base" as const, label: "Camp", icon: Home },
+        { id: "equipment" as const, label: "Forge", icon: Hammer },
+        { id: "combat" as const, label: "Guardians", icon: Swords },
+        { id: "worldMap" as const, label: "Atlas", icon: Map },
+        { id: "npcs" as const, label: "Travelers", icon: MessageCircle },
+        { id: "missions" as const, label: "Missions", icon: Flag },
+        { id: "storyQuests" as const, label: "Story Quests", icon: ScrollText },
+        { id: "dictionary" as const, label: t("cta.dictionary"), icon: Languages },
+      ],
+    },
+    {
+      id: "progress",
+      title: "Progress & Rewards",
+      description: "Achievements, mastery, seasons and challenges",
+      icon: Trophy,
+      items: [
+        { id: "achievements" as const, label: "Achievements", icon: Trophy },
+        { id: "progression" as const, label: "Mastery & Progression", icon: Crown },
+        { id: "seasonProgress" as const, label: "Season Progress", icon: CalendarRange },
+        { id: "liveOps" as const, label: "Events & Challenges", icon: CalendarDays },
+        { id: "leaderboard" as const, label: t("cta.leaderboard"), icon: Trophy },
+      ],
+    },
+    {
+      id: "collection",
+      title: "Collection",
+      description: "Manage your items, pets and upgrades",
+      icon: BookOpen,
+      items: [
+        { id: "inventory" as const, label: t("cta.inventory"), icon: BookOpen },
+        { id: "pets" as const, label: "Pets", icon: Sparkles },
+        { id: "equipment" as const, label: "Forge & Equipment", icon: Hammer },
+        { id: "shop" as const, label: "Shop", icon: CreditCard },
+      ],
+    },
+    {
+      id: "social",
+      title: "Social",
+      description: "Friends, clans and multiplayer",
+      icon: Users,
+      items: [
+        { id: "social" as const, label: "Friends & Clans", icon: Users },
+        { id: "multiplayer" as const, label: "Online Multiplayer", icon: Swords },
+        { id: "leaderboard" as const, label: "Leaderboard", icon: Trophy },
+      ],
+    },
+    {
+      id: "smart",
+      title: "Smart Features",
+      description: "AI, coaching, adaptive gameplay and voice tools",
+      icon: BrainCircuit,
+      items: [
+        { id: "coach" as const, label: "Smart Coach", icon: BrainCircuit },
+        { id: "adaptive" as const, label: "Adaptive Challenge", icon: Gauge },
+        { id: "journeyPlanner" as const, label: "Journey Planner", icon: Route },
+        { id: "voice" as const, label: "Voice Command Center", icon: Mic },
+      ],
+    },
+    {
+      id: "creator",
+      title: "Creator Studio",
+      description: "Create, test, audit and publish content",
+      icon: PenTool,
+      items: [
+        { id: "creator" as const, label: "Creator Studio", icon: PenTool },
+        { id: "creatorCommunity" as const, label: "Creator Community", icon: Users },
+        { id: "aiPuzzleLab" as const, label: "AI Puzzle Lab", icon: WandSparkles },
+        { id: "puzzleAudit" as const, label: "Puzzle QA Lab", icon: ShieldCheck },
+        { id: "playablePreview" as const, label: "Playable Preview Studio", icon: Eye },
+        { id: "creatorPlaytest" as const, label: "Creator Playtest", icon: Trophy },
+      ],
+    },
+    {
+      id: "release",
+      title: "Release Center",
+      description: "Prepare, verify and archive releases",
+      icon: PackageCheck,
+      items: [
+        { id: "publishReadiness" as const, label: "Publish Readiness", icon: ClipboardCheck },
+        { id: "releasePackage" as const, label: "Release Package", icon: PackageCheck },
+        { id: "releaseVerifier" as const, label: "Release Verifier", icon: FileCheck2 },
+        { id: "releaseArchive" as const, label: "Release Archive", icon: Archive },
+      ],
+    },
+    {
+      id: "settings",
+      title: "Settings",
+      description: "Customize gameplay, appearance, language and data",
+      icon: Wrench,
+      items: [
+        { id: "settings" as const, label: t("cta.settings"), icon: Wrench },
+        { id: "accessibility" as const, label: "Accessibility", icon: Accessibility },
+        { id: "pwa" as const, label: "Offline, Install & Updates", icon: Smartphone },
+        { id: "pushSettings" as const, label: "Push Delivery", icon: Bell },
+        { id: "content" as const, label: "Languages & Content", icon: Globe2 },
+      ],
+    },
+    {
+      id: "account",
+      title: "Account & Data",
+      description: "Purchases, saves and account-related tools",
+      icon: HardDrive,
+      items: [
+        { id: "saveSlots" as const, label: "Save Slots & Recovery", icon: HardDrive },
+        { id: "payments" as const, label: "Purchases & Entitlements", icon: CreditCard },
+      ],
+    },
+    {
+      id: "system",
+      title: "System",
+      description: "Diagnostics, analytics and administration",
+      icon: Activity,
+      items: [
+        { id: "systems" as const, label: "Systems & Diagnostics", icon: Activity },
+        { id: "analytics" as const, label: "Player Analytics", icon: LineChart },
+        { id: "admin" as const, label: "Admin Control", icon: ShieldCheck },
+      ],
+    },
+    {
+      id: "help",
+      title: "Help & Legal",
+      description: "Information, terms and privacy",
+      icon: Scale,
+      items: [
+        { id: "legal" as const, label: t("cta.legal"), icon: Scale },
+      ],
+    },
   ];
+
+  const activeCategory = categories.find((c) => c.id === category);
+
   return (
     <Screen title={t("cta.more")}>
-      <div className="flex flex-col gap-2">
-        {items.map((it) => (
-          <button
-            key={it.id}
-            type="button"
-            className="panel flex items-center gap-3 rounded-2xl p-4 text-left"
-            onClick={() => go(it.id)}
-          >
-            <it.icon className="size-5 text-primary" />
-            <span className="font-semibold text-fg">{it.label}</span>
-          </button>
-        ))}
-      </div>
+      {!activeCategory ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {categories.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setCategory(item.id)}
+              className="panel flex min-h-[110px] items-center gap-4 rounded-2xl p-5 text-left transition-transform active:scale-[0.98]"
+            >
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-surface-2">
+                <item.icon className="size-6 text-primary" />
+              </span>
+
+              <span className="min-w-0 flex-1">
+                <span className="block text-base font-semibold text-fg">
+                  {item.title}
+                </span>
+                <span className="mt-1 block text-xs leading-relaxed text-muted">
+                  {item.description}
+                </span>
+              </span>
+
+              <span className="text-xl text-muted">›</span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div>
+          <div className="mb-4 flex items-center gap-3">
+            <button
+              type="button"
+              className="hud-chip text-fg"
+              onClick={() => setCategory(null)}
+            >
+              ←
+            </button>
+
+            <div>
+              <h2 className="text-lg font-semibold text-fg">
+                {activeCategory.title}
+              </h2>
+              <p className="text-xs text-muted">
+                {activeCategory.description}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            {activeCategory.items.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className="panel flex items-center gap-3 rounded-2xl p-4 text-left transition-transform active:scale-[0.98]"
+                onClick={() => go(item.id)}
+              >
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-surface-2">
+                  <item.icon className="size-5 text-primary" />
+                </span>
+
+                <span className="flex-1 font-semibold text-fg">
+                  {item.label}
+                </span>
+
+                <span className="text-lg text-muted">›</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </Screen>
   );
 }
