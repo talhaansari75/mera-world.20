@@ -249,3 +249,56 @@ export const SPIN_TABLE = [
     label: "Jackpot",
   },
 ] as const;
+```ts
+export function rewardCoins(opts: {
+  mode: string;
+  stars: number;
+  combo: number;
+  hints: number;
+  mistakes: number;
+  wordCount: number;
+  firstClear: boolean;
+  boss: boolean;
+}) {
+  let coins = 12 + opts.stars * 8 + opts.wordCount * 2;
+
+  if (opts.combo >= 5) coins += Math.min(30, opts.combo * 2);
+  if (opts.hints === 0) coins += 10;
+  if (opts.mistakes === 0) coins += 5;
+  if (opts.firstClear) coins += 10;
+  if (opts.boss) coins += 40;
+
+  if (opts.mode === "double_reward") coins *= 2;
+  if (opts.mode === "treasure") coins += 20;
+  if (opts.mode === "hardcore" || opts.mode === "nightmare") coins += 15;
+
+  coins -= opts.hints * 3;
+  coins -= opts.mistakes;
+
+  return Math.max(6, coins);
+}
+
+export function recordLevelResult(
+  save: PlayerSave,
+  level: number,
+  result: LevelResult
+): PlayerSave {
+  const key = String(level);
+  const previous = save.results[key];
+
+  const shouldReplace =
+    !previous ||
+    result.stars > previous.stars ||
+    (result.stars === previous.stars && result.timeMs < previous.timeMs);
+
+  const results = shouldReplace
+    ? { ...save.results, [key]: result }
+    : save.results;
+
+  return {
+    ...save,
+    results,
+    unlockedLevel: Math.max(save.unlockedLevel, level + 1),
+  };
+}
+```
