@@ -116,7 +116,11 @@ const baseURL = explicitBaseURL ?? {
 // Origins Better Auth accepts on credentialed POSTs (sign-up/sign-in, etc.).
 // Missing entries here surface as FORBIDDEN "Invalid origin".
 const trustedOrigins: string[] = explicitBaseURL
-  ? [explicitBaseURL, ...LOCAL_DEV_ORIGINS]
+  ? [
+      explicitBaseURL,
+      ...LOCAL_DEV_ORIGINS,
+      "https://mera-world-20-4c5t10ve1-talha-d4d6.vercel.app",
+    ]
   : [
       // Host wildcards (matched against Origin's host)
       ...previewAllowedHosts,
