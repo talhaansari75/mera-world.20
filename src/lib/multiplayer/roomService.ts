@@ -1,3 +1,4 @@
+
 import { getPrisma } from "@/lib/db";
 import { audit } from "@/lib/server/v3/audit";
 import { consumeRateLimit } from "@/lib/server/v3/rateLimit";
@@ -26,26 +27,14 @@ export async function joinRoom(userId:string,displayName:string,id:string){
         return tx.multiplayerRoom.findUnique({where:{roomId:id},include:{members:{orderBy:{joinedAt:"asc"}}}}).then(formatRoom);
       },{isolationLevel:"Serializable",maxWait:5000,timeout:10000});
     }catch(error){
-      if((error as {code?:string})?.code==="P2034" && attempt<2)continue;
+      if ((error as { code?: string })?.code === "P2034" && attempt < 2) continue;
       throw error;
     }
   }
   throw new Error("room_join_conflict");
 }
 export async function getRoom(id:string){return formatRoom(await getPrisma().multiplayerRoom.findUnique({where:{roomId:id},include:{members:{orderBy:{joinedAt:"asc"}}}}))}
-type RoomWithMembers = {
-  roomId:string;
-  hostUserId:string;
-  mode:string;
-  stateJson:unknown;
-  status:string;
-  maxPlayers:number;
-  members:Array<{
-    userId:string;
-    displayName:string;
-    role:string;
-  }>;
-};
+type RoomWithMembers = { roomId:string; hostUserId:string; mode:string; stateJson:unknown; status:string; maxPlayers:number; members:Array<{ userId:string; displayName:string; role:string; }>; };
 function formatRoom(room: RoomWithMembers | null){
   if(!room)return null;
   return {roomId:room.roomId,hostUserId:room.hostUserId,mode:room.mode,state:room.stateJson,status:room.status,maxPlayers:room.maxPlayers,members:room.members.map(m=>({userId:m.userId,displayName:m.displayName,role:m.role}))};
