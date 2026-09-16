@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { emailAndPasswordEnabled } from "@/lib/auth/email-password";
 
@@ -36,10 +36,10 @@ function Login() {
   return (
     <main className="app-shell starfield safe-pad grid min-h-dvh place-items-center p-6">
       <div className="panel w-full max-w-sm rounded-3xl p-6">
-        <p className="text-xs uppercase tracking-[0.2em] text-accent">Optional</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-accent">Required</p>
         <h1 className="font-display mt-1 text-2xl text-fg">Join the hall</h1>
         <p className="mt-2 text-sm text-muted">
-          Cloud save and leaderboards. Guests keep every page locally — no forced login.
+          Sign in or create an account to continue your journey.
         </p>
 
         {authEnabled ? (
@@ -103,9 +103,6 @@ function Login() {
           </form>
         )}
 
-        <Link to="/" className="btn-ghost mt-5">
-          Continue as guest
-        </Link>
       </div>
     </main>
   );

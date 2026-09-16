@@ -39,6 +39,7 @@ const MODELS: Record<string, ModelCfg> = {
   pushSubscription: { table: "push_subscriptions", jsonb: ["subscriptionJson"], dates: ["updatedAt"], uniques: { userId_endpoint: ["userId", "endpoint"] } },
   creatorProfile: { table: "creator_profiles", dates: ["createdAt", "updatedAt"], uniques: { userId: ["userId"] } },
   userRole: { table: "user_roles", uniques: { userId_roleId: ["userId", "roleId"] } },
+  legalConsent: { table: "legal_consents", dates: ["acceptedAt"], uniques: { userId_version: ["userId", "version"] } },
   role: { table: "roles", uniques: { id: ["id"], name: ["name"] } },
   permission: { table: "permissions", uniques: { id: ["id"], name: ["name"] } },
   analyticsEventV5: { table: "analytics_events_v5", jsonb: ["propertiesJson"], uniques: { id: ["id"] } },

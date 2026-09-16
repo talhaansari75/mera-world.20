@@ -366,9 +366,9 @@ export function LegalScreen() {
       <article className="prose-like space-y-4 text-sm leading-relaxed text-muted">
         <h2 className="font-display text-xl text-fg">Terms of travel</h2>
         <p>
-          Mera Word Search Journey is a free, ad-free atlas. Play as a guest. Optional sign-in stores a cloud copy of
-          your progress and lets you appear on the hall of names. You may export or delete local progress at any time
-          from Settings.
+          Mera Word Search Journey is a free, ad-free atlas. An account is required to enter the game and
+          enables cloud save and account-based game features. You may manage or delete your account through
+          the available account tools.
         </p>
         <h2 className="font-display text-xl text-fg">Quiet ledger (privacy)</h2>
         <p>
@@ -376,7 +376,7 @@ export function LegalScreen() {
           scores, scoped to your account. We do not sell data. Optional AI riddles are user-initiated and sent without
           your full save. Account deletion is available through your signed-in profile tools.
         </p>
-        <p>No ads. No forced login. Progress is yours to keep, export, or erase.</p>
+        <p>No ads. Your account data is used to provide the game's account-based features.</p>
       </article>
     </Screen>
   );
