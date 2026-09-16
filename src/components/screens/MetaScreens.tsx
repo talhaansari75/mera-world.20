@@ -205,92 +205,237 @@ export function SettingsScreen() {
   const s = useGame((s) => s.save.settings);
   const lang = useGame((s) => s.save.language);
   const set = useGame.getState().setSetting;
+  const [category, setCategory] = useState<string | null>(null);
+
   const toggle = (k: keyof GameSettings) => {
     const next = !s[k];
     set(k, next as never);
+
     if (k === "music") {
       applyVolumes({ musicOn: next });
       if (next) startMusic();
       else stopMusic();
     }
+
     if (k === "sfx") applyVolumes({ sfxOn: next });
   };
+
+  const categories = [
+    {
+      id: "gameplay",
+      icon: "🎮",
+      title: "Gameplay",
+      description: "Game behavior and play options",
+    },
+    {
+      id: "audio",
+      icon: "🔊",
+      title: "Audio",
+      description: "Music, sound effects and haptics",
+    },
+    {
+      id: "appearance",
+      icon: "🎨",
+      title: "Appearance",
+      description: "Theme and tile style",
+    },
+    {
+      id: "accessibility",
+      icon: "♿",
+      title: "Accessibility",
+      description: "Display, motion and reading options",
+    },
+    {
+      id: "language",
+      icon: "🌐",
+      title: "Language",
+      description: "Choose your language",
+    },
+    {
+      id: "data",
+      icon: "💾",
+      title: "Data",
+      description: "Export, import or reset your save",
+    },
+  ];
+
+  const renderCategory = () => {
+    switch (category) {
+      case "gameplay":
+        return (
+          <>
+            <SettingHeader title="Gameplay" onBack={() => setCategory(null)} />
+            <ToggleRow
+              label="Personalized gameplay"
+              on={s.personalization}
+              onClick={() => toggle("personalization")}
+            />
+            <p className="-mt-1 mb-3 text-xs text-muted">
+              Uses only in-game behavior such as pace, hints, combos, pets and challenges.
+            </p>
+            <ToggleRow label="Show timer" on={s.showTimer} onClick={() => toggle("showTimer")} />
+            <ToggleRow label="Grid lines" on={s.gridLines} onClick={() => toggle("gridLines")} />
+          </>
+        );
+
+      case "audio":
+        return (
+          <>
+            <SettingHeader title="Audio" onBack={() => setCategory(null)} />
+            <ToggleRow label="Sound effects" on={s.sfx} onClick={() => toggle("sfx")} />
+            <ToggleRow label="Music" on={s.music} onClick={() => toggle("music")} />
+            <ToggleRow label="Haptics" on={s.haptics} onClick={() => toggle("haptics")} />
+          </>
+        );
+
+      case "appearance":
+        return (
+          <>
+            <SettingHeader title="Appearance" onBack={() => setCategory(null)} />
+
+            <p className="text-xs text-muted">Tile style</p>
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {(["carved", "ink", "neon"] as const).map((st) => (
+                <button
+                  key={st}
+                  type="button"
+                  className="hud-chip text-fg capitalize"
+                  onClick={() => set("tileStyle", st)}
+                >
+                  {st}
+                </button>
+              ))}
+            </div>
+
+            <p className="mt-5 text-xs text-muted">Theme</p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {THEMES.map((th) => (
+                <button
+                  key={th.id}
+                  type="button"
+                  className="panel rounded-xl p-3 text-left"
+                  onClick={() => useGame.getState().equipTheme(th.id as ThemeId)}
+                >
+                  <span className="block text-sm font-semibold text-fg">{th.name}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        );
+
+      case "accessibility":
+        return (
+          <>
+            <SettingHeader title="Accessibility" onBack={() => setCategory(null)} />
+            <ToggleRow label="Reduced motion" on={s.reducedMotion} onClick={() => toggle("reducedMotion")} />
+            <ToggleRow label="High contrast" on={s.highContrast} onClick={() => toggle("highContrast")} />
+            <ToggleRow label="Larger type" on={s.largeText} onClick={() => toggle("largeText")} />
+            <ToggleRow label="Force RTL" on={s.rtlForce} onClick={() => toggle("rtlForce")} />
+          </>
+        );
+
+      case "language":
+        return (
+          <>
+            <SettingHeader title="Language" onBack={() => setCategory(null)} />
+            <label className="text-xs text-muted">App language</label>
+            <select
+              className="mt-2 w-full rounded-xl border border-border bg-surface px-3 py-3 text-fg"
+              value={lang}
+              onChange={(e) => useGame.getState().setLang(e.target.value as typeof lang)}
+            >
+              {LANGS.map((l) => (
+                <option key={l} value={l}>
+                  {tr(l, `lang.${l}`)}
+                </option>
+              ))}
+            </select>
+          </>
+        );
+
+      case "data":
+        return (
+          <>
+            <SettingHeader title="Data" onBack={() => setCategory(null)} />
+
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => {
+                const blob = new Blob([useGame.getState().exportJson()], {
+                  type: "application/json",
+                });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = "mera-word-search.json";
+                a.click();
+              }}
+            >
+              Export save
+            </button>
+
+            <label className="btn-ghost mt-2">
+              Import save
+              <input
+                type="file"
+                accept="application/json"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  useGame.getState().importJson(await file.text());
+                }}
+              />
+            </label>
+
+            <button
+              type="button"
+              className="btn-ghost mt-2 text-danger"
+              onClick={() => useGame.getState().resetProgress()}
+            >
+              Reset progress
+            </button>
+          </>
+        );
+
+      default:
+        return (
+          <div className="mt-4 flex flex-col gap-3">
+            {categories.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setCategory(item.id)}
+                className="panel flex items-center gap-4 rounded-2xl p-4 text-left"
+              >
+                <span className="text-2xl">{item.icon}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-semibold text-fg">{item.title}</span>
+                  <span className="mt-1 block text-xs text-muted">{item.description}</span>
+                </span>
+                <span className="text-lg text-muted">›</span>
+              </button>
+            ))}
+          </div>
+        );
+    }
+  };
+
   return (
     <Screen title={t("settings.title")}>
-      <label className="text-xs text-muted">Language</label>
-      <select
-        className="mt-1 mb-4 w-full rounded-xl border border-border bg-surface px-3 py-3 text-fg"
-        value={lang}
-        onChange={(e) => useGame.getState().setLang(e.target.value as typeof lang)}
-      >
-        {LANGS.map((l) => (
-          <option key={l} value={l}>
-            {tr(l, `lang.${l}`)}
-          </option>
-        ))}
-      </select>
-      <ToggleRow label="Sound effects" on={s.sfx} onClick={() => toggle("sfx")} />
-      <ToggleRow label="Personalized gameplay" on={s.personalization} onClick={() => toggle("personalization")} />
-      <p className="-mt-1 mb-3 text-xs text-muted">Uses only in-game behavior such as pace, hints, combos, pets and challenges. No private or identity data is used. Turn it off anytime.</p>
-      <ToggleRow label="Music" on={s.music} onClick={() => toggle("music")} />
-      <ToggleRow label="Haptics" on={s.haptics} onClick={() => toggle("haptics")} />
-      <ToggleRow label="Reduced motion" on={s.reducedMotion} onClick={() => toggle("reducedMotion")} />
-      <ToggleRow label="High contrast" on={s.highContrast} onClick={() => toggle("highContrast")} />
-      <ToggleRow label="Larger type" on={s.largeText} onClick={() => toggle("largeText")} />
-      <ToggleRow label="Show timer" on={s.showTimer} onClick={() => toggle("showTimer")} />
-      <ToggleRow label="Grid lines" on={s.gridLines} onClick={() => toggle("gridLines")} />
-      <ToggleRow label="Force RTL" on={s.rtlForce} onClick={() => toggle("rtlForce")} />
-      <p className="mt-4 text-xs text-muted">Tile style</p>
-      <div className="mt-2 flex gap-2">
-        {(["carved", "ink", "neon"] as const).map((st) => (
-          <button key={st} type="button" className="hud-chip text-fg capitalize" onClick={() => set("tileStyle", st)}>
-            {st}
-          </button>
-        ))}
-      </div>
-      <p className="mt-4 text-xs text-muted">Theme</p>
-      <div className="mt-2 grid grid-cols-2 gap-2">
-        {THEMES.map((th) => (
-          <button
-            key={th.id}
-            type="button"
-            className="panel rounded-xl p-3 text-left"
-            onClick={() => useGame.getState().equipTheme(th.id as ThemeId)}
-          >
-            <span className="block text-sm font-semibold text-fg">{th.name}</span>
-          </button>
-        ))}
-      </div>
-      <button
-        type="button"
-        className="btn-ghost mt-6"
-        onClick={() => {
-          const blob = new Blob([useGame.getState().exportJson()], { type: "application/json" });
-          const a = document.createElement("a");
-          a.href = URL.createObjectURL(blob);
-          a.download = "mera-word-search.json";
-          a.click();
-        }}
-      >
-        Export save
-      </button>
-      <label className="btn-ghost mt-2">
-        Import save
-        <input
-          type="file"
-          accept="application/json"
-          className="hidden"
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            useGame.getState().importJson(await file.text());
-          }}
-        />
-      </label>
-      <button type="button" className="btn-ghost mt-2 text-danger" onClick={() => useGame.getState().resetProgress()}>
-        Reset progress
-      </button>
+      {renderCategory()}
     </Screen>
+  );
+}
+
+function SettingHeader({ title, onBack }: { title: string; onBack: () => void }) {
+  return (
+    <div className="mb-3 flex items-center gap-3">
+      <button type="button" className="hud-chip text-fg" onClick={onBack}>
+        ←
+      </button>
+      <h2 className="text-lg font-semibold text-fg">{title}</h2>
+    </div>
   );
 }
 
