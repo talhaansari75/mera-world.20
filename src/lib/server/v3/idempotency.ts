@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { getPrisma } from "@/lib/db";
 
 const LEASE_MS = 30_000;
@@ -28,7 +27,7 @@ export async function withIdempotency<T>(
     });
     owner = true;
   } catch (error) {
-    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
+    if ((error as {code?:string})?.code !== "P2002") throw error;
   }
 
   if (!owner) {
