@@ -16,7 +16,7 @@ export function MoreScreen() {
     {
       id: "profile",
       title: "Profile",
-      description: "Your player profile, stats and skills",
+      description: "Your identity and personal progress",
       icon: User,
       items: [
         { id: "profile" as const, label: t("cta.profile"), icon: User },
@@ -27,23 +27,23 @@ export function MoreScreen() {
     {
       id: "journey",
       title: "Journey",
-      description: "Explore the world and continue your adventure",
+      description: "Explore, battle and continue your adventure",
       icon: Map,
       items: [
         { id: "base" as const, label: "Camp", icon: Home },
-        { id: "equipment" as const, label: "Forge", icon: Hammer },
-        { id: "combat" as const, label: "Guardians", icon: Swords },
         { id: "worldMap" as const, label: "Atlas", icon: Map },
-        { id: "npcs" as const, label: "Travelers", icon: MessageCircle },
         { id: "missions" as const, label: "Missions", icon: Flag },
         { id: "storyQuests" as const, label: "Story Quests", icon: ScrollText },
+        { id: "npcs" as const, label: "Travelers", icon: MessageCircle },
+        { id: "combat" as const, label: "Guardians", icon: Swords },
+        { id: "equipment" as const, label: "Forge", icon: Hammer },
         { id: "dictionary" as const, label: t("cta.dictionary"), icon: Languages },
       ],
     },
     {
       id: "progress",
-      title: "Progress & Rewards",
-      description: "Achievements, mastery, seasons and challenges",
+      title: "Progress",
+      description: "Achievements, mastery, seasons and rankings",
       icon: Trophy,
       items: [
         { id: "achievements" as const, label: "Achievements", icon: Trophy },
@@ -56,30 +56,28 @@ export function MoreScreen() {
     {
       id: "collection",
       title: "Collection",
-      description: "Manage your items, pets and upgrades",
+      description: "Items, pets and your in-game resources",
       icon: BookOpen,
       items: [
         { id: "inventory" as const, label: t("cta.inventory"), icon: BookOpen },
         { id: "pets" as const, label: "Pets", icon: Sparkles },
-        { id: "equipment" as const, label: "Forge & Equipment", icon: Hammer },
         { id: "shop" as const, label: "Shop", icon: CreditCard },
       ],
     },
     {
       id: "social",
       title: "Social",
-      description: "Friends, clans and multiplayer",
+      description: "Connect, compete and play together",
       icon: Users,
       items: [
         { id: "social" as const, label: "Friends & Clans", icon: Users },
         { id: "multiplayer" as const, label: "Online Multiplayer", icon: Swords },
-        { id: "leaderboard" as const, label: "Leaderboard", icon: Trophy },
       ],
     },
     {
       id: "smart",
-      title: "Smart Features",
-      description: "AI, coaching, adaptive gameplay and voice tools",
+      title: "Smart",
+      description: "Personalized tools and intelligent gameplay",
       icon: BrainCircuit,
       items: [
         { id: "coach" as const, label: "Smart Coach", icon: BrainCircuit },
@@ -90,22 +88,22 @@ export function MoreScreen() {
     },
     {
       id: "creator",
-      title: "Creator Studio",
-      description: "Create, test, audit and publish content",
+      title: "Creator",
+      description: "Create, test and manage game content",
       icon: PenTool,
       items: [
         { id: "creator" as const, label: "Creator Studio", icon: PenTool },
         { id: "creatorCommunity" as const, label: "Creator Community", icon: Users },
         { id: "aiPuzzleLab" as const, label: "AI Puzzle Lab", icon: WandSparkles },
         { id: "puzzleAudit" as const, label: "Puzzle QA Lab", icon: ShieldCheck },
-        { id: "playablePreview" as const, label: "Playable Preview Studio", icon: Eye },
+        { id: "playablePreview" as const, label: "Playable Preview", icon: Eye },
         { id: "creatorPlaytest" as const, label: "Creator Playtest", icon: Trophy },
       ],
     },
     {
       id: "release",
-      title: "Release Center",
-      description: "Prepare, verify and archive releases",
+      title: "Release",
+      description: "Prepare and verify your releases",
       icon: PackageCheck,
       items: [
         { id: "publishReadiness" as const, label: "Publish Readiness", icon: ClipboardCheck },
@@ -117,23 +115,23 @@ export function MoreScreen() {
     {
       id: "settings",
       title: "Settings",
-      description: "Customize gameplay, appearance, language and data",
+      description: "Customize your game experience",
       icon: Wrench,
       items: [
         { id: "settings" as const, label: t("cta.settings"), icon: Wrench },
         { id: "accessibility" as const, label: "Accessibility", icon: Accessibility },
-        { id: "pwa" as const, label: "Offline, Install & Updates", icon: Smartphone },
-        { id: "pushSettings" as const, label: "Push Delivery", icon: Bell },
         { id: "content" as const, label: "Languages & Content", icon: Globe2 },
+        { id: "pwa" as const, label: "Offline & Updates", icon: Smartphone },
+        { id: "pushSettings" as const, label: "Push Notifications", icon: Bell },
       ],
     },
     {
       id: "account",
-      title: "Account & Data",
-      description: "Purchases, saves and account-related tools",
+      title: "Account",
+      description: "Saves, purchases and account data",
       icon: HardDrive,
       items: [
-        { id: "saveSlots" as const, label: "Save Slots & Recovery", icon: HardDrive },
+        { id: "saveSlots" as const, label: "Save & Recovery", icon: HardDrive },
         { id: "payments" as const, label: "Purchases & Entitlements", icon: CreditCard },
       ],
     },
@@ -151,7 +149,7 @@ export function MoreScreen() {
     {
       id: "help",
       title: "Help & Legal",
-      description: "Information, terms and privacy",
+      description: "Terms, privacy and important information",
       icon: Scale,
       items: [
         { id: "legal" as const, label: t("cta.legal"), icon: Scale },
@@ -164,28 +162,30 @@ export function MoreScreen() {
   return (
     <Screen title={t("cta.more")}>
       {!activeCategory ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3">
           {categories.map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => setCategory(item.id)}
-              className="panel flex min-h-[110px] items-center gap-4 rounded-2xl p-5 text-left transition-transform active:scale-[0.98]"
+              className="panel group flex min-h-[128px] flex-col items-start justify-between rounded-2xl p-4 text-left transition-transform active:scale-[0.97]"
             >
-              <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-surface-2">
-                <item.icon className="size-6 text-primary" />
+              <span className="flex size-11 items-center justify-center rounded-xl bg-surface-2">
+                <item.icon className="size-5 text-primary" />
               </span>
 
-              <span className="min-w-0 flex-1">
-                <span className="block text-base font-semibold text-fg">
+              <span className="mt-3 min-w-0">
+                <span className="block text-sm font-bold text-fg">
                   {item.title}
                 </span>
-                <span className="mt-1 block text-xs leading-relaxed text-muted">
+                <span className="mt-1 block text-[11px] leading-snug text-muted">
                   {item.description}
                 </span>
               </span>
 
-              <span className="text-xl text-muted">›</span>
+              <span className="mt-2 text-xs text-muted">
+                {item.items.length} features →
+              </span>
             </button>
           ))}
         </div>
@@ -194,36 +194,43 @@ export function MoreScreen() {
           <div className="mb-4 flex items-center gap-3">
             <button
               type="button"
-              className="hud-chip text-fg"
+              className="hud-chip flex size-10 items-center justify-center p-0 text-lg text-fg"
               onClick={() => setCategory(null)}
+              aria-label="Back to More categories"
             >
               ←
             </button>
 
-            <div>
-              <h2 className="text-lg font-semibold text-fg">
-                {activeCategory.title}
-              </h2>
-              <p className="text-xs text-muted">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <activeCategory.icon className="size-5 text-primary" />
+                <h2 className="text-lg font-bold text-fg">
+                  {activeCategory.title}
+                </h2>
+              </div>
+
+              <p className="mt-1 text-xs text-muted">
                 {activeCategory.description}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-1 gap-2">
             {activeCategory.items.map((item) => (
               <button
                 key={item.id}
                 type="button"
-                className="panel flex items-center gap-3 rounded-2xl p-4 text-left transition-transform active:scale-[0.98]"
+                className="panel flex items-center gap-3 rounded-2xl p-3.5 text-left transition-transform active:scale-[0.98]"
                 onClick={() => go(item.id)}
               >
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-surface-2">
                   <item.icon className="size-5 text-primary" />
                 </span>
 
-                <span className="flex-1 font-semibold text-fg">
-                  {item.label}
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-fg">
+                    {item.label}
+                  </span>
                 </span>
 
                 <span className="text-lg text-muted">›</span>
