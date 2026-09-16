@@ -218,18 +218,18 @@
 }
 
 [data-theme="parchment"] {
-  --color-bg: #e8dcc8;
-  --color-bg-elevated: #efe6d4;
-  --color-surface: #f3ead8;
-  --color-surface-2: #e7dcc6;
+  --color-bg: #f8fafc;
+  --color-bg-elevated: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-2: #f1f5f9;
   --color-fg: #2a2418;
   --color-muted: #6b624e;
   --color-subtle: #8a7e66;
   --color-primary: #6b4f2a;
   --color-primary-deep: #4a351c;
   --color-accent: #8a6434;
-  --color-tile: #f7f1e4;
-  --color-tile-ink: #2a2418;
+  --color-tile: #ffffff;
+  --color-tile-ink: #1e293b;
 }
 
 [data-theme="ocean"] {
