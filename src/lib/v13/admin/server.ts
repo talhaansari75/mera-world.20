@@ -91,7 +91,7 @@ export const getAdminUsers = createServerFn({ method: "GET" })
         on ur.user_id = u.id
       left join roles r
         on r.id = ur.role_id
-      order by u.created_at desc
+      order by u."createdAt" desc
       limit 500
       `,
       [],
