@@ -72,18 +72,6 @@ export function PlayScreen() {
     if (remaining != null && remaining <= 0 && play && !overlay) useGame.getState().failPlay();
   }, [remaining, play, overlay, tick]);
 
-  useEffect(() => {
-    if (overlay !== "win" || !play || !user) return;
-    if (!play.serverSessionId) return;
-    const sessionId = play.serverSessionId;
-    window.setTimeout(() => {
-      void verifyGameplayCompletion({ data: { sessionId, found: play.found, paths: play.actions.filter(a => a.type === "found").map(a => ({ word: a.word ?? "", cells: a.cells ?? [] })) } })
-        .then((res) => {
-          if (res.ok && !res.duplicate && res.save) useGame.getState().applyServerSave(res.save as never);
-        }).catch(() => undefined);
-    }, 700);
-  }, [overlay, play?.serverSessionId]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const remainingWords = useMemo(() => {
     if (!play) return [];
     return play.puzzle.words.filter((w) => !play.found.includes(w));
