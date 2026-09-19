@@ -326,13 +326,41 @@ export const verifyGameplayCompletion = createServerFn({ method: "POST" })
       const elapsed=now-Number(row.startedAt)-Math.min(pausedMs, 120_000);
       if(elapsed < Math.min(1200, state.words.length*120)) return {ok:false as const,error:"Completion was too fast to verify."};
       if(elapsed > state.timeLimitMs + 5000) return {ok:false as const,error:"Gameplay session expired."};
+      // Reconcile client-submitted found paths with the authoritative session.
+      // Every path is re-validated against the server-generated puzzle placements.
+      const recordedFound = state.actions.filter(a=>a.type==="found");
+      const recordedWords = new Set(recordedFound.map(a=>a.word).filter(Boolean));
+
+      for (const path of data.paths) {
+        const word = String(path.word ?? "").toUpperCase();
+        if (recordedWords.has(word)) continue;
+
+        const expected = state.placements.find(x => x.word === word);
+        if (!expected || !path.cells || !sameCells(path.cells, expected.cells)) {
+          return {ok:false as const,error:"Invalid word path."};
+        }
+
+        state.actions.push({
+          id: `completion-${row.id}-${word}`,
+          type: "found",
+          word,
+          cells: path.cells,
+          at: Date.now(),
+        });
+        recordedWords.add(word);
+      }
+
       const foundActions=state.actions.filter(a=>a.type==="found");
       const validWords=new Set<string>();
+
       for(const a of foundActions){
         const expected=a.word ? state.placements.find(x=>x.word===a.word) : undefined;
         if(expected && a.cells && sameCells(a.cells,expected.cells)) validWords.add(a.word!);
       }
-      if(validWords.size!==state.words.length || state.words.some(w=>!validWords.has(w))) return {ok:false as const,error:"All puzzle words must be solved through verified server actions."};
+
+      if(validWords.size!==state.words.length || state.words.some(w=>!validWords.has(w))) {
+        return {ok:false as const,error:"All puzzle words must be solved through verified server actions."};
+      }
       const hints=state.actions.filter(a=>a.type==="hint").length;
       let combo=0, bestCombo=0;
       for (const a of state.actions) { if (a.type === "found") { combo++; bestCombo=Math.max(bestCombo, combo); } else if (a.type === "miss") combo=0; }
