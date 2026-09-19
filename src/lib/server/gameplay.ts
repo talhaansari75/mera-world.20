@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { getPrisma } from "@/lib/db";
-import { defaultSave } from "@/lib/game/persist";
+import { defaultSave, migrateSave } from "@/lib/game/persist";
 import { puzzleForDaily, puzzleForLevel, specFor, modeMods, targetTimeMs, todayKey, isBoss } from "@/lib/game/levels";
 import { rewardCoins, xpForClear } from "@/lib/game/core/progression";
 import { HINT_COST } from "@/lib/game/constants";
@@ -48,6 +48,7 @@ export const startGameplaySession = createServerFn({ method: "POST" })
     dailyChallengeId: d.dailyChallengeId ? String(d.dailyChallengeId).slice(0, 20) : undefined,
   }))
   .handler(async ({ context, data }) => {
+    try {
     if (data.kind === "daily" && data.day !== todayKey()) return { ok:false as const, error:"Daily challenge is not for today." };
     if (data.kind === "daily" && data.dailyChallengeId !== dailyChallengeFor(data.day).id) return { ok:false as const, error:"Daily challenge variant mismatch." };
     const db = getPrisma();
@@ -56,7 +57,9 @@ export const startGameplaySession = createServerFn({ method: "POST" })
       if (claimed) return { ok:false as const, error:"Today's daily challenge has already been claimed." };
     }
     const row = await db.playerSave.findUnique({ where:{userId:context.userId} });
-    const save = row?.saveJson ? safeJson(JSON.parse(row.saveJson)) : safeJson(defaultSave());
+    const save = row?.saveJson
+      ? migrateSave(JSON.parse(row.saveJson))
+      : defaultSave();
     const unlocked = Number(save.unlockedLevel ?? 1);
     if (data.kind === "level" && data.level > unlocked) return { ok:false as const, error:"Level is locked on the server." };
     const rules = modeRules(data.mode);
@@ -86,7 +89,9 @@ export const startGameplaySession = createServerFn({ method: "POST" })
         }
       }
       const currentRow = await tx.playerSave.findUnique({ where:{userId:context.userId} });
-      const currentSave = currentRow?.saveJson ? safeJson(JSON.parse(currentRow.saveJson)) : safeJson(defaultSave());
+      const currentSave = currentRow?.saveJson
+        ? migrateSave(JSON.parse(currentRow.saveJson))
+        : defaultSave();
       const currentUnlocked = Number(currentSave.unlockedLevel ?? 1);
       const energyAt = Number(currentSave.energyAt ?? now);
       const refills = Math.max(0, Math.floor((now - energyAt) / ENERGY_REFILL_MS));
@@ -114,6 +119,13 @@ export const startGameplaySession = createServerFn({ method: "POST" })
     const authoritativeRow = await db.playerSave.findUnique({ where:{userId:context.userId}, select:{saveJson:true} });
     const authoritativeSave = authoritativeRow?.saveJson ? JSON.parse(authoritativeRow.saveJson) : defaultSave();
     return { ok:true as const, sessionId, startedAt:now, timeLimitMs, seed:puzzle.seed, adaptiveTier: adaptive.tier, startingReveals: adaptive.startingReveals, save: authoritativeSave };
+    } catch (error) {
+      console.error("[GAMEPLAY_SESSION_START_ERROR]", error);
+      return {
+        ok: false as const,
+        error: `GAMEPLAY_START_ERROR: ${error instanceof Error ? error.message : String(error)}`
+      };
+    }
   });
 
 export const recordGameplayAction = createServerFn({ method:"POST" })
