@@ -632,7 +632,17 @@ export const useGame = create<GameState>((set, get) => ({
           if (delivery.ok === false) { flash(set, delivery.error ?? "Gameplay action delivery failed. Please retry."); return; }
         }
         const verified = await verifyGameplayCompletion({ data: { sessionId: play.serverSessionId, found: play.found, paths: play.actions.filter(a => a.type === "found").map(a => ({ word: a.word ?? "", cells: a.cells ?? [] })) } });
-        if (!verified.ok) { flash(set, verified.error); return; }
+        if (!verified.ok) {
+  console.error("[GAMEPLAY_COMPLETION_FAILED]", {
+    level: play.level,
+    sessionId: play.serverSessionId,
+    found: play.found,
+    actions: play.actions,
+    error: verified.error,
+  });
+  flash(set, verified.error);
+  return;
+}
         if (verified.save) get().applyServerSave(verified.save as PlayerSave);
         persistPlay(null);
         sfxPlay.win();
