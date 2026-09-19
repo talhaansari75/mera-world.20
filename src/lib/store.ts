@@ -649,10 +649,11 @@ export const useGame = create<GameState>((set, get) => ({
         set({ overlay: "win", lastReward: { coins: verified.coins ?? 0, xp: verified.xp ?? 0, stars: verified.stars ?? 0, title: play.puzzle.title }, play: { ...play, found: play.puzzle.words.slice() } });
         gameEvents.emit("level:complete", { level: play.level, stars: verified.stars ?? 0, timeMs: elapsed });
         return;
-      } catch {
-        flash(set, "Level completion failed. Please retry.");
-        return;
-      }
+      } catch (error) {
+  console.error("[GAMEPLAY_VERIFY_EXCEPTION]", error);
+  flash(set, error instanceof Error ? `Verification failed: ${error.message}` : "Secure result verification failed. Please retry.");
+  return;
+}
     }
     persistPlay(null);
     sfxPlay.win();
