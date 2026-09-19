@@ -12,7 +12,7 @@ import { MAX_ENERGY, ENERGY_REFILL_MS } from "@/lib/game/constants";
 import type { GameMode, LangCode } from "@/lib/game/types";
 import { dailyChallengeFor, dailyChallengeObjective, dailyChallengeRewardMultiplier } from "@/lib/game/dailyChallenges";
 import { specialTilesForPuzzle, specialKindsAt, clipAtLocked } from "@/lib/game/specialTiles";
-import { isJourneyBoss } from "@/lib/game/journeyWorlds";
+import { isJourneyBoss, journeyWorldForLevel } from "@/lib/game/journeyWorlds";
 import { startCombat, combatTurn, playerCombatPower, type CombatState } from "@/lib/game/combat";
 import { petProfile, petPower, petEffect } from "@/lib/game/rpg";
 import { petXpEarned } from "@/lib/game/engagement";
