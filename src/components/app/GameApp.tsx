@@ -3,6 +3,7 @@ import { AdaptiveScreen } from "@/components/v32/AdaptiveScreen";
 import { JourneyPlannerScreen } from "@/components/v33/JourneyPlannerScreen";
 import { useEffect } from "react";
 import { useGame } from "@/lib/store";
+import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { refillEnergy } from "@/lib/game/economy";
 import { writeSave } from "@/lib/game/persist";
 import { applyVolumes, startMusic, unlockAudio } from "@/lib/game/audio";
@@ -69,6 +70,17 @@ export function GameApp() {
   const screen = useGame((s) => s.screen);
   const save = useGame((s) => s.save);
   const toast = useGame((s) => s.toast);
+  const user = useCurrentUser();
+
+  // Sync auth display name into game profile when still default "Traveler"
+  useEffect(() => {
+    if (!ready || !user?.displayName) return;
+    const current = useGame.getState().save.playerName;
+    if (current === "Traveler") {
+      useGame.getState().setName(user.displayName.slice(0, 24));
+    }
+  }, [ready, user?.displayName]);
+
 
   useEffect(() => {
     useGame.getState().hydrate();
