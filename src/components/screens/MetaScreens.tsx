@@ -116,31 +116,54 @@ export function ProfileScreen() {
       </div>
       <p className="mt-4 text-xs uppercase tracking-wider text-muted">Class</p>
       <div className="mt-2 grid grid-cols-2 gap-2">
-        {CLASSES.map((c) => (
+        {CLASSES.map((c) => {
+          const selected = save.classId === c.id;
+          return (
           <button
             key={c.id}
             type="button"
             className="panel rounded-2xl p-3 text-left"
             onClick={() => useGame.getState().patchSave((s) => ({ ...s, classId: c.id }))}
+            style={selected ? { outline: "2px solid var(--color-primary)" } : undefined}
           >
-            <p className="font-semibold text-fg">{c.name}</p>
+            <p className="font-semibold text-fg">{c.name}{selected ? " ✓" : ""}</p>
             <p className="text-xs text-muted">{c.blurb}</p>
           </button>
-        ))}
+          );
+        })}
       </div>
       <p className="mt-4 text-xs uppercase tracking-wider text-muted">Avatar</p>
       <div className="mt-2 grid grid-cols-4 gap-2">
-        {AVATARS.map((a) => (
+        {AVATARS.map((a) => {
+          const icons: Record<string, string> = {
+            "ink-1": "🪶",
+            "ink-2": "🏮",
+            "ink-3": "🧭",
+            "ink-4": "⚓",
+            "ink-5": "🦅",
+            "ink-6": "🪷",
+            "ink-7": "🌙",
+            "ink-8": "⛰️",
+            "ink-9": "🌊",
+            "ink-10": "⭐",
+            "ink-11": "🍃",
+            "ink-12": "🔥",
+          };
+          const selected = save.avatarId === a.id;
+          return (
           <button
             key={a.id}
             type="button"
             onClick={() => useGame.getState().setAvatar(a.id)}
-            className="panel aspect-square rounded-xl text-xs font-semibold text-fg"
-            style={save.avatarId === a.id ? { outline: "2px solid var(--color-primary)" } : undefined}
+            className="panel flex aspect-square flex-col items-center justify-center gap-0.5 rounded-xl text-xs font-semibold text-fg"
+            style={selected ? { outline: "2px solid var(--color-primary)" } : undefined}
+            aria-label={a.label}
           >
-            {a.label}
+            <span className="text-2xl leading-none" aria-hidden="true">{icons[a.id] ?? "✨"}</span>
+            <span className="text-[10px] opacity-80">{a.label}</span>
           </button>
-        ))}
+          );
+        })}
       </div>
       <div className="mt-6 flex items-center justify-between">
         <SignedIn>
