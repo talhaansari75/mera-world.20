@@ -292,7 +292,9 @@ export const verifyGameplayCompletion = createServerFn({ method: "POST" })
   }))
   .handler(async ({ context, data }) => {
     const db=getPrisma();
-    const result = await db.$transaction(async tx=>{
+    let result;
+    try {
+      result = await db.$transaction(async tx=>{
       await tx.$queryRaw`SELECT id FROM game_sessions_v5 WHERE id=${data.sessionId} AND user_id=${context.userId} FOR UPDATE`;
       const row=await tx.gameSessionV5.findUnique({where:{id:data.sessionId}});
       if(!row || row.userId!==context.userId) return {ok:false as const,error:"Gameplay session not found."};
@@ -402,6 +404,14 @@ export const verifyGameplayCompletion = createServerFn({ method: "POST" })
       if(state.kind==="daily") await tx.dailyResult.create({data:{userId:context.userId,dayKey:state.day,score:state.words.length*100+stars*100,timeMs:elapsed,stars,displayName:name}});
       return {ok:true as const,duplicate:false,stars,coins,xp,save:next,leaderboard:{name,starsScore:Number(next.stars??0),wordsScore:Number(next.stats?.wordsFound??0),sessionId:row.id}};
     }, { isolationLevel: "Serializable" });
+    } catch (error) {
+      console.error("[VERIFY_SERVER_EXCEPTION]", error);
+      return {
+        ok: false as const,
+        error: error instanceof Error ? `SERVER: ${error.message}` : "SERVER: Unknown verification error"
+      };
+    }
+
     if (result.ok && !("duplicate" in result && result.duplicate) && "leaderboard" in result && result.leaderboard) {
       try {
         const board = result.leaderboard;
