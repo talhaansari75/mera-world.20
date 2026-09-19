@@ -327,6 +327,12 @@ export const useGame = create<GameState>((set, get) => ({
             flash(set, result.error || "Server verification unavailable. You can continue playing.");
           }
           return result;
+        })
+        .catch((error) => {
+          console.error("[GAMEPLAY_START_RPC_ERROR]", error);
+          const message = error instanceof Error ? error.message : String(error);
+          flash(set, `GAMEPLAY_START_RPC_ERROR: ${message.slice(0, 300)}`);
+          return { ok: false as const, error: message };
         });
       pendingServerStarts.set(`${level}:${mode}`, startPromise);
       void startPromise.then(() => undefined, () => undefined).finally(() => pendingServerStarts.delete(`${level}:${mode}`)).catch(() => undefined);
