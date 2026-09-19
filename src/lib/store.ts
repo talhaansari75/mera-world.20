@@ -322,9 +322,9 @@ export const useGame = create<GameState>((set, get) => ({
             flushPendingPlayActions(result.sessionId, updated);
             if (!free) get().applyServerSave(result.save as PlayerSave);
           } else if (!result.ok && current?.kind === "level" && current.level === level) {
-            persistPlay(null);
-            set({ play: null, overlay: null, screen: get().prevScreen === "play" ? "home" : get().prevScreen });
-            flash(set, result.error);
+            // Keep the locally started level playable even if the server session
+            // could not be created. Do not bounce the player back to Begin/Home.
+            flash(set, result.error || "Server verification unavailable. You can continue playing.");
           }
           return result;
         });
