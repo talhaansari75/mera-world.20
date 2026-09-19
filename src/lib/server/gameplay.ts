@@ -74,7 +74,8 @@ export const startGameplaySession = createServerFn({ method: "POST" })
     const sessionId = randomUUID();
     const now = Date.now();
     const state: SessionState = { kind:data.kind, level:data.level, day:data.day, mode:data.mode, language:data.language, dailyChallengeId:data.dailyChallengeId, words:puzzle.words.map(w=>w.toUpperCase()), grid:puzzle.grid, placements:puzzle.placements.map(p=>({word:p.word.toUpperCase(),cells:p.cells})), actions:[], timeLimitMs, adaptiveTier: adaptive.tier, adaptiveBonusTarget: adaptive.bonusTarget, startingReveals: adaptive.startingReveals };
-    await db.$transaction(async tx => {
+    try {
+      await db.$transaction(async tx => {
       if (data.kind === "daily") {
         await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`daily-session:${context.userId}:${data.day}`}))`;
         const claimedInsideTx = await tx.dailyResult.findUnique({ where: { userId_dayKey: { userId: context.userId, dayKey: data.day } }, select: { userId: true } });
@@ -103,7 +104,13 @@ export const startGameplaySession = createServerFn({ method: "POST" })
         await tx.playerSave.update({ where:{userId:context.userId}, data:{saveJson:JSON.stringify({...currentSave,energy:currentEnergy,energyAt:nextEnergyAt}),version:{increment:1},revision:{increment:1n}} });
       }
       await tx.gameSessionV5.create({ data:{id:sessionId,userId:context.userId,levelId:data.level,seed:String(puzzle.seed),status:"open",startedAt:BigInt(now),updatedAt:BigInt(now),score:0,stateJson:state as any} });
-    }, { isolationLevel: "Serializable" });
+      }, { isolationLevel: "Serializable" });
+    } catch (error) {
+      console.error("[GAMEPLAY_START_ERROR]", error);
+      const message = error instanceof Error ? error.message : String(error);
+      return { ok:false as const, error:`GAMEPLAY_START_ERROR: ${message.slice(0,300)}` };
+    }
+
     const authoritativeRow = await db.playerSave.findUnique({ where:{userId:context.userId}, select:{saveJson:true} });
     const authoritativeSave = authoritativeRow?.saveJson ? JSON.parse(authoritativeRow.saveJson) : defaultSave();
     return { ok:true as const, sessionId, startedAt:now, timeLimitMs, seed:puzzle.seed, adaptiveTier: adaptive.tier, startingReveals: adaptive.startingReveals, save: authoritativeSave };
