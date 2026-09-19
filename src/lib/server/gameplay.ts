@@ -13,6 +13,7 @@ import type { GameMode, LangCode } from "@/lib/game/types";
 import { dailyChallengeFor, dailyChallengeObjective, dailyChallengeRewardMultiplier } from "@/lib/game/dailyChallenges";
 import { specialTilesForPuzzle, specialKindsAt, clipAtLocked } from "@/lib/game/specialTiles";
 import { isJourneyBoss, journeyWorldForLevel } from "@/lib/game/journeyWorlds";
+import { isAdminUser } from "@/lib/v13/admin/access";
 import { startCombat, combatTurn, playerCombatPower, type CombatState } from "@/lib/game/combat";
 import { petProfile, petPower, petEffect } from "@/lib/game/rpg";
 import { petXpEarned } from "@/lib/game/engagement";
@@ -49,6 +50,7 @@ export const startGameplaySession = createServerFn({ method: "POST" })
   }))
   .handler(async ({ context, data }) => {
     try {
+    const admin = isAdminUser(context.userId);
     if (data.kind === "daily" && data.day !== todayKey()) return { ok:false as const, error:"Daily challenge is not for today." };
     if (data.kind === "daily" && data.dailyChallengeId !== dailyChallengeFor(data.day).id) return { ok:false as const, error:"Daily challenge variant mismatch." };
     const db = getPrisma();
@@ -69,7 +71,7 @@ export const startGameplaySession = createServerFn({ method: "POST" })
     const adaptive = data.kind === "level" ? intelligenceAdaptivePlan(save as unknown as import("@/lib/game/types").PlayerSave, data.level) : { tier: "steady" as const, timeMultiplier: 1, startingReveals: 0, bonusTarget: 0, surprise: false };
     const energyCost = Math.max(1, Math.ceil(1 * rules.energyMultiplier * (1 - Number(effects.energyReductionPercent ?? 0) / 100)));
     const energy = Number(save.energy ?? 20);
-    if (data.kind === "level" && !rules.free && energy < energyCost) return { ok:false as const, error:"Not enough energy." };
+    if (!admin && data.kind === "level" && !rules.free && energy < energyCost) return { ok:false as const, error:"Not enough energy." };
     const puzzle = data.kind === "daily" ? puzzleForDaily(data.day, data.language, data.dailyChallengeId) : puzzleForLevel(data.level, data.mode, data.language);
     const daily = data.kind === "daily" ? dailyChallengeFor(data.day) : undefined;
     const spec = data.kind === "daily" ? { timeLimit: daily?.id === "speed" ? 90 : 150 } : modeMods(data.mode, specFor(data.level));
@@ -98,8 +100,8 @@ export const startGameplaySession = createServerFn({ method: "POST" })
       const currentEnergy = Math.min(MAX_ENERGY, Number(currentSave.energy ?? MAX_ENERGY) + refills);
       const nextEnergyAt = currentEnergy >= MAX_ENERGY ? now : energyAt + refills * ENERGY_REFILL_MS;
       if (data.kind === "level" && data.level > currentUnlocked) throw new Error("Level is locked on the server.");
-      if (data.kind === "level" && !rules.free && currentEnergy < energyCost) throw new Error("Not enough energy.");
-      if (data.kind === "level" && !rules.free) {
+      if (!admin && data.kind === "level" && !rules.free && currentEnergy < energyCost) throw new Error("Not enough energy.");
+      if (!admin && data.kind === "level" && !rules.free) {
         const nextSave = {...currentSave, energy:currentEnergy-energyCost, energyAt:nextEnergyAt};
         if (currentRow) await tx.playerSave.update({ where:{userId:context.userId}, data:{ saveJson:JSON.stringify(nextSave), version:{increment:1}, revision:{increment:1n} } });
         else await tx.playerSave.create({ data:{userId:context.userId,saveJson:JSON.stringify(nextSave),version:1,revision:1n} });
