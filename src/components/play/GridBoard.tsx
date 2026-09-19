@@ -222,7 +222,7 @@ export function GridBoard({ puzzle, found, revealed, fog, mirror, tileStyle, dis
   return (
     <div
       ref={wrapRef}
-      className="grid-board relative aspect-square w-full max-w-[min(100%,72dvh)]"
+      className="grid-board relative aspect-square h-auto w-full max-h-full max-w-[min(100%,48dvh)] sm:max-w-[min(100%,72dvh)]"
       onPointerDown={onDown}
       onPointerMove={onMove}
       onPointerUp={onUp}

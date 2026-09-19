@@ -133,7 +133,7 @@ export function PlayScreen() {
   }));
 
   return (
-    <div className="app-shell safe-pad flex h-dvh flex-col gap-2">
+    <div className="app-shell safe-pad flex h-dvh min-h-0 flex-col gap-1 overflow-hidden sm:gap-2">
       <header className="flex items-center gap-2">
         <button
           type="button"
@@ -171,7 +171,7 @@ export function PlayScreen() {
       {play.kind === "level" && play.adaptiveTier === "assist" && <div className="mx-auto w-full max-w-xl rounded-xl bg-accent/10 px-3 py-1.5 text-center text-[10px] font-semibold text-accent">Smart Assist · the journey is giving you a little breathing room</div>}
       {play.kind === "level" && play.adaptiveTier === "expert" && <div className="mx-auto w-full max-w-xl rounded-xl bg-gold/10 px-3 py-1.5 text-center text-[10px] font-semibold text-gold">Expert Pace · bonus-word mastery challenge active</div>}
 
-      <div key={feedbackKey} className="grid min-h-0 flex-1 place-items-center gameplay-board-pop">
+      <div key={feedbackKey} className="grid min-h-0 flex-1 place-items-center overflow-hidden gameplay-board-pop">
         <GridBoard
           puzzle={play.puzzle}
           found={play.found}
@@ -184,7 +184,7 @@ export function PlayScreen() {
         />
       </div>
 
-      <div className="flex max-h-28 flex-wrap gap-1.5 overflow-y-auto py-1">
+      <div className="flex max-h-20 shrink-0 flex-wrap gap-1.5 overflow-y-auto py-1 sm:max-h-28">
         {play.puzzle.words.map((w) => (
           <span key={w} className="word-chip text-fg" data-found={play.found.includes(w) ? "1" : undefined}>
             {mirror ? [...w].reverse().join("") : w}
@@ -252,7 +252,7 @@ export function PlayScreen() {
 
       {aiHint && <p className="text-center text-sm text-muted">{aiHint}</p>}
 
-      <div className="flex gap-2 pb-1">
+      <div className="flex shrink-0 gap-2 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
         <HintBtn label="First" cost={HINT_COST.first} onClick={() => useGame.getState().useHint("first")} />
         <HintBtn label="Letter" cost={HINT_COST.letter} onClick={() => useGame.getState().useHint("letter")} />
         <HintBtn label="Word" cost={HINT_COST.word} onClick={() => useGame.getState().useHint("word")} />
@@ -275,7 +275,7 @@ export function PlayScreen() {
 
 function GoalStrip({ goals }: { goals: Array<{ id: string; label: string; done: boolean }> }) {
   return (
-    <div className="mx-auto flex w-full max-w-xl gap-1.5 overflow-x-auto pb-0.5" aria-label="Short term goals">
+    <div className="mx-auto flex w-full max-w-xl shrink-0 gap-1.5 overflow-x-auto pb-0.5" aria-label="Short term goals">
       {goals.map((goal) => (
         <div key={goal.id} className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${goal.done ? "border-success/40 bg-success/10 text-success" : "border-white/10 bg-surface-2 text-muted"}`}>
           {goal.done ? "✓" : "○"} {goal.label}
