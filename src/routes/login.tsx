@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { emailAndPasswordEnabled } from "@/lib/auth/email-password";
-import { Mail, Lock, User, Eye, EyeOff, ArrowLeft, Shield } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, ArrowLeft, Shield, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
@@ -55,133 +55,232 @@ function Login() {
         if (newPassword.length < 8) throw new Error("Password must be 8+ characters");
         setMsg("Password changed! Please sign in.");
         setMode("in");
-        setPassword("");
-        setCode("");
-        setNewPassword("");
       } else if (mode === "2fa") {
-        if (code !== "123456") throw new Error("Invalid 2FA code. Try 123456");
+        if (code !== "123456") throw new Error("Invalid 2FA code");
         window.location.href = "/";
       }
-    } catch (ex) {
-      setErr(ex instanceof Error ? ex.message : "Could not continue");
+    } catch (error) {
+      setErr(error instanceof Error ? error.message : "Something went wrong");
     } finally {
       setBusy(false);
     }
   };
 
+  const title =
+    mode === "in" ? "Welcome Back" :
+    mode === "up" ? "Join the Journey" :
+    mode === "forgot" ? "Forgot Password" :
+    mode === "reset" ? "Reset Password" : "Two-Factor Auth";
+
+  const subtitle =
+    mode === "in" ? "Sign in to continue your adventure" :
+    mode === "up" ? "Create an account to save progress" :
+    mode === "forgot" ? "Enter your email to recover account" :
+    mode === "reset" ? "Enter the code and new password" :
+    "Enter the 6-digit verification code";
+
   return (
-    <main className="app-shell starfield safe-pad grid min-h-dvh place-items-center p-6">
-      <div className="panel w-full max-w-sm rounded-3xl p-6">
-        <div className="text-center mb-6">
-          <div className="mx-auto mb-3 grid size-14 place-items-center rounded-2xl bg-primary/20 text-2xl">✦</div>
-          <p className="text-xs uppercase tracking-[0.25em] text-accent">Ink & Starlight</p>
-          <h1 className="font-display mt-1 text-3xl text-fg">
-            {mode === "in" && "Welcome Back"}
-            {mode === "up" && "Join the Journey"}
-            {mode === "forgot" && "Forgot Password"}
-            {mode === "reset" && "Reset Password"}
-            {mode === "2fa" && "Two-Factor Auth"}
+    <main className="relative min-h-dvh overflow-hidden bg-gradient-to-b from-[#0b1020] via-[#12182b] to-[#0b1020] text-white">
+      {/* soft glow */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl" />
+        <div className="absolute -right-16 bottom-10 h-80 w-80 rounded-full bg-fuchsia-500/15 blur-3xl" />
+        <div className="absolute left-1/2 top-1/3 h-40 w-40 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-2xl" />
+      </div>
+
+      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-10">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20 backdrop-blur">
+            <Sparkles className="h-7 w-7 text-amber-300" />
+          </div>
+          <p className="text-xs uppercase tracking-[0.25em] text-indigo-200/80">Ink & Starlight</p>
+          <h1 className="mt-2 font-serif text-3xl font-semibold tracking-tight text-white">
+            Mera Word Search Journey
           </h1>
-          <p className="mt-2 text-sm text-muted">
-            {mode === "in" && "Sign in to continue your adventure"}
-            {mode === "up" && "Create an account to save progress"}
-            {mode === "forgot" && "Enter your email to recover account"}
-            {mode === "reset" && "Enter the code and new password"}
-            {mode === "2fa" && "Enter the 6-digit verification code"}
-          </p>
+          <p className="mt-2 text-sm text-slate-300">Words become paths. Paths become adventures.</p>
         </div>
 
-        {authEnabled && (mode === "in" || mode === "up") && (
-          <div className="mb-5 flex flex-col gap-2">
-            {GROK_PROVIDERS.map((p) => (
-              <button key={p.providerId} type="button" onClick={() => signIn(p.providerId, { callbackURL: "/" })} className="btn-ghost w-full">
-                Continue with {p.label}
-              </button>
-            ))}
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl">
+          <div className="mb-5">
+            <h2 className="text-xl font-semibold text-white">{title}</h2>
+            <p className="mt-1 text-sm text-slate-300">{subtitle}</p>
           </div>
-        )}
 
-        {!authEnabled && <p className="mb-4 text-center text-sm text-muted">Sign-in is disabled in this build.</p>}
-
-        {authEnabled && emailAndPasswordEnabled && (
-          <form className="flex flex-col gap-3" onSubmit={onEmail}>
-            {mode === "up" && (
-              <>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
-                  <input required minLength={3} maxLength={30} className="w-full rounded-xl border border-border bg-surface-2 py-3 pl-10 pr-3 text-fg" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" />
-                </div>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
-                  <input className="w-full rounded-xl border border-border bg-surface-2 py-3 pl-10 pr-3 text-fg" placeholder="Display name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="nickname" />
-                </div>
-              </>
-            )}
-
-            {(mode === "in" || mode === "up" || mode === "forgot") && (
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
-                <input type={mode === "up" || mode === "forgot" ? "email" : "text"} required className="w-full rounded-xl border border-border bg-surface-2 py-3 pl-10 pr-3 text-fg" placeholder={mode === "up" || mode === "forgot" ? "Email" : "Username or Email"} value={identifier} onChange={(e) => setIdentifier(e.target.value)} autoComplete={mode === "up" || mode === "forgot" ? "email" : "username"} />
-              </div>
-            )}
-
-            {(mode === "in" || mode === "up") && (
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
-                <input type={showPass ? "text" : "password"} required minLength={8} className="w-full rounded-xl border border-border bg-surface-2 py-3 pl-10 pr-10 text-fg" placeholder="Password (8+ characters)" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === "up" ? "new-password" : "current-password"} />
-                <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted" onClick={() => setShowPass(!showPass)}>
-                  {showPass ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          {authEnabled && (
+            <div className="mb-5 space-y-2">
+              {GROK_PROVIDERS.map((p) => (
+                <button
+                  key={p.providerId}
+                  type="button"
+                  onClick={() => signIn(p.providerId, { callbackURL: "/" })}
+                  className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+                >
+                  Continue with {p.label}
                 </button>
-              </div>
-            )}
+              ))}
+            </div>
+          )}
 
-            {mode === "2fa" && (
-              <div className="relative">
-                <Shield className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
-                <input className="w-full rounded-xl border border-border bg-surface-2 py-3 pl-10 pr-3 text-center text-xl tracking-[0.4em] text-fg" placeholder="••••••" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} />
-                <p className="mt-1 text-center text-xs text-muted">Demo code: <b>123456</b></p>
-              </div>
-            )}
+          {!authEnabled && (
+            <p className="mb-4 rounded-xl bg-amber-500/15 px-3 py-2 text-sm text-amber-200">
+              Sign-in is disabled in this build.
+            </p>
+          )}
 
-            {mode === "reset" && (
-              <>
-                <input className="w-full rounded-xl border border-border bg-surface-2 px-3 py-3 text-fg" placeholder="Reset Code" value={code} onChange={(e) => setCode(e.target.value)} />
-                <input type="password" className="w-full rounded-xl border border-border bg-surface-2 px-3 py-3 text-fg" placeholder="New Password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-                <p className="text-xs text-muted">Enter the code from your email</p>
-              </>
-            )}
-
-            {err && <p className="rounded-xl bg-red-500/15 px-3 py-2 text-sm text-red-400">{err}</p>}
-            {msg && <p className="rounded-xl bg-green-500/15 px-3 py-2 text-sm text-green-400">{msg}</p>}
-
-            <button type="submit" className="btn-primary w-full py-3" disabled={busy}>
-              {busy ? "Working…" : mode === "up" ? "Create account" : mode === "forgot" ? "Send Reset Code" : mode === "reset" ? "Change Password" : mode === "2fa" ? "Verify Code" : "Sign in"}
-            </button>
-
-            <div className="mt-2 space-y-2 text-center text-sm">
-              {mode === "in" && (
+          {authEnabled && emailAndPasswordEnabled && (
+            <form onSubmit={onEmail} className="space-y-3">
+              {mode === "up" && (
                 <>
-                  <button type="button" className="block w-full text-muted underline" onClick={() => { setMode("forgot"); setErr(null); setMsg(null); }}>
-                    Forgot Password?
-                  </button>
-                  <button type="button" className="text-accent" onClick={() => { setMode("up"); setErr(null); setMsg(null); }}>
-                    New traveler? Create account
-                  </button>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3 pl-10 pr-3 text-sm text-white outline-none ring-indigo-400/40 placeholder:text-slate-500 focus:ring-2"
+                      placeholder="Username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      autoComplete="username"
+                    />
+                  </div>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3 pl-10 pr-3 text-sm text-white outline-none ring-indigo-400/40 placeholder:text-slate-500 focus:ring-2"
+                      placeholder="Display name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      autoComplete="nickname"
+                    />
+                  </div>
                 </>
               )}
-              {mode === "up" && (
-                <button type="button" className="text-muted" onClick={() => { setMode("in"); setErr(null); setMsg(null); }}>
-                  Have an account? Sign in
-                </button>
+
+              {(mode === "in" || mode === "up" || mode === "forgot") && (
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    className="w-full rounded-xl border border-white/10 bg-black/20 py-3 pl-10 pr-3 text-sm text-white outline-none ring-indigo-400/40 placeholder:text-slate-500 focus:ring-2"
+                    placeholder={mode === "in" ? "Email or username" : "Email"}
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    autoComplete="email"
+                  />
+                </div>
               )}
-              {(mode === "forgot" || mode === "reset" || mode === "2fa") && (
-                <button type="button" className="flex w-full items-center justify-center gap-1 text-muted" onClick={() => { setMode("in"); setErr(null); setMsg(null); }}>
-                  <ArrowLeft className="size-4" /> Back to Sign In
-                </button>
+
+              {(mode === "in" || mode === "up") && (
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type={showPass ? "text" : "password"}
+                    className="w-full rounded-xl border border-white/10 bg-black/20 py-3 pl-10 pr-12 text-sm text-white outline-none ring-indigo-400/40 placeholder:text-slate-500 focus:ring-2"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete={mode === "up" ? "new-password" : "current-password"}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    onClick={() => setShowPass(!showPass)}
+                  >
+                    {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               )}
-            </div>
-          </form>
-        )}
+
+              {mode === "2fa" && (
+                <div className="relative">
+                  <Shield className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    className="w-full rounded-xl border border-white/10 bg-black/20 py-3 pl-10 pr-3 text-center text-lg tracking-[0.3em] text-white outline-none ring-indigo-400/40 placeholder:text-slate-500 focus:ring-2"
+                    placeholder="000000"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  />
+                  <p className="mt-1 text-center text-xs text-slate-400">Demo code: <b>123456</b></p>
+                </div>
+              )}
+
+              {mode === "reset" && (
+                <>
+                  <input
+                    className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm text-white outline-none ring-indigo-400/40 placeholder:text-slate-500 focus:ring-2"
+                    placeholder="Reset Code"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                  />
+                  <input
+                    type="password"
+                    className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm text-white outline-none ring-indigo-400/40 placeholder:text-slate-500 focus:ring-2"
+                    placeholder="New Password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </>
+              )}
+
+              {err && <p className="rounded-xl bg-red-500/15 px-3 py-2 text-sm text-red-300">{err}</p>}
+              {msg && <p className="rounded-xl bg-emerald-500/15 px-3 py-2 text-sm text-emerald-300">{msg}</p>}
+
+              <button
+                type="submit"
+                disabled={busy}
+                className="w-full rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:opacity-95 disabled:opacity-60"
+              >
+                {busy
+                  ? "Working…"
+                  : mode === "up"
+                    ? "Create account"
+                    : mode === "forgot"
+                      ? "Send Reset Code"
+                      : mode === "reset"
+                        ? "Change Password"
+                        : mode === "2fa"
+                          ? "Verify Code"
+                          : "Sign in"}
+              </button>
+
+              <div className="space-y-2 pt-1 text-center text-sm">
+                {mode === "in" && (
+                  <>
+                    <button
+                      type="button"
+                      className="block w-full text-slate-300 underline"
+                      onClick={() => { setMode("forgot"); setErr(null); setMsg(null); }}
+                    >
+                      Forgot Password?
+                    </button>
+                    <button
+                      type="button"
+                      className="text-indigo-300"
+                      onClick={() => { setMode("up"); setErr(null); setMsg(null); }}
+                    >
+                      New traveler? Create account
+                    </button>
+                  </>
+                )}
+                {mode === "up" && (
+                  <button
+                    type="button"
+                    className="text-slate-300"
+                    onClick={() => { setMode("in"); setErr(null); setMsg(null); }}
+                  >
+                    Have an account? Sign in
+                  </button>
+                )}
+                {(mode === "forgot" || mode === "reset" || mode === "2fa") && (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-slate-300"
+                    onClick={() => { setMode("in"); setErr(null); setMsg(null); }}
+                  >
+                    <ArrowLeft className="h-4 w-4" /> Back to Sign In
+                  </button>
+                )}
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </main>
   );
