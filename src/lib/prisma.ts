@@ -344,7 +344,7 @@ function taggedToSql(strings: TemplateStringsArray, values: unknown[]) {
   return { text, params };
 }
 
-function clientFromSql(sql: Sql) {
+function clientFromSql(sql: Sql): any {
   const models: Dict = {};
   for (const name of Object.keys(MODELS)) models[name] = modelDelegate(sql, name);
 

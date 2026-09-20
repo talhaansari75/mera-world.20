@@ -9,7 +9,7 @@ import { useGame } from "@/lib/store";
 
 export function CreatorPlaytestScreen() {
   const go = useGame.getState().go;
-  const [drafts] = useState<CreatorDraft[]>(() => listDrafts().filter(d => d.status !== "archived"));
+  const [drafts] = useState<CreatorDraft[]>(() => listDrafts().filter(d => d.status !== ("archived" as string)));
   const [selected, setSelected] = useState(drafts[0]?.id || "");
   const draft = useMemo(() => drafts.find(d => d.id === selected), [drafts, selected]);
   const [puzzle, setPuzzle] = useState(() => draft ? buildPlayablePreview({ words: draft.words, title: draft.title, category: draft.category, seed: hash(draft.id) }).puzzle : null);

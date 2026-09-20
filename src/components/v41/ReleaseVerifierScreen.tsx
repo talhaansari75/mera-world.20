@@ -37,7 +37,7 @@ export function ReleaseVerifierScreen() {
           <p><b className="text-fg">Integrity:</b> {result.digestMatches ? "matches" : "does not match"}</p>
           <p><b className="text-fg">Readiness:</b> {result.readinessConsistent ? "valid" : "invalid"}</p>
         </div>
-        {result.issues.length > 0 && <div className="mt-4 grid gap-2">{result.issues.map((issue) => <p key={issue} className="rounded-xl border border-border p-3 text-sm text-muted">{issue}</p>)}</div>}
+        {result.issues.length > 0 && <div className="mt-4 grid gap-2">{result.issues.map((issue: string) => <p key={issue} className="rounded-xl border border-border p-3 text-sm text-muted">{issue}</p>)}</div>}
       </section>}
       <div className="flex flex-wrap gap-4"><button onClick={() => go("releasePackage")} className="text-sm text-primary">← Release Package</button><button onClick={() => go("creator")} className="text-sm text-primary">Creator Studio →</button><button onClick={() => go("more")} className="text-sm text-muted">More</button></div>
     </div>

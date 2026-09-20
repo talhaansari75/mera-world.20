@@ -42,7 +42,7 @@ export async function buildReleasePackage(draftId:string):Promise<CreatorRelease
     integrity:await digestFor(data)};
 }
 
-export function listReleaseCandidates(){return listDrafts().filter(d=>d.status!=="archived").map(d=>({draft:d,readiness:evaluatePublishReadiness(d.id)})).filter(x=>x.readiness)};
+export function listReleaseCandidates(){return listDrafts().filter(d=>d.status!==("archived" as string)).map(d=>({draft:d,readiness:evaluatePublishReadiness(d.id)})).filter(x=>x.readiness)};
 
 export function downloadReleasePackage(pkg:CreatorReleasePackage){
   const blob=new Blob([JSON.stringify(pkg,null,2)],{type:"application/json"});

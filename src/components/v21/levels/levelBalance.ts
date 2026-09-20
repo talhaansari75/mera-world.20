@@ -1,6 +1,6 @@
-import type { GameMode, LevelSpec } from "../../game/types";
-import { MAX_LEVEL } from "../../game/constants";
-import { specFor, modeMods, isBoss, worldOf } from "../../game/levels";
+import type { GameMode, LevelSpec } from "../../../lib/game/types";
+import { MAX_LEVEL } from "../../../lib/game/constants";
+import { specFor, modeMods, isBoss, worldOf } from "../../../lib/game/levels";
 
 export type LevelBand = {
   from: number;

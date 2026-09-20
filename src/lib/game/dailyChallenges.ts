@@ -50,3 +50,4 @@ export function dailyChallengeRewardMultiplier(challenge: DailyChallenge | undef
   if (challenge.id === "treasure" && input.bonusWords >= 2) multiplier += 0.1;
   return Math.min(1.5, multiplier);
 }
+export function specialTilesForPuzzle(puzzle: any) { return []; }
