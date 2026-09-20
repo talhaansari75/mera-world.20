@@ -44,10 +44,44 @@ export function HomeScreen() {
       <HudChips />
       <JourneyHero />
       {(() => {
-        const rec = recommendFor(save);
-        const live = recommendLiveEvent(save);
-        return <div className="grid gap-2" aria-label="Personalized recommendations"><div className="panel rounded-2xl p-4"><div className="flex items-center justify-between gap-3"><div><p className="text-[10px] uppercase tracking-[0.2em] text-accent">For You</p><p className="font-semibold text-fg">{rec.title}</p><p className="text-xs text-muted">{rec.detail}</p></div><span className="text-lg">✨</span></div></div><div className="panel rounded-2xl p-4"><p className="text-[10px] uppercase tracking-[0.2em] text-gold">Live Now</p><p className="font-semibold text-fg">{live.title}</p><p className="text-xs text-muted">{live.detail}</p></div></div>;
-      })()}
+  const rec = recommendFor(save);
+  const live = recommendLiveEvent(save);
+
+  return (
+    <div className="grid gap-3" aria-label="Personalized recommendations">
+      {/* Continue Level Card */}
+      <button
+        type="button"
+        onClick={() => useGame.getState().startLevel(save.unlockedLevel)}
+        className="panel w-full rounded-2xl p-4 text-left transition-all active:scale-[0.98] hover:bg-white/5"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-accent">
+              For You
+            </p>
+            <p className="mt-1 text-lg font-semibold text-fg">{rec.title}</p>
+            <p className="mt-0.5 text-sm text-muted">{rec.detail}</p>
+          </div>
+          <span className="text-2xl">✨</span>
+        </div>
+      </button>
+
+      {/* Daily Discovery Card */}
+      <button
+        type="button"
+        onClick={() => useGame.getState().go("daily")}
+        className="panel w-full rounded-2xl p-4 text-left transition-all active:scale-[0.98] hover:bg-white/5"
+      >
+        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-yellow-400">
+          Live Now
+        </p>
+        <p className="mt-1 text-lg font-semibold text-fg">{live.title}</p>
+        <p className="mt-0.5 text-sm text-muted">{live.detail}</p>
+      </button>
+    </div>
+  );
+})()}
       <button type="button" className="journey-continue btn-primary animate-pop" onClick={() => useGame.getState().startLevel(save.unlockedLevel)}>
         <span><span className="block text-xs uppercase tracking-[0.2em] opacity-80">Continue Journey</span><strong className="block text-lg">Level {save.unlockedLevel} · {world.name}</strong></span><span className="text-2xl">→</span>
       </button>
