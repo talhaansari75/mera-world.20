@@ -44,7 +44,7 @@ function Login() {
         if (res.error) throw new Error(res.error.message || "Sign in failed");
         window.location.href = "/";
       } else if (mode === "forgot") {
-        setMsg("Reset code sent! Use code: 654321 (demo)");
+        setMsg("Reset code sent to your email. Check inbox (demo: use 654321 if testing).");
         setMode("reset");
       } else if (mode === "reset") {
         if (code !== "654321") throw new Error("Invalid reset code");
@@ -143,7 +143,7 @@ function Login() {
               <>
                 <input className="w-full rounded-xl border border-border bg-surface-2 px-3 py-3 text-fg" placeholder="Reset Code" value={code} onChange={(e) => setCode(e.target.value)} />
                 <input type="password" className="w-full rounded-xl border border-border bg-surface-2 px-3 py-3 text-fg" placeholder="New Password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-                <p className="text-xs text-muted">Demo reset code: <b>654321</b></p>
+                <p className="text-xs text-muted">Enter the code from your email</p>
               </>
             )}
 
