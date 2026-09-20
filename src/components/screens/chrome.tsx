@@ -46,29 +46,29 @@ export function HudChips() {
   return (
     <div className="flex flex-wrap items-center gap-2.5">
       {/* Coins */}
-      <span className="hud-chip flex items-center gap-1.5 rounded-full bg-black/20 px-3.5 py-2 text-base font-bold text-fg backdrop-blur-sm">
-        <Coins className="size-5 text-yellow-400" />
+      <span className="hud-chip flex items-center gap-1.5 rounded-full bg-black/40 px-4 py-2 text-base font-extrabold text-white shadow-md backdrop-blur-md">
+        <Coins className="size-6 text-yellow-400" />
         {refilledSave.coins}
       </span>
 
       {/* Diamonds */}
-      <span className="hud-chip flex items-center gap-1.5 rounded-full bg-black/20 px-3.5 py-2 text-base font-bold text-fg backdrop-blur-sm">
-        <Gem className="size-5 text-cyan-400" />
+      <span className="hud-chip flex items-center gap-1.5 rounded-full bg-black/40 px-4 py-2 text-base font-extrabold text-white shadow-md backdrop-blur-md">
+        <Gem className="size-6 text-cyan-400" />
         {refilledSave.diamonds}
       </span>
 
       {/* Stars */}
-      <span className="hud-chip flex items-center gap-1.5 rounded-full bg-black/20 px-3.5 py-2 text-base font-bold text-fg backdrop-blur-sm">
-        <Star className="size-5 text-yellow-300" />
+      <span className="hud-chip flex items-center gap-1.5 rounded-full bg-black/40 px-4 py-2 text-base font-extrabold text-white shadow-md backdrop-blur-md">
+        <Star className="size-6 text-yellow-300" />
         {refilledSave.stars}
       </span>
 
       {/* Energy */}
-      <span className="hud-chip flex items-center gap-1.5 rounded-full bg-black/20 px-3.5 py-2 text-base font-bold text-fg backdrop-blur-sm">
-        <Zap className="size-5 text-orange-400" />
+      <span className="hud-chip flex items-center gap-1.5 rounded-full bg-black/40 px-4 py-2 text-base font-extrabold text-white shadow-md backdrop-blur-md">
+        <Zap className="size-6 text-orange-400" />
         {refilledSave.energy}/{MAX_ENERGY}
         {refilledSave.energy < MAX_ENERGY && (
-          <span className="ml-1 text-sm opacity-80">
+          <span className="ml-1 text-sm font-normal opacity-90">
             {m}:{String(sec).padStart(2, "0")}
           </span>
         )}
