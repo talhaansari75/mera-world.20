@@ -1,6 +1,6 @@
 {
   "name": "mera-word-search-journey",
-  "description": "Mera Word Search Journey - Word search + RPG adventure game",
+  "description": "Mera Word Search Journey - A rich word search + RPG adventure game",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -99,5 +99,13 @@
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.2.0"
-  }
+  },
+  "keywords": [
+    "word-search",
+    "rpg",
+    "puzzle",
+    "game",
+    "typescript"
+  ],
+  "license": "MIT"
 }
