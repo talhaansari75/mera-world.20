@@ -123,7 +123,7 @@ export function ProfileScreen() {
             key={c.id}
             type="button"
             className="panel rounded-2xl p-3 text-left"
-            onClick={() => useGame.getState().patchSave((s) => ({ ...s, classId: c.id }))}
+            onClick={() => useGame.getState().patchSave((s: any) => ({ ...s, classId: c.id }))}
             style={selected ? { outline: "2px solid var(--color-primary)" } : undefined}
           >
             <p className="font-semibold text-fg">{c.name}{selected ? " ✓" : ""}</p>
@@ -565,7 +565,7 @@ export function InventoryScreen() {
         <p className="text-muted">The satchel is light.</p>
       ) : (
         <ul className="flex flex-col gap-2">
-          {inv.map((id) => (
+          {inv.map((id: any) => (
             <li key={id} className="panel rounded-xl p-3 text-fg">
               {id}
             </li>
@@ -678,7 +678,7 @@ export function EquipmentScreen() {
       <div className="mt-4 grid gap-2">
         {save.equipment.length === 0 ? (
           <div className="panel rounded-2xl p-4 text-sm text-muted">No equipment yet. Craft your first item.</div>
-        ) : save.equipment.map((e) => {
+        ) : save.equipment.map((e: any) => {
           const active = save.equippedEquipment[e.slot] === e.id;
           return (
             <button key={e.id} type="button" className="panel flex items-center justify-between rounded-2xl p-4 text-left" onClick={() => equip(e.id)}>

@@ -18,7 +18,7 @@ export function PublishReadinessScreen() {
     </section>
     <section className="panel rounded-2xl p-4">
       <select value={selected} onChange={e => setSelected(e.target.value)} className="w-full rounded-xl border border-border bg-surface px-3 py-3 text-fg">
-        <option value="">Choose a Creator draft</option>{candidates.map((x: string) => <option key={x.draft.id} value={x.draft.id}>{x.draft.title} · {x.score}/100</option>)}
+        <option value="">Choose a Creator draft</option>{candidates.map((x: any) => <option key={x.draft.id} value={x.draft.id}>{x.draft.title} · {x.score}/100</option>)}
       </select>
       {!result && <p className="mt-3 text-sm text-muted">Create a Creator draft first.</p>}
     </section>

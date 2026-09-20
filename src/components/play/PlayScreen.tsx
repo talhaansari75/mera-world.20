@@ -110,13 +110,13 @@ export function PlayScreen() {
       const ok = useGame.getState().useHint("word");
       if (!ok) return;
     } else if (id === "focus") {
-      useGame.getState().patchSave((x) => ({
+      useGame.getState().patchSave((x: any) => ({
         ...x,
         coins: x.coins - power.cost,
         stats: { ...x.stats, coinsEarned: x.stats.coinsEarned },
       }));
     } else {
-      useGame.getState().patchSave((x) => ({
+      useGame.getState().patchSave((x: any) => ({
         ...x,
         coins: x.coins - power.cost,
         inventory: x.inventory.includes("streak-shield") ? x.inventory : [...x.inventory, "streak-shield"],
