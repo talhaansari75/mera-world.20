@@ -36,10 +36,7 @@ export function Screen({
 }
 
 export function HudChips() {
-  // IMPORTANT:
-  // Direct save object lo, refillEnergy ko selector ke andar mat chalao.
   const save = useGame((s) => s.save);
-
   const refilledSave = refillEnergy(save);
 
   const eta = energyEta(refilledSave);
@@ -47,28 +44,34 @@ export function HudChips() {
   const sec = Math.floor((eta % 60000) / 1000);
 
   return (
-    <div className="flex flex-wrap gap-1.5">
-      <span className="hud-chip text-fg">
-        <Coins className="size-3.5 text-gold" />
+    <div className="flex flex-wrap items-center gap-2.5">
+      {/* Coins */}
+      <span className="hud-chip flex items-center gap-1.5 rounded-full bg-black/20 px-3.5 py-2 text-base font-bold text-fg backdrop-blur-sm">
+        <Coins className="size-5 text-yellow-400" />
         {refilledSave.coins}
       </span>
 
-      <span className="hud-chip text-fg">
-        <Gem className="size-3.5 text-accent" />
+      {/* Diamonds */}
+      <span className="hud-chip flex items-center gap-1.5 rounded-full bg-black/20 px-3.5 py-2 text-base font-bold text-fg backdrop-blur-sm">
+        <Gem className="size-5 text-cyan-400" />
         {refilledSave.diamonds}
       </span>
 
-      <span className="hud-chip text-fg">
-        <Star className="size-3.5 text-gold" />
+      {/* Stars */}
+      <span className="hud-chip flex items-center gap-1.5 rounded-full bg-black/20 px-3.5 py-2 text-base font-bold text-fg backdrop-blur-sm">
+        <Star className="size-5 text-yellow-300" />
         {refilledSave.stars}
       </span>
 
-      <span className="hud-chip text-fg">
-        <Zap className="size-3.5 text-warning" />
+      {/* Energy */}
+      <span className="hud-chip flex items-center gap-1.5 rounded-full bg-black/20 px-3.5 py-2 text-base font-bold text-fg backdrop-blur-sm">
+        <Zap className="size-5 text-orange-400" />
         {refilledSave.energy}/{MAX_ENERGY}
-        {refilledSave.energy < MAX_ENERGY
-          ? ` · ${m}:${String(sec).padStart(2, "0")}`
-          : ""}
+        {refilledSave.energy < MAX_ENERGY && (
+          <span className="ml-1 text-sm opacity-80">
+            {m}:{String(sec).padStart(2, "0")}
+          </span>
+        )}
       </span>
     </div>
   );

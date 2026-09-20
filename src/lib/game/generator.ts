@@ -6,7 +6,7 @@ import { nativeWordsFor } from "./languageWords.ts";
 import type { LangCode } from "./types.ts";
 import { EXTENDED_WORDS } from "./extendedWords.ts";
 import { validatePuzzle } from "./core/puzzleValidator.ts";
-import { validatePuzzleQuality } from "../v16/core/puzzleQuality.ts";
+import { validatePuzzleQuality } from "../v16/core/puzzleQuality";
 
 export function canPlace(
   grid: string[][],
