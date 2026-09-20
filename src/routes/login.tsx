@@ -44,8 +44,12 @@ function Login() {
         if (res.error) throw new Error(res.error.message || "Sign in failed");
         window.location.href = "/";
       } else if (mode === "forgot") {
-        setMsg("Reset code sent to your email. Check inbox (demo: use 654321 if testing).");
-        setMode("reset");
+        const { error } = await authClient.requestPasswordReset({
+          email: identifier,
+          redirectTo: `${window.location.origin}/login?reset=1`,
+        });
+        if (error) throw new Error(error.message || "Could not send reset email");
+        setMsg("Agar yeh email registered hai to reset link email mein bhej diya gaya hai.");
       } else if (mode === "reset") {
         if (code !== "654321") throw new Error("Invalid reset code");
         if (newPassword.length < 8) throw new Error("Password must be 8+ characters");

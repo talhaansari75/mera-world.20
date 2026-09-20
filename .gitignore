@@ -4,3 +4,10 @@ node_modules/
 .env
 .env.*
 .vercel/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+dist/
+build/

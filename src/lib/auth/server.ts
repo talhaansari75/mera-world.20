@@ -223,7 +223,18 @@ export const auth = betterAuth({
   session: { cookieCache: { enabled: true, maxAge: 300 } },
 
   // Local email/password — toggled only via `./email-password` (not a plugin).
-  ...(emailAndPasswordEnabled ? { emailAndPassword: { enabled: true } } : {}),
+  ...(emailAndPasswordEnabled ? { emailAndPassword: {
+    sendResetPassword: async ({ user, url }) => {
+      void import("@/lib/email/send").then(({ sendEmail }) =>
+        sendEmail({
+          to: user.email,
+          subject: "Reset your Mera World password",
+          html: `<p>Hi ${user.name || "Traveler"},</p><p>Password reset ke liye link par click karo:</p><p><a href="${url}">Reset Password</a></p><p>Link ~1 hour mein expire ho jayega.</p>`,
+          text: `Reset your password: ${url}`,
+        })
+      );
+    },
+    resetPasswordTokenExpiresIn: 3600, enabled: true } } : {}),
 
   // `__Host-` prefixed cookies: the browser REFUSES any same-named cookie that
   // carries a `Domain` attribute, so a sibling `*.grok.me` app cannot "toss" a
