@@ -14,7 +14,7 @@ export function AIPuzzleLabScreen() {
   const [busy, setBusy] = useState(false);
   const run = async () => {
     setBusy(true); setNote("");
-    try { const r = await generateCreatorIdeas({ data: { category, difficulty, count } }); setWords(r.ok ? r.words : []); setNote(r.ok ? `${r.source === "ai" ? "AI" : "Local"} suggestions ready. ${r.note}` : r.error); }
+    try { const r = await generateCreatorIdeas({ data: { category, difficulty, count } }); setWords(r.ok ? r.words : []); setNote(r.ok ? `${r.source === "ai" ? "AI" : "Local"} suggestions ready. ${r.note}` : (r as any).error); }
     catch { setNote("Sign in or enable the server AI boundary to generate suggestions."); }
     finally { setBusy(false); }
   };

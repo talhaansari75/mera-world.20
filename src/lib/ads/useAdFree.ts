@@ -10,7 +10,7 @@ export function useAdFree() {
     void getMyEntitlements()
       .then((rows) => {
         if (!alive) return;
-        setAdFree(rows.some((row) => row.productId === AD_FREE_PRODUCT_ID && row.active && (!row.expiresAt || new Date(row.expiresAt).getTime() > Date.now())));
+        setAdFree(rows.some((row: any) => row.productId === AD_FREE_PRODUCT_ID && row.active && (!row.expiresAt || new Date(row.expiresAt).getTime() > Date.now())));
       })
       .catch(() => {
         if (alive) setAdFree(false);

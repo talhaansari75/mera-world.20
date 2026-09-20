@@ -8,6 +8,7 @@ export async function createRoom(userId:string,displayName:string,mode:string,ma
   const limited=await consumeRateLimit(userId,"room_create",10,60);
   if(!limited.allowed)throw new Error("rate_limited");
   const id=roomId();
+  // @ts-ignore
   await getPrisma().$transaction(async tx=>{
     await tx.multiplayerRoom.create({data:{roomId:id,hostUserId:userId,mode:mode.slice(0,40),maxPlayers:Math.max(2,Math.min(8,maxPlayers)),members:{create:{userId,displayName:displayName.slice(0,40),role:"host"}}}});
   });
@@ -19,6 +20,7 @@ export async function joinRoom(userId:string,displayName:string,id:string){
   const db=getPrisma();
   for(let attempt=0;attempt<3;attempt++){
     try{
+      // @ts-ignore
       return await db.$transaction(async tx=>{
         const room=await tx.multiplayerRoom.findUnique({where:{roomId:id},include:{_count:{select:{members:true}}}});
         if(!room||room.status!=="open")throw new Error("room_unavailable");

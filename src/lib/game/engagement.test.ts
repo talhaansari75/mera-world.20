@@ -8,12 +8,12 @@ function saveWithResults(levels: number[]): PlayerSave {
   const base = {
     version: 54, playerName: "Test", avatarId: "default", classId: "detective" as const,
     xp: 0, coins: 0, diamonds: 0, stars: 0, energy: 100, energyAt: 0, unlockedLevel: 1,
-    results: {}, settings: {} as PlayerSave["settings"], ownedThemes: [], ownedAvatars: [],
+    results: ({} as Record<string, any>), settings: ({} as Record<string, any>) as PlayerSave["settings"], ownedThemes: [], ownedAvatars: [],
     ownedPets: ["dog" as const], petLevels: { dog: 1 }, petXp: { dog: 0 }, equippedPet: "dog" as const,
-    equippedTheme: "midnight" as const, achievements: [], stats: {} as PlayerSave["stats"], lastDaily: null,
+    equippedTheme: "midnight" as const, achievements: [], stats: ({} as Record<string, any>) as PlayerSave["stats"], lastDaily: null,
     lastSpin: null, lastLoginReward: null, skillPoints: 0, skills: { speed: 0, vision: 0, luck: 0 },
-    language: "en" as const, storyChapter: 0, inventory: [], loginDays: 0, baseBuildings: {}, materials: {},
-    equipment: [], equippedEquipment: {}, claimedAchievements: [], claimedMissions: [], claimedSeasonTiers: [],
+    language: "en" as const, storyChapter: 0, inventory: [], loginDays: 0, baseBuildings: { camp: 0, workshop: 0, forge: 0, library: 0, treasury: 0 }, materials: { wood: 0, stone: 0, crystal: 0, iron: 0, gold: 0 },
+    equipment: [], equippedEquipment: ({} as Record<string, any>), claimedAchievements: [], claimedMissions: [], claimedSeasonTiers: [], dailyStreak: 0, behaviorProfile: ({} as Record<string, any>) as any,
   } satisfies PlayerSave;
   for (const level of levels) base.results[String(level)] = { stars: 3, timeMs: 1000, found: 5, hints: 0, perfect: true };
   base.unlockedLevel = Math.min(2000, Math.max(1, ...levels.map((x) => x + 1)));

@@ -52,7 +52,7 @@ export const pushCloudSave = createServerFn({ method: "POST" })
     ] as const;
 
     const db = getPrisma();
-    return db.$transaction(async (tx) => {
+    return db.$transaction(async (tx: any) => {
       const row = await tx.playerSave.findUnique({ where: { userId: context.userId } });
       if (!row) {
         if (data.expectedRevision && data.expectedRevision !== 0) {

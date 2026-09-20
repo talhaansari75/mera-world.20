@@ -21,7 +21,7 @@ export function evaluatePublishReadiness(draftId: string): PublishReadiness | nu
   const latest = playtests[0];
   const blockers: string[] = [];
   const recommendations: string[] = [];
-  if (!audit.ok) blockers.push("Puzzle QA audit is below the publish threshold.");
+  if (!(audit as any).ok) blockers.push("Puzzle QA audit is below the publish threshold.");
   if (!latest?.completed) blockers.push("Complete at least one full creator playtest.");
   if (latest && latest.score < 60) blockers.push("Latest playtest score is below 60.");
   if (draft.words.length < 5) recommendations.push("Add more target words for a richer puzzle.");

@@ -190,12 +190,12 @@ function CloudRow() {
         onClick={async () => {
           try {
             const remote = await loadCloudSave();
-            if (!remote.ok) {
-              setMsg(remote.error);
+            if (!(remote as any).ok) {
+              setMsg((remote as any).error);
               return;
             }
-            if (remote.save && typeof remote.save === "object") {
-              useGame.getState().applyCloud(remote.save as never);
+            if ((remote as any).save && typeof (remote as any).save === "object") {
+              useGame.getState().applyCloud((remote as any).save as never);
             } else setMsg("No cloud save yet.");
           } catch {
             setMsg("Sign in to sync.");

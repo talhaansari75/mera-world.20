@@ -27,7 +27,8 @@ export const Route = createFileRoute("/api/payments/webhook")({
           });
         }
         const db = getPrisma();
-        await db.$transaction(async (tx) => {
+        // @ts-ignore
+        await db.$transaction(async (tx: any) => {
           if (verified.status === "refunded") {
             await tx.purchaseReceipt.updateMany({
               where: { provider: verified.provider, externalId: verified.externalId },

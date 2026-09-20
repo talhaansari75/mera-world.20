@@ -319,7 +319,7 @@ export function LeaderboardScreen() {
       try {
         if (board === "daily") {
           const data = await getDailyBoard({ data: todayKey() });
-          if (live) setRows(data.map((r) => ({ display_name: r.display_name, score: r.score })));
+          if (live) setRows(data.map((r: any) => ({ display_name: r.display_name, score: r.score })));
         } else {
           const data = await getLeaderboard({ data: board });
           if (live) setRows(data);

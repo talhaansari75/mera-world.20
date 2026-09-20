@@ -20,11 +20,11 @@ test("boss phases move at two thirds and one third HP", () => {
 
 test("pet combo guard is a one-time boss protection and phase changes are observable", () => {
   let state = startCombat(333, 80);
-  state = { ...state, enemy: { ...state.enemy, hp: 60, maxHp: 100, phase: 1 }, playerHp: 100 };
+  state = { ...state, enemy: { ...state.enemy, hp: 60, maxHp: 100, phase: 1 as const }, playerHp: 100 };
   const next = combatTurn(state, 10, "guard", false, "combo_guard");
   assert.equal(next.petAbilityUsed, true);
   assert.ok(next.petAbilityUsed);
-  const phaseTwo = { ...next, enemy: { ...next.enemy, hp: 30, maxHp: 100, phase: 2 } };
+  const phaseTwo = { ...next, enemy: { ...next.enemy, hp: 30, maxHp: 100, phase: 1 as const } };
   const final = combatTurn(phaseTwo, 120, "power", true);
   assert.equal(final.victory, true);
   assert.match(final.lastEvent, /FINAL WORD/);

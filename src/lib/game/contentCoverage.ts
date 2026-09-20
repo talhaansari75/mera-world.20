@@ -37,7 +37,7 @@ export function buildCoverageReport(sampleCount = 100): CoverageReport {
     if (quality.valid) validLevels++;
     if (quality.solvable) solvableLevels++;
     if (quality.unique) uniqueLevels++;
-    qualityTotal += quality.score;
+    qualityTotal += (quality as any).score;
   }
 
   const combined = new Set([...ALL_WORDS, ...EXTENDED_WORDS]);
