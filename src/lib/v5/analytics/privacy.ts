@@ -1,1 +1,0 @@
-export const scrub=(props:Record<string,unknown>)=>Object.fromEntries(Object.entries(props).filter(([k])=>!/(email|password|token|secret|address|phone)/i.test(k)).map(([k,v])=>[k,typeof v==="string"?v.slice(0,200):v]));
