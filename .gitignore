@@ -11,3 +11,8 @@ node_modules/
 .DS_Store
 dist/
 build/
+.env
+.env.*
+dist/
+build/
+*.log
