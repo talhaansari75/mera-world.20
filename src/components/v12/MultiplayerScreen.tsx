@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageCircle, RefreshCw, Swords, Users, Wifi, Bot, Mic, Square, Play, Send } from "lucide-react";
+import { MessageCircle, RefreshCw, Swords, Users, Wifi, Bot, Mic, Square } from "lucide-react";
 import { Screen } from "@/components/screens/chrome";
 import { useGame } from "@/lib/store";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
@@ -35,7 +35,12 @@ export function MultiplayerScreen({ onBack }: Props) {
   const [message, setMessage] = useState("");
   const [log, setLog] = useState<Array<{ message: string; userId: string; createdAt: string }>>([]);
   const [notice, setNotice] = useState("");
-  const [opponentKind, setOpponentKind] = useState<"human" | "waiting" | "bot" | null>(null);\n  const [recording, setRecording] = useState(false);\n  const [voiceMessages, setVoiceMessages] = useState<Array<{id:string;userId:string;data:string;mimeType:string;durationMs:number}>>([]);\n  const recorderRef = useRef<MediaRecorder | null>(null);\n  const chunksRef = useRef<Blob[]>([]);\n  const recordStartedRef = useRef(0);
+  const [opponentKind, setOpponentKind] = useState<"human" | "waiting" | "bot" | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [voiceMessages, setVoiceMessages] = useState<Array<{id:string;userId:string;data:string;mimeType:string;durationMs:number}>>([]);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const recordStartedRef = useRef(0);
   const startedRoomRef = useRef<string | null>(null);
   const botTimerRef = useRef<number | null>(null);
 
@@ -207,7 +212,19 @@ export function MultiplayerScreen({ onBack }: Props) {
     } catch {}
   }
 
-  useEffect(() => {\n    if (!room?.roomId || opponentKind !== "human") return;\n    const load = async () => { try { const r = await fetch(`/api/multiplayer/voice?roomId=${encodeURIComponent(room.roomId)}`); const j = await r.json(); if (j.ok) setVoiceMessages(j.messages ?? []); } catch {} };\n    void load(); const t = window.setInterval(load, 3000); return () => window.clearInterval(t);\n  }, [room?.roomId, opponentKind]);\n\n  const toggleVoice = async () => {\n    if (recording) { recorderRef.current?.stop(); return; }\n    if (!room) return;\n    try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); const rec = new MediaRecorder(stream, { mimeType: "audio/webm" }); chunksRef.current = []; recordStartedRef.current = Date.now(); rec.ondataavailable = e => { if (e.data.size) chunksRef.current.push(e.data); }; rec.onstop = async () => { stream.getTracks().forEach(t => t.stop()); const blob = new Blob(chunksRef.current, { type: rec.mimeType }); const reader = new FileReader(); reader.onloadend = async () => { try { await fetch("/api/multiplayer/voice", { method: "POST", headers: {"content-type":"application/json"}, body: JSON.stringify({ roomId: room.roomId, mimeType: rec.mimeType, durationMs: Math.min(20000, Math.max(250, Date.now()-recordStartedRef.current)), data: reader.result }) }); } catch {} }; reader.readAsDataURL(blob); setRecording(false); }; recorderRef.current = rec; rec.start(); setRecording(true); window.setTimeout(() => rec.state === "recording" && rec.stop(), 20000); } catch { setNotice("Microphone permission is required for voice messages."); }\n  };\n\n  const leave = () => {
+  useEffect(() => {
+    if (!room?.roomId || opponentKind !== "human") return;
+    const load = async () => { try { const r = await fetch(`/api/multiplayer/voice?roomId=${encodeURIComponent(room.roomId)}`); const j = await r.json(); if (j.ok) setVoiceMessages(j.messages ?? []); } catch {} };
+    void load(); const t = window.setInterval(load, 3000); return () => window.clearInterval(t);
+  }, [room?.roomId, opponentKind]);
+
+  const toggleVoice = async () => {
+    if (recording) { recorderRef.current?.stop(); return; }
+    if (!room) return;
+    try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); const rec = new MediaRecorder(stream, { mimeType: "audio/webm" }); chunksRef.current = []; recordStartedRef.current = Date.now(); rec.ondataavailable = e => { if (e.data.size) chunksRef.current.push(e.data); }; rec.onstop = async () => { stream.getTracks().forEach(t => t.stop()); const blob = new Blob(chunksRef.current, { type: rec.mimeType }); const reader = new FileReader(); reader.onloadend = async () => { try { await fetch("/api/multiplayer/voice", { method: "POST", headers: {"content-type":"application/json"}, body: JSON.stringify({ roomId: room.roomId, mimeType: rec.mimeType, durationMs: Math.min(20000, Math.max(250, Date.now()-recordStartedRef.current)), data: reader.result }) }); } catch {} }; reader.readAsDataURL(blob); setRecording(false); }; recorderRef.current = rec; rec.start(); setRecording(true); window.setTimeout(() => rec.state === "recording" && rec.stop(), 20000); } catch { setNotice("Microphone permission is required for voice messages."); }
+  };
+
+  const leave = () => {
     clearBotTimer();
     startedRoomRef.current = null;
     sessionStorage.removeItem("mwsj.multiplayer.room");
@@ -364,7 +381,17 @@ export function MultiplayerScreen({ onBack }: Props) {
                     <p className="text-xs text-muted">No comments yet.</p>
                   )}
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">\n                  <button type="button" onClick={() => void toggleVoice()} className={recording ? "btn-primary" : "hud-chip"}>\n                    {recording ? <><Square className="mr-1 size-4" /> Stop recording</> : <><Mic className="mr-1 size-4" /> Voice</>}\n                  </button>\n                </div>\n                {voiceMessages.length > 0 && <div className="mt-3 space-y-2">\n                  {voiceMessages.map(v => <div key={v.id} className="flex items-center gap-2 rounded-xl bg-surface px-2 py-2"><span className="text-xs text-muted">{v.userId===user?.id?"You":"Opponent"}</span><audio controls preload="none" src={`data:${v.mimeType};base64,${v.data}`} className="h-8 min-w-0 flex-1" /></div>)}\n                </div>}\n\n                <div className="mt-3 flex gap-2">\n                  <input
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button type="button" onClick={() => void toggleVoice()} className={recording ? "btn-primary" : "hud-chip"}>
+                    {recording ? <><Square className="mr-1 size-4" /> Stop recording</> : <><Mic className="mr-1 size-4" /> Voice</>}
+                  </button>
+                </div>
+                {voiceMessages.length > 0 && <div className="mt-3 space-y-2">
+                  {voiceMessages.map(v => <div key={v.id} className="flex items-center gap-2 rounded-xl bg-surface px-2 py-2"><span className="text-xs text-muted">{v.userId===user?.id?"You":"Opponent"}</span><audio controls preload="none" src={`data:${v.mimeType};base64,${v.data}`} className="h-8 min-w-0 flex-1" /></div>)}
+                </div>}
+
+                <div className="mt-3 flex gap-2">
+                  <input
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={(e) => {
