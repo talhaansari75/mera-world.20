@@ -2,7 +2,7 @@ const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
 const TX_HASH_RE = /^0x[0-9a-fA-F]{64}$/;
 
 export const ERC20_TRANSFER_TOPIC =
-  "0xddf252ad1be2c89b69c2b068fc378daa952ad163c4a11628f55a4df523b3ef";
+  "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
 export function assertAddress(value: string): string {
   if (!ADDRESS_RE.test(value)) throw new Error("Invalid EVM address");
