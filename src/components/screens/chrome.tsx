@@ -15,8 +15,8 @@ export function Screen({
   onBack?: () => void;
 }) {
   return (
-    <div className="app-shell safe-pad flex h-dvh flex-col">
-      <header className="mb-3 flex items-center gap-2">
+    <div className="app-shell safe-pad flex h-dvh min-h-0 flex-col">
+      <header className="mb-3 flex shrink-0 items-center gap-2">
         <button
           type="button"
           className="inline-flex h-11 w-11 items-center justify-center rounded-xl panel"
@@ -28,7 +28,7 @@ export function Screen({
         <h1 className="font-display text-xl text-fg">{title}</h1>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto pb-8">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-16">
         {children}
       </div>
     </div>
