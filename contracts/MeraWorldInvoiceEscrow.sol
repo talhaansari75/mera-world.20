@@ -3,6 +3,8 @@ pragma solidity ^0.8.24;
 interface IERC20Minimal { function transfer(address to,uint256 amount) external returns(bool); function transferFrom(address from,address to,uint256 amount) external returns(bool); }
 contract MeraWorldInvoiceEscrow {
  address public immutable owner; IERC20Minimal public immutable token; address public treasury;
+    uint256 private locked = 1;
+    modifier nonReentrant(){require(locked == 1,"REENTRANCY");locked=2;_;locked=1;}
  struct Invoice { address payer; uint256 amount; uint256 paid; uint64 expiresAt; bool released; bool refunded; }
  mapping(bytes32=>Invoice) public invoices;
  event InvoiceCreated(bytes32 indexed invoiceId,address indexed payer,uint256 amount,uint64 expiresAt);
