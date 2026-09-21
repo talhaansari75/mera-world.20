@@ -1,11 +1,7 @@
-import React from "react";
-
-export function PaymentsScreen() {
-  return (
-    <div className="p-4 text-center">
-      <h2 className="text-lg font-bold">PaymentsScreen</h2>
-    </div>
-  );
-}
-
+import React,{useEffect,useState} from "react";
+type Payment={id:string;user_id:string;product_id:string;chain_id:number;amount_atomic:string;status:string;tx_hash?:string|null;confirmations?:number|null;created_at:string};
+export function PaymentsScreen(){const [payments,setPayments]=useState<Payment[]>([]),[summary,setSummary]=useState<any>({}),[loading,setLoading]=useState(true),[error,setError]=useState("");
+useEffect(()=>{fetch("/api/payments/admin").then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||"Forbidden");setSummary(d.summary);setPayments(d.payments||[])}).catch(e=>setError(e.message)).finally(()=>setLoading(false))},[]);
+if(loading)return <div className="p-4">Loading payments…</div>;if(error)return <div className="p-4 text-red-400">{error}</div>;
+return <div className="space-y-4 p-4"><div className="grid grid-cols-2 gap-3 md:grid-cols-4">{[["Total",summary.intents],["Paid",summary.paid],["Pending",summary.pending],["Failed",summary.failed]].map(([k,v])=><div key={String(k)} className="panel rounded-xl p-3"><div className="text-2xl font-bold">{v??0}</div><div className="text-xs text-muted">{k}</div></div>)}</div><div className="overflow-auto rounded-2xl border border-white/10"><table className="w-full text-left text-sm"><thead><tr><th className="p-3">Product</th><th>Chain</th><th>Amount</th><th>Status</th><th>Confirmations</th><th>TX</th></tr></thead><tbody>{payments.map(p=><tr key={p.id} className="border-t border-white/5"><td className="p-3">{p.product_id}</td><td>{p.chain_id}</td><td>{p.amount_atomic}</td><td>{p.status}</td><td>{p.confirmations??0}</td><td>{p.tx_hash?<a className="underline" target="_blank" rel="noreferrer" href={`https://basescan.org/tx/${p.tx_hash}`}>{p.tx_hash.slice(0,10)}…</a>:"—"}</td></tr>)}</tbody></table></div></div>}
 export default PaymentsScreen;
