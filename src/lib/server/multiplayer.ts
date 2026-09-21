@@ -50,27 +50,17 @@ export const getMultiplayerRoom = createServerFn({ method: "GET" })
 export const quickMatchMultiplayer = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .handler(async ({ context }) => {
-    const db = getPrisma();
-    // @ts-ignore - Prisma model is generated from the project's multiplayer schema.
-    const room = await db.multiplayerRoom.findFirst({
-      where: {
-        status: "open",
-        members: { some: { userId: { not: context.userId }, lastSeenAt: { gte: new Date(Date.now() - 120000) } } },
-      },
-      orderBy: { updatedAt: "desc" },
-      include: { members: true },
-    });
-    if (room) {
+    const sql = await getSql();
+    const rows = await sql.query<{ room_id: string }>(
+      "select r.room_id from multiplayer_rooms r where r.status = 'open' and exists (select 1 from multiplayer_members m where m.room_id = r.room_id and m.user_id <> $1 and m.last_seen_at >= now() - interval '2 minutes') order by r.updated_at desc limit 1",
+      [context.userId],
+    );
+    if (rows[0]?.room_id) {
       try {
-        const joined = await joinRoom(context.userId, "Traveler", room.roomId);
-        return { ok: true as const, kind: "human" as const, room: joined };
-      } catch {
-        // Another player may have filled the room between lookup and join.
-      }
+        const room = await joinRoom(context.userId, "Traveler", rows[0].room_id);
+        return { ok: true as const, kind: "human" as const, room };
+      } catch {}
     }
-
-    // No human opponent is available. The UI uses an explicitly disclosed
-    // practice opponent rather than pretending a bot is a real person.
     return { ok: true as const, kind: "bot" as const, room: null };
   });
 
