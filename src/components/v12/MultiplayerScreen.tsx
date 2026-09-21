@@ -98,12 +98,12 @@ export function MultiplayerScreen({ onBack }: Props) {
           <button type="button" onClick={() => void quick()} disabled={loading} className="btn-primary mt-4 flex w-full items-center justify-center gap-2">
             <Wifi className="size-4" /> {loading ? "Finding opponent…" : "Quick Match"}
           </button>
-          {notice && <p className="mt-3 rounded-2xl bg-surface-2 p-3 text-sm text-muted">{notice}</p>
+          {notice && <p className="mt-3 rounded-2xl bg-surface-2 p-3 text-sm text-muted">{notice}</p>}
           {opponentKind === "bot" && (
             <button type="button" onClick={() => useGame.getState().startLevel(1, "classic")} className="btn-primary mt-3">
               Start Practice Match
             </button>
-          )}}
+          )}
         </section>
 
         <section className="panel rounded-3xl p-5">
