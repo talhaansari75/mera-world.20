@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Activity, Clock3, Gamepad2, Mail, RefreshCw, ShieldCheck, Users } from "lucide-react";
 import { getAdminDashboard } from "@/lib/server/admin";
 import { Screen } from "@/components/screens/chrome";
@@ -162,7 +162,7 @@ export function AdminScreen({ onBack }: { onBack?: () => void }) {
   );
 }
 
-function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+function Metric({ icon, label, value }: { icon: ReactNode; label: string; value: number }) {
   return <section className="panel rounded-2xl p-4"><div className="mb-2 size-5 text-primary">{icon}</div><p className="text-xs text-muted">{label}</p><p className="mt-1 text-2xl font-bold text-fg">{value}</p></section>;
 }
 
