@@ -1,5 +1,6 @@
-import { BookOpen, Gift, Map, PawPrint, Settings, ShoppingBag, Sparkles, Swords, Trophy, User, Users } from "lucide-react";
+import { Bell, BookOpen, ChevronRight, Crown, Flame, Gift, Map, PawPrint, Settings, ShoppingBag, Sparkles, Swords, Target, Trophy, User, Users, Wallet } from "lucide-react";
 import { useGame, playerLevel } from "@/lib/store";
+import { xpForLevel } from "@/lib/game/economy";
 import { HudChips, TileButton, useT } from "./chrome";
 import { unlockAudio, startMusic } from "@/lib/game/audio";
 import { todayKey, worldOf } from "@/lib/game/levels";
@@ -35,70 +36,104 @@ export function HomeScreen() {
   const save = useGame((s) => s.save);
   const world = worldOf(save.unlockedLevel);
   const claimed = save.lastLoginReward === todayKey();
-  return (
-    <div className="app-shell starfield safe-pad flex h-dvh flex-col gap-4 overflow-y-auto">
-      <header className="flex items-center justify-between gap-3">
-        <div><p className="text-xs uppercase tracking-[0.2em] text-accent">{save.playerName}</p><h1 className="font-display text-2xl text-fg">{t("app.title")}</h1></div>
-        <button type="button" className="inline-flex h-11 w-11 items-center justify-center rounded-xl panel" onClick={() => useGame.getState().go("profile")} aria-label={t("cta.profile")}><User className="size-5" /></button>
-      </header>
-      <HudChips />
-      <JourneyHero />
-      {(() => {
-  const rec = recommendFor(save);
-  const live = recommendLiveEvent(save);
+  const level = playerLevel(save.xp);
+  const levelBase = xpForLevel(level);
+  const nextBase = xpForLevel(level + 1);
+  const levelProgress = nextBase > levelBase ? Math.min(100, Math.round(((save.xp - levelBase) / (nextBase - levelBase)) * 100)) : 100;
+  const streak = Math.max(save.dailyStreak, save.stats.currentStreak);
 
   return (
-    <div className="grid gap-3" aria-label="Personalized recommendations">
-      {/* Continue Level Card */}
-      <button
-        type="button"
-        onClick={() => useGame.getState().startLevel(save.unlockedLevel)}
-        className="panel w-full rounded-2xl p-4 text-left transition-all active:scale-[0.98] hover:bg-white/5"
-      >
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-accent">
-              For You
-            </p>
-            <p className="mt-1 text-lg font-semibold text-fg">{rec.title}</p>
-            <p className="mt-0.5 text-sm text-muted">{rec.detail}</p>
+    <div className="app-shell starfield safe-pad flex h-dvh flex-col overflow-y-auto">
+      <header className="flex items-center justify-between gap-3 pb-1">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="dashboard-avatar">
+            <span>{save.avatarId?.slice(0, 1)?.toUpperCase() || "✦"}</span>
           </div>
-          <span className="text-2xl">✨</span>
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.28em] text-accent">Ink & Starlight</p>
+            <h1 className="truncate font-display text-2xl text-fg">{save.playerName}</h1>
+          </div>
         </div>
-      </button>
+        <div className="flex items-center gap-2">
+          <button type="button" className="dashboard-icon-btn" aria-label="Notifications"><Bell className="size-5" /></button>
+          <button type="button" className="dashboard-icon-btn" onClick={() => useGame.getState().go("profile")} aria-label={t("cta.profile")}><User className="size-5" /></button>
+        </div>
+      </header>
 
-      {/* Daily Discovery Card */}
-      <button
-        type="button"
-        onClick={() => useGame.getState().go("daily")}
-        className="panel w-full rounded-2xl p-4 text-left transition-all active:scale-[0.98] hover:bg-white/5"
-      >
-        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-yellow-400">
-          Live Now
-        </p>
-        <p className="mt-1 text-lg font-semibold text-fg">{live.title}</p>
-        <p className="mt-0.5 text-sm text-muted">{live.detail}</p>
-      </button>
-    </div>
-  );
-})()}
-      <button type="button" className="journey-continue btn-primary animate-pop" onClick={() => useGame.getState().startLevel(save.unlockedLevel)}>
-        <span><span className="block text-xs uppercase tracking-[0.2em] opacity-80">Continue Journey</span><strong className="block text-lg">Level {save.unlockedLevel} · {world.name}</strong></span><span className="text-2xl">→</span>
-      </button>
-      {!claimed && <button type="button" className="panel flex items-center justify-between rounded-2xl p-4 text-left" onClick={() => useGame.getState().claimLogin()}><span><span className="flex items-center gap-2 text-sm font-semibold text-fg"><Gift className="size-4 text-gold" /> Daily reward ready</span><span className="text-xs text-muted">Day {(save.loginDays % 7) + 1} · +{DAILY_REWARD_COINS[save.loginDays % 7]} coins</span></span><span className="text-sm font-semibold text-primary">Claim</span></button>}
-      <div className="grid grid-cols-3 gap-2">
-        <TileButton icon={<Map className="size-5" />} label={t("cta.worlds")} onClick={() => useGame.getState().go("worlds")} />
-        <TileButton icon={<Sparkles className="size-5" />} label={t("cta.daily")} onClick={() => useGame.getState().go("daily")} />
-        <TileButton icon={<Swords className="size-5" />} label={t("cta.modes")} onClick={() => useGame.getState().go("modes")} />
-        <TileButton icon={<Users className="size-5" />} label="Multiplayer" onClick={() => useGame.getState().go("multiplayer")} />
-        <TileButton icon={<ShoppingBag className="size-5" />} label={t("cta.shop")} onClick={() => useGame.getState().go("shop")} />
-        <TileButton icon={<PawPrint className="size-5" />} label={t("cta.pets")} onClick={() => useGame.getState().go("pets")} />
-        <TileButton icon={<Trophy className="size-5" />} label={t("cta.achievements")} onClick={() => useGame.getState().go("achievements")} />
-        <TileButton icon={<Gift className="size-5" />} label={t("cta.spin")} onClick={() => useGame.getState().go("spin")} />
-        <TileButton icon={<BookOpen className="size-5" />} label={t("cta.story")} onClick={() => useGame.getState().go("story")} />
-        <TileButton icon={<Settings className="size-5" />} label={t("cta.more")} onClick={() => useGame.getState().go("more")} />
+      <div className="dashboard-currency-row">
+        <button type="button" className="dashboard-currency" onClick={() => useGame.getState().go("shop")}><span className="currency-icon coin">◈</span><span><b>{save.coins.toLocaleString()}</b><small>Coins</small></span></button>
+        <button type="button" className="dashboard-currency premium" onClick={() => useGame.getState().go("shop")}><span className="currency-icon gem">✦</span><span><b>{save.diamonds.toLocaleString()}</b><small>Diamonds</small></span><ChevronRight className="size-4 opacity-50" /></button>
+        <div className="dashboard-currency"><span className="currency-icon energy">ϟ</span><span><b>{save.energy}</b><small>Energy</small></span></div>
       </div>
-      <DailyRewardPopup />
+
+      <section className="dashboard-hero journey-hero animate-pop overflow-hidden rounded-[28px] p-5 sm:p-7">
+        <div className="journey-hero-glow" />
+        <div className="relative z-10 grid gap-6 md:grid-cols-[1.35fr_.65fr] md:items-end">
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <span className="dashboard-kicker">Current expedition</span>
+              <span className="dashboard-pill">World {world.world}</span>
+            </div>
+            <h2 className="max-w-[16ch] font-display text-4xl leading-none text-fg sm:text-5xl">{world.name}</h2>
+            <p className="mt-2 max-w-[48ch] text-sm text-muted">Level {save.unlockedLevel} is waiting. Continue your journey and uncover the next hidden word.</p>
+            <div className="mt-5 max-w-xl">
+              <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-[0.16em] text-muted"><span>Level {level}</span><span>{levelProgress}% XP</span></div>
+              <div className="dashboard-progress"><span style={{ width: levelProgress + "%" }} /></div>
+            </div>
+            <button type="button" className="journey-continue btn-primary mt-5 max-w-md" onClick={() => useGame.getState().startLevel(save.unlockedLevel)}>
+              <span><span className="block text-xs uppercase tracking-[0.2em] opacity-75">Continue Journey</span><strong className="block text-lg">Play Level {save.unlockedLevel}</strong></span><ChevronRight className="size-6" />
+            </button>
+          </div>
+          <div className="dashboard-orbit" aria-hidden="true"><div className="dashboard-orbit-core">✦</div><div className="dashboard-orbit-ring ring-a" /><div className="dashboard-orbit-ring ring-b" /></div>
+        </div>
+      </section>
+
+      <section className="grid gap-3 sm:grid-cols-3">
+        <div className="dashboard-stat"><span className="dashboard-stat-icon"><Flame className="size-5" /></span><div><b>{streak}</b><small>Day streak</small></div></div>
+        <div className="dashboard-stat"><span className="dashboard-stat-icon"><Target className="size-5" /></span><div><b>{save.stats.levelsCompleted}</b><small>Levels cleared</small></div></div>
+        <div className="dashboard-stat"><span className="dashboard-stat-icon"><Trophy className="size-5" /></span><div><b>{save.stats.perfectClears}</b><small>Perfect clears</small></div></div>
+      </section>
+
+      <section className="grid gap-3 lg:grid-cols-[1.15fr_.85fr]">
+        <button type="button" className="dashboard-feature dashboard-feature-gold" onClick={() => useGame.getState().go("daily")}>
+          <div><span className="dashboard-kicker text-yellow-200">Live today</span><h3 className="mt-1 font-display text-2xl text-white">Daily Discovery</h3><p className="mt-1 text-sm text-white/65">Keep your streak alive and earn bonus rewards.</p></div>
+          <div className="dashboard-feature-icon">✧</div>
+        </button>
+        <button type="button" className="dashboard-feature dashboard-feature-purple" onClick={() => useGame.getState().go("shop")}>
+          <div><span className="dashboard-kicker text-indigo-200">Premium</span><h3 className="mt-1 font-display text-2xl text-white">Diamond Vault</h3><p className="mt-1 text-sm text-white/65">Top up with USDC on Base.</p></div>
+          <Wallet className="size-8 text-white/80" />
+        </button>
+      </section>
+
+      {!claimed && <button type="button" className="dashboard-reward" onClick={() => useGame.getState().claimLogin()}>
+        <span className="dashboard-reward-icon"><Gift className="size-5" /></span>
+        <span className="min-w-0 flex-1 text-left"><b>Daily reward is ready</b><small>Day {(save.loginDays % 7) + 1} · Claim your free coins</small></span>
+        <span className="dashboard-claim">Claim</span>
+      </button>}
+
+      <section>
+        <div className="mb-3 flex items-end justify-between"><div><p className="dashboard-kicker">Quick travel</p><h3 className="font-display text-2xl text-fg">Your World</h3></div><button type="button" className="text-xs font-bold uppercase tracking-[0.15em] text-accent" onClick={() => useGame.getState().go("worlds")}>View map</button></div>
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+          <TileButton icon={<Map className="size-5" />} label={t("cta.worlds")} onClick={() => useGame.getState().go("worlds")} />
+          <TileButton icon={<Swords className="size-5" />} label={t("cta.modes")} onClick={() => useGame.getState().go("modes")} />
+          <TileButton icon={<PawPrint className="size-5" />} label={t("cta.pets")} onClick={() => useGame.getState().go("pets")} />
+          <TileButton icon={<ShoppingBag className="size-5" />} label={t("cta.shop")} onClick={() => useGame.getState().go("shop")} />
+          <TileButton icon={<Trophy className="size-5" />} label={t("cta.achievements")} onClick={() => useGame.getState().go("achievements")} />
+        </div>
+      </section>
+
+      <section className="dashboard-footer-card">
+        <div><p className="dashboard-kicker">Traveler profile</p><h3 className="font-display text-xl text-fg">Level {level} Explorer</h3><p className="text-sm text-muted">{save.stats.wordsFound.toLocaleString()} words discovered across {save.stats.gamesWon.toLocaleString()} victories.</p></div>
+        <button type="button" className="dashboard-outline-btn" onClick={() => useGame.getState().go("profile")}><Crown className="size-4" /> Profile</button>
+      </section>
+
+      <nav className="dashboard-bottom-nav" aria-label="Main navigation">
+        <button type="button" className="active" onClick={() => useGame.getState().go("home")}><Map className="size-5" /><span>Home</span></button>
+        <button type="button" onClick={() => useGame.getState().go("worlds")}><Target className="size-5" /><span>Worlds</span></button>
+        <button type="button" onClick={() => useGame.getState().startLevel(save.unlockedLevel)}><Swords className="size-5" /><span>Play</span></button>
+        <button type="button" onClick={() => useGame.getState().go("shop")}><ShoppingBag className="size-5" /><span>Shop</span></button>
+        <button type="button" onClick={() => useGame.getState().go("profile")}><User className="size-5" /><span>Profile</span></button>
+      </nav>
     </div>
   );
 }
