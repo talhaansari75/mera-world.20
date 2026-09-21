@@ -51,7 +51,7 @@ export const Route = createFileRoute("/api/payments/base")({
           const item = product(String(body.productId || ""));
           const id = randomUUID();
           const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-          await db.${queryRaw`
+          await db.$queryRaw`
             insert into blockchain_payment_intents
               (id,user_id,product_id,chain_id,token_address,recipient_address,amount_atomic,status,expires_at)
             values
@@ -63,7 +63,7 @@ export const Route = createFileRoute("/api/payments/base")({
         if (body.action === "verify") {
           if (!body.intentId || !body.txHash) return json({ error: "intentId and txHash are required" }, 400);
           if (!/^0x[0-9a-fA-F]{64}$/.test(body.txHash)) return json({ error: "Invalid transaction hash" }, 400);
-          const intents = await db.${queryRaw`select * from blockchain_payment_intents where id = ${body.intentId} and user_id = ${userId} limit 1`;
+          const intents = await db.$queryRaw`select * from blockchain_payment_intents where id = ${body.intentId} and user_id = ${userId} limit 1`;
           const intent = intents[0] as any;
           if (!intent) return json({ error: "Payment intent not found" }, 404);
           if (intent.status === "paid") return json({ ok: true, status: "paid", txHash: intent.tx_hash });
@@ -93,7 +93,32 @@ export const Route = createFileRoute("/api/payments/base")({
 
           const item = product(String(intent.product_id));
           await db.$transaction(async (txDb: any) => {
-            await txDb.${queryRaw`update blockchain_payment_intents set status='paid', tx_hash=${body.txHash}, paid_at=now() where id=${body.intentId} and status='pending'`;
+            const credited = await txDb.$queryRaw`
+              insert into blockchain_currency_ledger (user_id, intent_id, tx_hash, currency, amount)
+              values (${userId}, ${body.intentId}, ${body.txHash}, 'diamonds', ${item.diamonds})
+              on conflict (tx_hash) do nothing
+              returning id
+            `;
+            if (!credited.length) throw new Error("This transaction has already been credited.");
+            const saved = await txDb.$queryRaw`
+              update player_saves
+              set save_json = jsonb_set(
+                save_json::jsonb,
+                '{diamonds}',
+                to_jsonb(coalesce((save_json::jsonb->>'diamonds')::integer, 0) + ${item.diamonds}),
+                true
+              )::text,
+              updated_at = now(),
+              revision = revision + 1
+              where user_id = ${userId}
+              returning user_id
+            `;
+            if (!saved.length) throw new Error("Cloud save is not initialized for this account.");
+            await txDb.$queryRaw`
+              update blockchain_payment_intents
+              set status='paid', tx_hash=${body.txHash}, paid_at=now()
+              where id=${body.intentId} and status='pending'
+            `;
             await txDb.purchaseReceipt.upsert({
               where: { provider_externalId: { provider: "base-usdc", externalId: body.txHash } },
               create: { userId, provider: "base-usdc", externalId: body.txHash, productId: intent.product_id, amountMinor: Math.round(Number(item.priceUsd) * 100), currency: "USD", status: "verified", rawJson: { chainId: CHAIN_ID, txHash: body.txHash, from, tokenAddress: TOKEN_ADDRESS } },
