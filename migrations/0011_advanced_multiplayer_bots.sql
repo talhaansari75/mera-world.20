@@ -1,0 +1,11 @@
+alter table multiplayer_rooms add column if not exists match_id uuid;
+alter table multiplayer_rooms add column if not exists started_at timestamptz;
+alter table multiplayer_rooms add column if not exists finished_at timestamptz;
+alter table multiplayer_members add column if not exists is_bot boolean not null default false;
+alter table multiplayer_members add column if not exists country_code text not null default 'US';
+alter table multiplayer_members add column if not exists avatar_id text not null default 'traveler';
+alter table multiplayer_members add column if not exists bot_profile_id text;
+alter table multiplayer_members add column if not exists score integer not null default 0;
+alter table multiplayer_members add column if not exists ready boolean not null default false;
+create index if not exists multiplayer_members_match_idx on multiplayer_members(room_id, score desc);
+create unique index if not exists multiplayer_bot_profile_room_uq on multiplayer_members(room_id, bot_profile_id) where is_bot = true;
