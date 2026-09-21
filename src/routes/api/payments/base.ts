@@ -42,7 +42,7 @@ export const Route = createFileRoute("/api/payments/base")({
     POST: async ({ request }) => {
       try {
         const userId = await requireUserId(bearer(request));
-        const body = await request.json() as { action?: string; productId?: string; intentId?: string; txHash?: string };
+        const body = await request.json() as { action?: string; productId?: string; intentId?: string; txHash?: string; payerAddress?: string };
         const db = getPrisma();
 
         if (body.action === "create") {
@@ -53,7 +53,7 @@ export const Route = createFileRoute("/api/payments/base")({
           const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
           await db.$queryRaw`
             insert into blockchain_payment_intents
-              (id,user_id,product_id,chain_id,token_address,recipient_address,amount_atomic,status,expires_at)
+              (id,user_id,product_id,chain_id,token_address,recipient_address,payer_address,amount_atomic,status,expires_at)
             values
               (${id},${userId},${body.productId},${CHAIN_ID},${TOKEN_ADDRESS},${RECIPIENT_ADDRESS},${item.amountAtomic},'pending',${expiresAt})
           `;
@@ -69,20 +69,20 @@ export const Route = createFileRoute("/api/payments/base")({
           if (intent.status === "paid") return json({ ok: true, status: "paid", txHash: intent.tx_hash });
           if (new Date(String(intent.expires_at)).getTime() < Date.now()) return json({ error: "Payment intent expired" }, 400);
 
-          const tx = await rpc("eth_getTransactionByHash", [body.txHash]);
+          const networkHex = await rpc("eth_chainId", []); if(Number.parseInt(String(networkHex),16)!==Number(intent.chain_id)) return json({error:"Wrong network for payment intent"},400); const tx = await rpc("eth_getTransactionByHash", [body.txHash]);
           const receipt = await rpc("eth_getTransactionReceipt", [body.txHash]);
           if (!tx || !receipt) return json({ error: "Transaction not found yet" }, 202);
           if (tx.blockHash === null || receipt.status !== "0x1") return json({ error: "Transaction is not confirmed successfully" }, 400);
-          if (String(tx.to || "").toLowerCase() !== TOKEN_ADDRESS.toLowerCase()) return json({ error: "Transaction did not call the configured USDC contract" }, 400);
+          if (String(tx.to || "").toLowerCase() !== String(intent.token_address).toLowerCase()) return json({ error: "Transaction did not call the configured USDC contract" }, 400);
 
-          const from = String(tx.from || "").toLowerCase();
+          const from = String(tx.from || "").toLowerCase(); if(from!==String(intent.payer_address||"").toLowerCase()) return json({error:"Transaction sender does not match the payment intent"},400);
           const wantedRecipient = String(intent.recipient_address).toLowerCase().replace(/^0x/, "");
           const wantedAmount = BigInt(String(intent.amount_atomic)).toString(16).padStart(64, "0").toLowerCase();
           const recipientTopic = wantedRecipient.padStart(64, "0").toLowerCase();
           let matched = false;
           for (const log of receipt.logs ?? []) {
             const topics = log.topics ?? [];
-            if (String(log.address).toLowerCase() !== TOKEN_ADDRESS.toLowerCase()) continue;
+            if (String(log.address).toLowerCase() !== String(intent.token_address).toLowerCase()) continue;
             if (String(topics[0]).toLowerCase() !== TRANSFER_TOPIC) continue;
             if (String(topics[2] || "").toLowerCase().replace(/^0x/, "").padStart(64, "0") !== recipientTopic) continue;
             if (String(topics[1] || "").toLowerCase().replace(/^0x/, "").padStart(64, "0") !== from.slice(2).padStart(64, "0")) continue;
