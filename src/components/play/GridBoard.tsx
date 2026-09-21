@@ -12,11 +12,12 @@ type Props = {
   mirror?: boolean;
   tileStyle: "carved" | "ink" | "neon";
   disabled?: boolean;
+  opponentFound?: string[];
   onPath: (letters: string, cells: Array<[number, number]>) => "found" | "bonus" | "miss" | "repeat";
 };
 
 function key(r: number, c: number) { return `${r},${c}`; }
-export function GridBoard({ puzzle, found, revealed, fog, mirror, tileStyle, disabled, onPath }: Props) {
+export function GridBoard({ puzzle, found, revealed, fog, mirror, tileStyle, disabled, opponentFound = [], onPath }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [hot, setHot] = useState<Array<[number, number]>>([]);
   const [miss, setMiss] = useState<Array<[number, number]>>([]);
@@ -82,6 +83,11 @@ export function GridBoard({ puzzle, found, revealed, fog, mirror, tileStyle, dis
   const foundPaths = useMemo(
     () => puzzle.placements.filter((p) => found.includes(p.word)),
     [puzzle, found],
+  );
+
+  const opponentPaths = useMemo(
+    () => puzzle.placements.filter((p) => opponentFound.includes(p.word)),
+    [puzzle, opponentFound],
   );
 
   const revealedSet = useMemo(() => {
@@ -222,7 +228,7 @@ export function GridBoard({ puzzle, found, revealed, fog, mirror, tileStyle, dis
   return (
     <div
       ref={wrapRef}
-      className="grid-board relative aspect-square h-auto w-full max-h-full max-w-[min(100%,48dvh)] sm:max-w-[min(100%,72dvh)]"
+      className="grid-board relative aspect-square h-auto w-full max-h-full max-w-[min(100%,42dvh)] sm:max-w-[min(100%,50dvh)] lg:max-w-[min(100%,54dvh)]"
       onPointerDown={onDown}
       onPointerMove={onMove}
       onPointerUp={onUp}
@@ -273,6 +279,19 @@ export function GridBoard({ puzzle, found, revealed, fog, mirror, tileStyle, dis
         )}
       </div>
       <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox={`0 0 ${n} ${n}`}>
+        {opponentPaths.map((p) => (
+          <polyline
+            key={`opponent-${p.word}`}
+            fill="none"
+            stroke="color-mix(in oklab, var(--color-warning) 72%, white)"
+            strokeWidth="0.14"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray="0.28 0.18"
+            opacity="0.58"
+            points={p.cells.map(([r, c]) => pt(r, c)).join(" ")}
+          />
+        ))}
         {foundPaths.map((p) => (
           <polyline
             key={p.word}
