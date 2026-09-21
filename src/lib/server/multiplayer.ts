@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { getPrisma, getSql } from "@/lib/db";
 import { createRoom, joinRoom, getRoom } from "@/lib/multiplayer/roomService";
+import { botForCountry, botDisplayName } from "@/lib/multiplayer/bots";
 const GAME_MODES = new Set(["classic","timed","survival","blitz","zen","daily","endless","fog","mirror","category","boss","rush","precision","hardcore","double_reward","no_hints","small_grid","giant_grid","reverse_only","diagonal","orthogonal","chaos","streak","treasure","nightmare","focus","speedrun","marathon","random_rules"]);
 
 const clean = (v: unknown, max: number) => String(v ?? "").trim().slice(0, max);
@@ -63,6 +64,30 @@ export const quickMatchMultiplayer = createServerFn({ method: "POST" })
     }
     const waitingRoomId = await createRoom(context.userId, "Traveler", "classic", 2);
     return { ok: true as const, kind: "waiting" as const, room: await getRoom(waitingRoomId) };
+  });
+
+export const fillMultiplayerBot = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator((d: { roomId: string; countryCode?: string }) => ({ roomId: clean(d.roomId, 80), countryCode: clean(d.countryCode || "PK", 2).toUpperCase() || "PK" }))
+  .handler(async ({ context, data }) => {
+    const db = getPrisma();
+    const bot = botForCountry(data.countryCode, Date.now());
+    return db.$transaction(async (tx: any) => {
+      const room = await tx.multiplayerRoom.findUnique({ where: { roomId: data.roomId } });
+      if (!room || room.status !== "open") return { ok: false as const, error: "room_unavailable" };
+      const member = await tx.multiplayerMember.findUnique({ where: { roomId_userId: { roomId: data.roomId, userId: context.userId } } });
+      if (!member) return { ok: false as const, error: "not_room_member" };
+      const count = await tx.multiplayerMember.count({ where: { roomId: data.roomId } });
+      if (count >= 2) return { ok: true as const, kind: "human" as const };
+      const botId = "bot:" + crypto.randomUUID();
+      await tx.multiplayerMember.create({ data: {
+        roomId: data.roomId, userId: botId, displayName: botDisplayName(bot, Date.now()),
+        role: "bot", countryCode: bot.countryCode, isBot: true, avatarId: bot.avatar,
+        botProfileId: bot.id + "-" + Date.now().toString(36), botSkill: bot.skill, ready: true, lastSeenAt: new Date()
+      } });
+      await tx.multiplayerRoom.update({ where: { roomId: data.roomId }, data: { status: "playing" } });
+      return { ok: true as const, kind: "bot" as const, displayName: botDisplayName(bot, Date.now()), countryCode: bot.countryCode };
+    }, { isolationLevel: "Serializable" });
   });
 
 export const heartbeatMultiplayerRoom = createServerFn({ method: "POST" })
