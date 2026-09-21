@@ -2,6 +2,7 @@ import {createFileRoute} from "@tanstack/react-router";
 import {getPrisma} from "@/lib/db";
 import {requireUserId} from "@/lib/auth/verify.server";
 import {multiplayerPuzzle,sameCells} from "@/lib/multiplayer/serverPuzzle";
+import {settleMatch} from "@/lib/multiplayer/settle";
 const json=(d:unknown,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json"}});
 const allowed=new Set(["word_found","finish"]);
 export const Route=createFileRoute("/api/multiplayer/action")({server:{handlers:{POST:async({request})=>{try{
@@ -14,7 +15,7 @@ if(b.action==="ready"){await db.$queryRaw`update multiplayer_members set ready=t
 if(!b.matchId||!allowed.has(b.action))return json({error:"Unsupported match action"},400);
 const match=await db.$queryRaw`select match_id,status,mode,level_id,started_at,duration_seconds from multiplayer_matches where match_id=${b.matchId} and room_id=${b.roomId} limit 1`;
 if(!match.length)return json({error:"Match not found"},404);if(match[0].status!=="live")return json({error:"Match is not live"},409);
-const started=new Date(match[0].started_at).getTime();if(Date.now()>started+Number(match[0].duration_seconds)*1000)return json({error:"Match time expired"},409);
+const started=new Date(match[0].started_at).getTime();if(Date.now()>started+Number(match[0].duration_seconds)*1000){await settleMatch(b.matchId);return json({error:"Match time expired",settled:true},409);}
 const payload=b.payload||{};
 if(b.action==="word_found"){
 const word=String(payload.word||"").toUpperCase().trim();const cells=payload.cells;
