@@ -61,7 +61,8 @@ export const quickMatchMultiplayer = createServerFn({ method: "POST" })
         return { ok: true as const, kind: "human" as const, room };
       } catch {}
     }
-    return { ok: true as const, kind: "bot" as const, room: null };
+    const waitingRoomId = await createRoom(context.userId, "Traveler", "classic", 2);
+    return { ok: true as const, kind: "waiting" as const, room: await getRoom(waitingRoomId) };
   });
 
 export const heartbeatMultiplayerRoom = createServerFn({ method: "POST" })
