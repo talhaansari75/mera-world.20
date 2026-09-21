@@ -11,7 +11,7 @@ import { todayKey, puzzleForLevel } from "@/lib/game/levels";
 import { MAX_LEVEL } from "@/lib/game/constants";
 import { journeyWorldForLevel, isJourneyBoss } from "@/lib/game/journeyWorlds";
 import { adaptivePlan, nextChallengePreview, petEvolutionName, petXpEarned, petXpFor, petXpProgress, shortTermGoals } from "@/lib/game/engagement";
-import { useCurrentUser } from "@/lib/auth/use-current-user";
+import { useCurrentUser } from "@/lib/auth/use-current-user";\nimport { getMultiplayerRoom, updateMultiplayerScore } from "@/lib/server/multiplayer";
 import { DAILY_QUESTS, POWER_UPS, questProgress, xpIntoLevel, type PowerUpId } from "@/lib/game/liveSystems";
 
 import { showH5Interstitial } from "@/lib/ads/h5GamesAds";
@@ -36,7 +36,31 @@ export function PlayScreen() {
   const [powerCooldowns, setPowerCooldowns] = useState<Record<string, number>>({});
   const [showSystems, setShowSystems] = useState(false);
   const [feedbackKey, setFeedbackKey] = useState(0);
+  const [multiplayer, setMultiplayer] = useState<{ roomId: string; opponent: string; opponentScore: number } | null>(null);
   useEffect(() => { if (play?.found.length) setFeedbackKey((n) => n + 1); }, [play?.found.length]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !play) return;
+    const roomId = sessionStorage.getItem("mwsj.multiplayer.room");
+    if (!roomId) { setMultiplayer(null); return; }
+    let alive = true;
+    const poll = async () => {
+      try {
+        const r = await getMultiplayerRoom({ data: { roomId } });
+        if (!alive || !r.ok || !r.room) return;
+        const room: any = r.room;
+        const me = user?.id;
+        const other = room.members?.find((m: any) => m.userId !== me);
+        const scores = room.state?.scores ?? {};
+        const opponentScore = other ? Number(scores[other.userId] ?? 0) : 0;
+        setMultiplayer({ roomId, opponent: other?.displayName ?? "Opponent", opponentScore });
+        await updateMultiplayerScore({ data: { roomId, score: play.found.length } });
+      } catch {}
+    };
+    void poll();
+    const timer = window.setInterval(poll, 2000);
+    return () => { alive = false; window.clearInterval(timer); };
+  }, [play?.found.length, play?.puzzle.id, user?.id]);
   const adFree = useAdFree();
 
   useEffect(() => {
@@ -164,6 +188,13 @@ export function PlayScreen() {
           <Pause className="size-4" />
         </button>
       </header>
+
+      {multiplayer && (
+        <div className="mx-auto flex w-full max-w-xl items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-xs">
+          <span className="font-semibold text-fg">⚔️ Online match · You {play.found.length} — {multiplayer.opponent} {multiplayer.opponentScore}</span>
+          <button type="button" className="text-muted underline" onClick={() => { sessionStorage.removeItem("mwsj.multiplayer.room"); setMultiplayer(null); }}>Leave</button>
+        </div>
+      )}
 
       <GameplayFeedback combo={play.combo} found={play.found.length} total={play.puzzle.words.length} />
       <GoalStrip goals={shortTermGoals({ level: play.level || 1, combo: play.combo, found: play.found.length, total: play.puzzle.words.length, bonus: play.bonus.length, daily: play.kind === "daily", adaptiveTier: play.adaptiveTier })} />
