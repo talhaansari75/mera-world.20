@@ -17,12 +17,11 @@ export const Route=createFileRoute("/api/multiplayer/action")({server:{handlers:
  if(action==="chat"){const message=text(payload.message);if(!message)return json({error:"Empty message"},400);await db.$queryRaw`insert into multiplayer_chat(room_id,user_id,message) values(${roomId},${userId},${message})`;return json({ok:true});}
  if(action==="ready"){await db.$queryRaw`update multiplayer_members set ready=true,last_seen_at=now() where room_id=${roomId} and user_id=${userId} and is_bot=false`;const m=await db.$queryRaw`select match_id from multiplayer_matches where room_id=${roomId} and status='waiting' limit 1`;if(m.length){const p=await db.$queryRaw`select count(*)::int as n from multiplayer_members where room_id=${roomId} and ready=false`;if(Number(p[0].n)===0){await db.$queryRaw`update multiplayer_matches set status='live',started_at=coalesce(started_at,now()) where match_id=${m[0].match_id} and status='waiting'`;await db.$queryRaw`update multiplayer_rooms set status='playing',updated_at=now(),state_json=jsonb_set(coalesce(state_json,'{}'::jsonb),'{phase}','"live"'::jsonb) where room_id=${roomId}`;}}return json({ok:true});}
  if(action!=="word_found")return json({error:"Unsupported match action"},400);
- if(!clientActionId)return json({error:"clientActionId required"},400);
+ 
  if(!matchId)return json({error:"matchId required"},400);
  const match=await db.$queryRaw`select match_id,status,mode,level_id,puzzle_seed,started_at,duration_seconds from multiplayer_matches where match_id=${matchId} and room_id=${roomId} limit 1`;
  if(!match.length)return json({error:"Match not found"},404);
- const receipt=await db.$queryRaw`insert into multiplayer_action_receipts(id,match_id,user_id,client_action_id,action_type) values(${crypto.randomUUID()},${matchId},${userId},${clientActionId},${action}) on conflict(match_id,user_id,client_action_id) do nothing returning id`;
- if(!receipt.length)return json({error:"Action already processed",replayed:true},409);
+ if(clientActionId){ const receipt=await db.$queryRaw`insert into multiplayer_action_receipts(id,match_id,user_id,client_action_id,action_type) values(${crypto.randomUUID()},${matchId},${userId},${clientActionId},${action}) on conflict(match_id,user_id,client_action_id) do nothing returning id`; if(!receipt.length)return json({error:"Action already processed",replayed:true},409); }
  if(match[0].status!=="live")return json({error:"Match is not live"},409);
  const started=new Date(match[0].started_at).getTime();if(!Number.isFinite(started))return json({error:"Match start time invalid"},500);
  if(Date.now()>started+Number(match[0].duration_seconds)*1000){await settleMatch(matchId);return json({error:"Match time expired",settled:true},409);}
