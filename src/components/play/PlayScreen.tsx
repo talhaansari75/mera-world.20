@@ -42,19 +42,25 @@ export function PlayScreen() {
   useEffect(() => {
     if (typeof window === "undefined" || !play) return;
     const roomId = sessionStorage.getItem("mwsj.multiplayer.room");
-    if (!roomId) { setMultiplayer(null); return; }
+    const bot = sessionStorage.getItem("mwsj.multiplayer.bot") === "1";
+    if (!roomId && !bot) { setMultiplayer(null); return; }
+    if (bot) {
+      const opponentScore = Math.min(play.puzzle.words.length, Math.floor(Math.max(0, Date.now() - play.startAt) / 8500));
+      setMultiplayer({ roomId: "practice", opponent: "Practice Opponent", opponentScore });
+      return;
+    }
     let alive = true;
     const poll = async () => {
       try {
-        const r = await getMultiplayerRoom({ data: { roomId } });
+        const r = await getMultiplayerRoom({ data: { roomId: roomId! } });
         if (!alive || !r.ok || !r.room) return;
         const room: any = r.room;
         const me = user?.id;
         const other = room.members?.find((m: any) => m.userId !== me);
         const scores = room.state?.scores ?? {};
         const opponentScore = other ? Number(scores[other.userId] ?? 0) : 0;
-        setMultiplayer({ roomId, opponent: other?.displayName ?? "Opponent", opponentScore });
-        await updateMultiplayerScore({ data: { roomId, score: play.found.length } });
+        setMultiplayer({ roomId: roomId!, opponent: other?.displayName ?? "Opponent", opponentScore });
+        await updateMultiplayerScore({ data: { roomId: roomId!, score: play.found.length } });
       } catch {}
     };
     void poll();
@@ -192,7 +198,7 @@ export function PlayScreen() {
       {multiplayer && (
         <div className="mx-auto flex w-full max-w-xl items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-xs">
           <span className="font-semibold text-fg">⚔️ Online match · You {play.found.length} — {multiplayer.opponent} {multiplayer.opponentScore}</span>
-          <button type="button" className="text-muted underline" onClick={() => { sessionStorage.removeItem("mwsj.multiplayer.room"); setMultiplayer(null); }}>Leave</button>
+          <button type="button" className="text-muted underline" onClick={() => { sessionStorage.removeItem("mwsj.multiplayer.room"); sessionStorage.removeItem("mwsj.multiplayer.bot"); setMultiplayer(null); }}>Leave</button>
         </div>
       )}
 
