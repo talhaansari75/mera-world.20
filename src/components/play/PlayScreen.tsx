@@ -11,7 +11,8 @@ import { todayKey, puzzleForLevel } from "@/lib/game/levels";
 import { MAX_LEVEL } from "@/lib/game/constants";
 import { journeyWorldForLevel, isJourneyBoss } from "@/lib/game/journeyWorlds";
 import { adaptivePlan, nextChallengePreview, petEvolutionName, petXpEarned, petXpFor, petXpProgress, shortTermGoals } from "@/lib/game/engagement";
-import { useCurrentUser } from "@/lib/auth/use-current-user";\nimport { getMultiplayerRoom, updateMultiplayerScore } from "@/lib/server/multiplayer";
+import { useCurrentUser } from "@/lib/auth/use-current-user";
+import { getMultiplayerRoom, updateMultiplayerScore } from "@/lib/server/multiplayer";
 import { DAILY_QUESTS, POWER_UPS, questProgress, xpIntoLevel, type PowerUpId } from "@/lib/game/liveSystems";
 
 import { showH5Interstitial } from "@/lib/ads/h5GamesAds";
