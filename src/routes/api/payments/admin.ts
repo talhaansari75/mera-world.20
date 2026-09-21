@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getPrisma } from "@/lib/db";
 import { isAdminUser } from "@/lib/v13/admin/access";
+import { requireUserId } from "@/lib/auth/verify.server";
 
 export const Route=createFileRoute("/api/payments/admin")({server:{handlers:{
  GET:async({request})=>{
-  const userId=request.headers.get("x-user-id");
+  const userId=await requireUserId();
   if(!userId||!(await isAdminUser(userId))) return new Response(JSON.stringify({error:"Forbidden"}),{status:403,headers:{"content-type":"application/json"}});
   const db=getPrisma();
   const [summary,recent]=await Promise.all([
