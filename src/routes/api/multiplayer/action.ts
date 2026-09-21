@@ -21,6 +21,8 @@ export const Route=createFileRoute("/api/multiplayer/action")({server:{handlers:
  if(!matchId)return json({error:"matchId required"},400);
  const match=await db.$queryRaw`select match_id,status,mode,level_id,puzzle_seed,started_at,duration_seconds from multiplayer_matches where match_id=${matchId} and room_id=${roomId} limit 1`;
  if(!match.length)return json({error:"Match not found"},404);
+ const receipt=await db.$queryRaw`insert into multiplayer_action_receipts(id,match_id,user_id,client_action_id,action_type) values(${crypto.randomUUID()},${matchId},${userId},${clientActionId},${action}) on conflict(match_id,user_id,client_action_id) do nothing returning id`;
+ if(!receipt.length)return json({error:"Action already processed",replayed:true},409);
  if(match[0].status!=="live")return json({error:"Match is not live"},409);
  const started=new Date(match[0].started_at).getTime();if(!Number.isFinite(started))return json({error:"Match start time invalid"},500);
  if(Date.now()>started+Number(match[0].duration_seconds)*1000){await settleMatch(matchId);return json({error:"Match time expired",settled:true},409);}
