@@ -26,3 +26,16 @@ create table if not exists blockchain_wallets (
 alter table purchase_receipts add column if not exists chain_id integer;
 alter table purchase_receipts add column if not exists tx_hash text;
 create unique index if not exists purchase_receipts_tx_hash_uq on purchase_receipts(tx_hash) where tx_hash is not null;
+
+
+create table if not exists blockchain_currency_ledger (
+  id bigserial primary key,
+  user_id text not null references "user"(id) on delete restrict,
+  intent_id uuid not null references blockchain_payment_intents(id) on delete restrict,
+  tx_hash text not null unique,
+  currency text not null default 'diamonds',
+  amount integer not null check (amount > 0),
+  created_at timestamptz not null default now()
+);
+create index if not exists blockchain_currency_ledger_user_idx
+  on blockchain_currency_ledger(user_id, created_at desc);
