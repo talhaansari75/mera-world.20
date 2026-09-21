@@ -17,7 +17,7 @@ export function MultiplayerScreen({ onBack }: Props) {
   const [message, setMessage] = useState("");
   const [log, setLog] = useState<Array<{ message: string; userId: string; createdAt: string }>>([]);
   const [notice, setNotice] = useState("");
-  const [opponentKind, setOpponentKind] = useState<"human" | "bot" | null>(null);
+  const [opponentKind, setOpponentKind] = useState<"human" | "waiting" | "bot" | null>(null);
 
   useEffect(() => { if (user?.displayName) setName(user.displayName); }, [user?.displayName]);
 
@@ -49,7 +49,7 @@ export function MultiplayerScreen({ onBack }: Props) {
         setNotice("A real online player is available. Match connected.");
       } else {
         setRoom(null);
-        setNotice("No online player is available right now. Practice opponent is ready.");
+        setNotice("Room created. Waiting for another online player…");
       }
     } catch (e) {
       setNotice(e instanceof Error ? e.message : "Could not find an opponent.");
@@ -126,7 +126,7 @@ export function MultiplayerScreen({ onBack }: Props) {
                 <p className="text-xs uppercase tracking-wider text-muted">Room</p>
                 <p className="break-all font-mono text-sm text-fg">{room.roomId}</p>
               </div>
-              <span className="hud-chip text-fg">{opponentKind === "human" ? "ONLINE HUMAN" : room.members.length > 1 ? "ONLINE" : "WAITING"}</span>
+              <span className="hud-chip text-fg">{opponentKind === "human" ? "ONLINE HUMAN" : opponentKind === "waiting" ? "WAITING FOR PLAYER" : room.members.length > 1 ? "ONLINE" : "WAITING"}</span>
             </div>
             <div className="mt-4 grid gap-2">
               {room.members.map(m => <div key={m.userId} className="flex items-center justify-between rounded-xl bg-surface-2 p-3"><span className="text-fg">{m.displayName}</span><span className="text-xs text-muted">{m.role}</span></div>)}
