@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { randomUUID } from "node:crypto";
 import { getPrisma } from "@/lib/db";
 import { requireUserId } from "@/lib/auth/verify.server";
+import { paymentRateLimit } from "@/lib/payments/rate-limit";
 
 const PRODUCTS = {
   starter_gems: { name: "Starter Gems", priceUsd: "1.99", amountAtomic: "1990000", diamonds: 250 },
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/api/payments/base")({
       try {
         const userId = await requireUserId(bearer(request));
         const body = await request.json() as { action?: string; productId?: string; intentId?: string; txHash?: string; payerAddress?: string };
+        const limit = paymentRateLimit(`payment:${userId}`, 10, 60_000); if (!limit.allowed) return json({ error: "Too many payment requests", retryAfterSeconds: limit.retryAfterSeconds }, 429);
         const db = getPrisma();
 
         if (body.action === "create") {
