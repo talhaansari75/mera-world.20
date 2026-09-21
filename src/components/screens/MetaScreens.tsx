@@ -653,26 +653,47 @@ export function EquipmentScreen() {
   const save = useGame((s) => s.save);
   const craft = useGame((s) => s.craft);
   const equip = useGame((s) => s.equipEquipment);
+  const slots = ["weapon", "armor", "charm"] as const;
   return (
     <Screen title="Forge & Equipment">
-      <div className="grid grid-cols-3 gap-2">
-        {(["weapon","armor","charm"] as const).map((slot) => (
-          <button key={slot} type="button" className="hud-chip" onClick={() => craft(slot)}>Craft {slot}</button>
-        ))}
-      </div>
-      <div className="mt-4 grid gap-2">
-        {save.equipment.length === 0 ? (
-          <div className="panel rounded-2xl p-4 text-sm text-muted">No equipment yet. Craft your first item.</div>
-        ) : save.equipment.map((e: any) => {
-          const active = save.equippedEquipment[e.slot] === e.id;
-          return (
-            <button key={e.id} type="button" className="panel flex items-center justify-between rounded-2xl p-4 text-left" onClick={() => equip(e.id)}>
-              <span><span className="block font-semibold text-fg">{e.name}</span><span className="text-xs text-muted">{e.slot} · Power {e.power} · Lv {e.level}</span></span>
-              <span className="text-xs text-accent">{active ? "EQUIPPED" : e.rarity.toUpperCase()}</span>
-            </button>
-          );
-        })}
+      <div className="space-y-4 pb-8">
+        <section className="panel rounded-3xl p-5">
+          <p className="text-xs uppercase tracking-wider text-accent">Forge</p>
+          <h2 className="mt-1 font-display text-2xl text-fg">Craft your gear</h2>
+          <p className="mt-1 text-sm text-muted">Use your collected materials to create stronger equipment.</p>
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            {slots.map((slot) => (
+              <button key={slot} type="button" className="panel rounded-2xl p-3 text-center" onClick={() => craft(slot)}>
+                <span className="block text-lg">{slot === "weapon" ? "⚔️" : slot === "armor" ? "🛡️" : "💠"}</span>
+                <span className="mt-1 block text-xs font-semibold capitalize text-fg">{slot}</span>
+                <span className="mt-1 block text-[10px] text-muted">Craft</span>
+              </button>
+            ))}
+          </div>
+        </section>
+        <section className="panel rounded-3xl p-5">
+          <div className="flex items-center justify-between"><div><p className="text-xs uppercase tracking-wider text-muted">Materials</p><p className="mt-1 text-sm text-fg">{Object.entries(save.materials).map(([k,v]) => `${k}: ${v}`).join(" · ")}</p></div><span className="text-2xl">🔨</span></div>
+        </section>
+        <section>
+          <p className="mb-2 text-xs uppercase tracking-wider text-muted">Your equipment</p>
+          <div className="grid gap-3">
+            {save.equipment.length === 0 ? (
+              <div className="panel rounded-2xl p-5 text-sm text-muted">No equipment yet. Gather materials, then craft your first item.</div>
+            ) : save.equipment.map((item: any) => {
+              const active = save.equippedEquipment[item.slot] === item.id;
+              return (
+                <button key={item.id} type="button" className="panel flex items-center gap-3 rounded-2xl p-4 text-left" onClick={() => equip(item.id)}>
+                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-surface-2 text-xl">{item.slot === "weapon" ? "⚔️" : item.slot === "armor" ? "🛡️" : "💠"}</span>
+                  <span className="min-w-0 flex-1"><span className="block font-semibold text-fg">{item.name}</span><span className="mt-1 block text-xs capitalize text-muted">{item.slot} · Level {item.level} · Power {item.power}</span></span>
+                  <span className="text-xs font-bold text-accent">{active ? "EQUIPPED" : item.rarity.toUpperCase()}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
       </div>
     </Screen>
   );
 }
+
+
