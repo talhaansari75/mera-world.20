@@ -47,8 +47,16 @@ export function PlayScreen() {
     if (!roomId && !bot) { setMultiplayer(null); return; }
     if (bot) {
       const opponentScore = Math.min(play.puzzle.words.length, Math.floor(Math.max(0, Date.now() - play.startAt) / 8500));
-      const opponentFound = play.puzzle.words.slice(0, opponentScore);\n      setMultiplayer({ roomId: "practice", opponent: "Practice Bot", opponentScore, opponentFound });
-      return;
+      const updateBot = () => {
+        const current = useGame.getState().play;
+        if (!current) return;
+        const opponentScore = Math.min(current.puzzle.words.length, Math.floor(Math.max(0, Date.now() - current.startAt) / 8500));
+        const opponentFound = current.puzzle.words.slice(0, opponentScore);
+        setMultiplayer({ roomId: "practice", opponent: "Practice Bot", opponentScore, opponentFound });
+      };
+      updateBot();
+      const botTimer = window.setInterval(updateBot, 500);
+      return () => window.clearInterval(botTimer);
     }
     let alive = true;
     const poll = async () => {
@@ -67,7 +75,7 @@ export function PlayScreen() {
     void poll();
     const timer = window.setInterval(poll, 2000);
     return () => { alive = false; window.clearInterval(timer); };
-  }, [play?.found.length, play?.puzzle.id, user?.id, tick]);
+  }, [play?.puzzle.id, user?.id, play?.startAt]);
   const adFree = useAdFree();
 
   useEffect(() => {
