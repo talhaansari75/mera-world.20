@@ -47,7 +47,7 @@ export const Route = createFileRoute("/api/payments/base")({
 
         if (body.action === "create") {
           if (!TOKEN_ADDRESS || !RECIPIENT_ADDRESS) return json({ error: "Blockchain payments are not configured." }, 503);
-          assertAddress(TOKEN_ADDRESS); assertAddress(RECIPIENT_ADDRESS);
+          assertAddress(TOKEN_ADDRESS); assertAddress(RECIPIENT_ADDRESS); if(!body.payerAddress)return json({error:"payerAddress is required"},400); assertAddress(body.payerAddress);
           const item = product(String(body.productId || ""));
           const id = randomUUID();
           const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
