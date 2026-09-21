@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { MessageCircle, RefreshCw, Swords, Users, Wifi } from "lucide-react";
-import { Screen } from "@/components/screens/chrome";
+import { Screen } from "@/components/screens/chrome";\nimport { useGame } from "@/lib/store";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { createMultiplayerRoom, getMultiplayerRoom, heartbeatMultiplayerRoom, joinMultiplayerRoom, quickMatchMultiplayer, sendMultiplayerRoomMessage } from "@/lib/server/multiplayer";
 
@@ -139,6 +139,14 @@ export function MultiplayerScreen({ onBack }: Props) {
               </div>
             )}
 
+            {opponentKind === "human" && room.members.length > 1 && (
+              <button type="button" onClick={() => {
+                sessionStorage.setItem("mwsj.multiplayer.room", room.roomId);
+                useGame.getState().startLevel(1, "classic");
+              }} className="btn-primary mt-4 flex items-center justify-center gap-2">
+                <Swords className="size-4" /> Start Match
+              </button>
+            )}
             <button type="button" onClick={() => { setRoom(null); setOpponentKind(null); }} className="hud-chip mt-4 flex items-center gap-2 text-fg"><RefreshCw className="size-4" /> Leave</button>
           </section>
         )}
