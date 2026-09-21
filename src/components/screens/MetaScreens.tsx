@@ -485,28 +485,36 @@ export function AchievementsScreen() {
 export function StatsScreen() {
   const t = useT();
   const st = useGame((s) => s.save.stats);
+  const save = useGame((s) => s.save);
   const rows: Array<[string, string | number]> = [
-    ["Clears", st.gamesWon],
-    ["Played", st.gamesPlayed],
-    ["Words", st.wordsFound],
-    ["Hints", st.hintsUsed],
-    ["Streak", st.currentStreak],
+    ["Games played", st.gamesPlayed],
+    ["Games won", st.gamesWon],
+    ["Words found", st.wordsFound],
+    ["Hints used", st.hintsUsed],
+    ["Current streak", st.currentStreak],
     ["Best streak", st.bestStreak],
-    ["Perfect", st.perfectClears],
+    ["Perfect clears", st.perfectClears],
     ["Coins earned", st.coinsEarned],
-    ["Dailies", st.dailyCompleted],
-    ["Bosses", st.bossesDefeated],
-    ["Hours", (st.playTimeMs / 3600000).toFixed(1)],
+    ["Daily challenges", st.dailyCompleted],
+    ["Bosses defeated", st.bossesDefeated],
   ];
   return (
-    <Screen title={t("cta.stats")}>
-      <div className="grid grid-cols-2 gap-2">
-        {rows.map(([k, v]) => (
-          <div key={k} className="panel rounded-2xl p-4">
-            <p className="text-xs text-muted">{k}</p>
-            <p className="font-display text-2xl text-fg">{v}</p>
+    <Screen title="Player Ledger">
+      <div className="space-y-4 pb-8">
+        <section className="panel rounded-3xl p-5">
+          <p className="text-xs uppercase tracking-[0.18em] text-accent">Journey ledger</p>
+          <h2 className="mt-1 font-display text-2xl text-fg">{save.playerName}</h2>
+          <p className="mt-1 text-sm text-muted">Your recorded progress, milestones and play history.</p>
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="rounded-2xl bg-surface-2 p-3"><p className="text-xs text-muted">Level</p><p className="text-xl font-bold text-fg">{playerLevel(save.xp)}</p></div>
+            <div className="rounded-2xl bg-surface-2 p-3"><p className="text-xs text-muted">XP</p><p className="text-xl font-bold text-fg">{save.xp}</p></div>
+            <div className="rounded-2xl bg-surface-2 p-3"><p className="text-xs text-muted">Play time</p><p className="text-xl font-bold text-fg">{(st.playTimeMs / 3600000).toFixed(1)}h</p></div>
+            <div className="rounded-2xl bg-surface-2 p-3"><p className="text-xs text-muted">Levels</p><p className="text-xl font-bold text-fg">{st.levelsCompleted}</p></div>
           </div>
-        ))}
+        </section>
+        <section className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {rows.map(([label, value]) => <div key={label} className="panel rounded-2xl p-4"><p className="text-xs text-muted">{label}</p><p className="mt-1 text-2xl font-display text-fg">{value}</p></div>)}
+        </section>
       </div>
     </Screen>
   );
