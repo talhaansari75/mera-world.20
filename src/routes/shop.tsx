@@ -10,7 +10,7 @@ function Shop(){
  useEffect(()=>{fetch("/api/payments/base").then(r=>r.json()).then(setConfig).catch(()=>setMessage("Payment service unavailable."));},[]);
  async function buy(item:Product){if(!config)return;setBusy(true);setMessage("");try{
   const address=await connectWallet();setWallet(address);await switchToChain(config.chainId);
-  const ir=await fetch("/api/payments/base",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"create",productId:item.id})});
+  const ir=await fetch("/api/payments/base",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"create",productId:item.id,payerAddress:address})});
   const intent=await ir.json();if(!ir.ok)throw new Error(intent.error||"Could not create payment.");
   const txHash=await sendUsdcPayment(intent.tokenAddress,intent.recipientAddress,intent.amountAtomic);
   const vr=await fetch("/api/payments/base",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",intentId:intent.intentId,txHash})});
