@@ -112,7 +112,7 @@ export function ProfileScreen() {
             <div className="min-w-0 flex-1">
               <p className="text-xs uppercase tracking-[0.18em] text-accent">Traveler Profile</p>
               <h2 className="mt-1 truncate font-display text-2xl text-fg">{save.playerName || "Traveler"}</h2>
-              <p className="mt-1 truncate text-sm text-muted">@{user?.displayName || save.playerName || "traveler"}</p>
+              <p className="mt-1 truncate text-sm text-muted">@{user?.username || user?.displayName || save.playerName || "traveler"}</p>
               {user?.primaryEmail && <p className="mt-0.5 truncate text-xs text-muted">{user.primaryEmail}</p>}
             </div>
             <div className="rounded-2xl bg-surface-2 px-4 py-3 text-center">
