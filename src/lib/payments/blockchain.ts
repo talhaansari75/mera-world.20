@@ -2,7 +2,7 @@ const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
 const TX_HASH_RE = /^0x[0-9a-fA-F]{64}$/;
 
 export const ERC20_TRANSFER_TOPIC =
-  "0xddf252ad1be2c89b69c2b068fc378daa952adf163c4a11628f55a4df523b3ef";
+  "0xddf252ad1be2c89b69c2b068fc378daa952ad163c4a11628f55a4df523b3ef";
 
 export function assertAddress(value: string): string {
   if (!ADDRESS_RE.test(value)) throw new Error("Invalid EVM address");
@@ -20,7 +20,9 @@ export function hexToBigInt(value: string): bigint {
 }
 
 export function topicAddress(value: string): string {
-  return assertAddress("0x" + value.replace(/^0x/, "").slice(-40));
+  const clean = value.replace(/^0x/, "");
+  if (clean.length !== 64) throw new Error("Invalid indexed address topic");
+  return assertAddress("0x" + clean.slice(-40));
 }
 
 export function topicAmount(value: string): bigint {
@@ -39,11 +41,11 @@ export function hasMatchingErc20Transfer(
   const recipient = assertAddress(recipientAddress);
   return logs.some((log) => {
     if (log.removed) return false;
-    if (assertAddress(String(log.address ?? "")) !== token) return false;
-    const topics = log.topics ?? [];
-    if (String(topics[0]).toLowerCase() !== ERC20_TRANSFER_TOPIC) return false;
-    if (topics.length < 3) return false;
     try {
+      if (assertAddress(String(log.address ?? "")) !== token) return false;
+      const topics = log.topics ?? [];
+      if (String(topics[0]).toLowerCase() !== ERC20_TRANSFER_TOPIC) return false;
+      if (topics.length < 3) return false;
       return (
         topicAddress(String(topics[1])) === payer &&
         topicAddress(String(topics[2])) === recipient &&
