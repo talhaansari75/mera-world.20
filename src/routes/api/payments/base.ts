@@ -55,7 +55,7 @@ export const Route = createFileRoute("/api/payments/base")({
             insert into blockchain_payment_intents
               (id,user_id,product_id,chain_id,token_address,recipient_address,payer_address,amount_atomic,status,expires_at)
             values
-              (${id},${userId},${body.productId},${CHAIN_ID},${TOKEN_ADDRESS},${RECIPIENT_ADDRESS},${item.amountAtomic},'pending',${expiresAt})
+              (${id},${userId},${body.productId},${CHAIN_ID},${TOKEN_ADDRESS},${RECIPIENT_ADDRESS},${String(body.payerAddress).toLowerCase()},${item.amountAtomic},'pending',${expiresAt})
           `;
           return json({ intentId: id, chainId: CHAIN_ID, tokenAddress: TOKEN_ADDRESS, recipientAddress: RECIPIENT_ADDRESS, amountAtomic: item.amountAtomic, product: item, expiresAt });
         }
