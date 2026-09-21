@@ -10,6 +10,7 @@ import {
   joinMultiplayerRoom,
   quickMatchMultiplayer,
   sendMultiplayerRoomMessage,
+  fillMultiplayerBot,
 } from "@/lib/server/multiplayer";
 
 type Room = {
@@ -71,11 +72,25 @@ export function MultiplayerScreen({ onBack }: Props) {
     useGame.getState().startLevel(1, "classic");
   };
 
-  const launchBotFallback = () => {
+  const launchBotFallback = async () => {
     clearBotTimer();
-    setOpponentKind("bot");
-    setNotice("No second player joined. Practice Bot is entering the same race.");
-    startMatch("bot");
+    if (room?.roomId) {
+      try {
+        const countryCode = (navigator.language.match(/-([A-Z]{2})$/i)?.[1] || "PK").toUpperCase();
+        const r = await fillMultiplayerBot({ data: { roomId: room.roomId, countryCode } });
+        if (!r.ok) { setNotice("Could not start the fallback opponent. Please try Quick Match again."); return; }
+        setOpponentKind(r.kind === "bot" ? "bot" : "human");
+        setNotice(r.kind === "bot" ? "Opponent found. The match is starting." : "A player joined just in time. Starting the live race…");
+        if (r.kind === "bot") startMatch("bot");
+        else startMatch("human", room.roomId);
+      } catch {
+        setNotice("Could not start the fallback opponent. Please try Quick Match again.");
+      }
+    } else {
+      setOpponentKind("bot");
+      setNotice("No second player joined. Practice Bot is entering the same race.");
+      startMatch("bot");
+    }
   };
 
   useEffect(() => {
