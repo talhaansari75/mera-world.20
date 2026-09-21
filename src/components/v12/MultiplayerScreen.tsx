@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { MessageCircle, RefreshCw, Swords, Users, Wifi } from "lucide-react";
-import { Screen } from "@/components/screens/chrome";\nimport { useGame } from "@/lib/store";
+import { Screen } from "@/components/screens/chrome";
+import { useGame } from "@/lib/store";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { createMultiplayerRoom, getMultiplayerRoom, heartbeatMultiplayerRoom, joinMultiplayerRoom, quickMatchMultiplayer, sendMultiplayerRoomMessage } from "@/lib/server/multiplayer";
 
