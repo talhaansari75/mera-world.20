@@ -4,9 +4,9 @@ import { getPrisma } from "@/lib/db";
 import { requireUserId } from "@/lib/auth/verify.server";
 
 const PRODUCTS = {
-  starter_gems: { name: "Starter Gems", priceUsd: "1.99", amountAtomic: "1990000", gems: 250 },
-  adventurer_gems: { name: "Adventurer Gems", priceUsd: "4.99", amountAtomic: "4990000", gems: 700 },
-  legendary_gems: { name: "Legendary Gems", priceUsd: "9.99", amountAtomic: "9990000", gems: 1600 },
+  starter_gems: { name: "Starter Gems", priceUsd: "1.99", amountAtomic: "1990000", diamonds: 250 },
+  adventurer_gems: { name: "Adventurer Gems", priceUsd: "4.99", amountAtomic: "4990000", diamonds: 700 },
+  legendary_gems: { name: "Legendary Gems", priceUsd: "9.99", amountAtomic: "9990000", diamonds: 1600 },
 } as const;
 
 const CHAIN_ID = Number(process.env.BASE_CHAIN_ID || 84532);
