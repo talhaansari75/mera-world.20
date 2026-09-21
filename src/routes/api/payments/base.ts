@@ -13,7 +13,7 @@ const CHAIN_ID = Number(process.env.BASE_CHAIN_ID || 84532);
 const TOKEN_ADDRESS = (process.env.BASE_USDC_ADDRESS || "").trim();
 const RECIPIENT_ADDRESS = (process.env.BASE_PAYMENT_RECIPIENT || "").trim();
 const RPC_URL = (process.env.BASE_RPC_URL || (CHAIN_ID === 8453 ? "https://mainnet.base.org" : "https://sepolia.base.org")).trim();
-const REQUIRED_CONFIRMATIONS = Math.max(1, Number(process.env.BASE_REQUIRED_CONFIRMATIONS || 3));
+const REQUIRED_CONFIRMATIONS = Math.max(1, Number(process.env.BASE_REQUIRED_CONFIRMATIONS || 12));
 
 function json(data: unknown, status = 200) { return new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json" } }); }
 function bearer(request: Request) { const value = request.headers.get("authorization"); return value?.startsWith("Bearer ") ? value.slice(7) : undefined; }
@@ -74,9 +74,14 @@ export const Route = createFileRoute("/api/payments/base")({
           const receipt = await rpc("eth_getTransactionReceipt", [body.txHash]);
           if (!tx || !receipt) return json({ error: "Transaction not found yet" }, 202);
           if (tx.blockHash === null || receipt.status !== "0x1") return json({ error: "Transaction is not confirmed successfully" }, 400);
+          const minedBlockHex = String(receipt.blockNumber);
+          const minedBlock = Number(BigInt(minedBlockHex));
+          const block = await rpc("eth_getBlockByNumber", [minedBlockHex, false]);
+          if (!block?.timestamp) return json({ error: "Mined block timestamp unavailable" }, 503);
+          const blockTimestampMs = Number(BigInt(String(block.timestamp))) * 1000;
+          if (!Number.isFinite(blockTimestampMs) || blockTimestampMs > new Date(String(intent.expires_at)).getTime()) return json({ error: "Payment was mined after the payment intent expired" }, 400);
           const latestBlockHex = await rpc("eth_blockNumber", []);
           const latestBlock = Number(BigInt(String(latestBlockHex)));
-          const minedBlock = Number(BigInt(String(receipt.blockNumber)));
           if (!Number.isSafeInteger(latestBlock) || !Number.isSafeInteger(minedBlock) || latestBlock - minedBlock + 1 < REQUIRED_CONFIRMATIONS) {
             return json({ ok: false, status: "confirming", confirmations: Math.max(0, latestBlock - minedBlock + 1), requiredConfirmations: REQUIRED_CONFIRMATIONS }, 202);
           }
