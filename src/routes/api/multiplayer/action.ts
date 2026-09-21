@@ -18,17 +18,18 @@ const started=new Date(match[0].started_at).getTime();if(Date.now()>started+Numb
 const payload=b.payload||{};
 if(b.action==="word_found"){
 const word=String(payload.word||"").toUpperCase().trim();const cells=payload.cells;
-const puzzle=multiplayerPuzzle(Number(match[0].level_id),String(match[0].mode));
+const puzzle=multiplayerPuzzle(Number(match[0].level_id),String(match[0].mode),Number(match[0].puzzle_seed));
 const placement=puzzle.placements.find((p)=>p.word===word);
 if(!placement||!sameCells(cells,placement.cells))return json({error:"Invalid word selection"},400);
 const found=await db.$queryRaw`select found_words from multiplayer_members where room_id=${b.roomId} and user_id=${userId} and is_bot=false limit 1`;
 if(!found.length)return json({error:"Player not found"},404);
-const words=Array.isArray(found[0].found_words)?found[0].found_words as string[]:[];
-if(words.includes(word))return json({error:"Word already found"},409);
-const next=[...words,word];const score=next.length*100+Math.max(0,Number(placement.word.length)-3)*20;
+const claimed=await db.$queryRaw`insert into multiplayer_found_words(match_id,user_id,word) values(${b.matchId},${userId},${word}) on conflict do nothing returning word`;
+if(!claimed.length)return json({error:"Word already found"},409);
+const words=[...(Array.isArray(found[0].found_words)?found[0].found_words as string[]:[]),word];
+const next=Array.from(new Set(words));const score=next.length*100+Math.max(0,Number(placement.word.length)-3)*20;
 await db.$queryRaw`update multiplayer_members set found_words=${JSON.stringify(next)}::jsonb,progress=${Math.floor(next.length/puzzle.words.length*100)},score=${score},combo=${next.length},last_seen_at=now() where room_id=${b.roomId} and user_id=${userId} and is_bot=false`;
 await db.$queryRaw`insert into multiplayer_match_events(match_id,seq,user_id,event_type,payload) select ${b.matchId},coalesce(max(seq),0)+1,${userId},'word_found',${JSON.stringify({word})}::jsonb from multiplayer_match_events where match_id=${b.matchId}`;
-if(next.length===puzzle.words.length){await db.$queryRaw`update multiplayer_matches set status='finished',finished_at=now(),winner_user_id=${userId},settled_at=now() where match_id=${b.matchId} and status='live'`;await db.$queryRaw`update multiplayer_rooms set status='finished',updated_at=now(),state_json=jsonb_set(state_json,'{phase}','"finished"'::jsonb) where room_id=${b.roomId}`;}
+if(next.length===puzzle.words.length){await db.$queryRaw`update multiplayer_matches set status='finished',finished_at=now(),winner_user_id=${userId},where match_id=${b.matchId} and status='live'`;await db.$queryRaw`update multiplayer_rooms set status='finished',updated_at=now(),state_json=jsonb_set(state_json,'{phase}','"finished"'::jsonb) where room_id=${b.roomId}`;}
 return json({ok:true,found:next.length,total:puzzle.words.length,score});}
 if(b.action==="finish")return json({error:"Finish is server-derived"},400);
 }catch(e){return json({error:e instanceof Error?e.message:"Multiplayer action failed"},400);}}}}});
