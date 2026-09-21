@@ -21,7 +21,8 @@
     "test:game": "node --experimental-strip-types --test src/lib/game/*.test.ts src/lib/game/core/*.test.ts src/lib/intelligence/*.test.ts",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "start": "vite preview --host 0.0.0.0 --port 8080"
+    "start": "vite preview --host 0.0.0.0 --port 8080",
+    "blockchain:preflight": "node scripts/blockchain-payment-preflight.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",
