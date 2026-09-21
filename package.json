@@ -17,7 +17,7 @@
     "preview:stop": "node scripts/preview.mjs stop",
     "typecheck": "tsc --noEmit",
     "check:auth": "node scripts/check-auth-invariant.mjs",
-    "test": "node --test 'scripts/**/*.test.mjs' && node --experimental-strip-types --test src/lib/app-data/app-data.test.ts src/lib/app-data/readiness-schedule.test.ts src/lib/auth/gate-identity.test.ts src/lib/auth/sign-in-gate.test.ts src/lib/game/behavior.test.ts src/lib/game/bossJourney.test.ts src/lib/game/dailyChallenges.test.ts src/lib/game/engagement.test.ts src/lib/game/journeyWorlds.test.ts src/lib/game/specialTiles.test.ts src/lib/game/core/modeEngine.test.ts src/lib/game/core/puzzleValidator.test.ts src/lib/intelligence/playerIntelligence.test.ts",
+    "test": "node --test 'scripts/**/*.test.mjs' && node --experimental-strip-types --test src/lib/payments/blockchain.test.ts src/lib/app-data/app-data.test.ts src/lib/app-data/readiness-schedule.test.ts src/lib/auth/gate-identity.test.ts src/lib/auth/sign-in-gate.test.ts src/lib/game/behavior.test.ts src/lib/game/bossJourney.test.ts src/lib/game/dailyChallenges.test.ts src/lib/game/engagement.test.ts src/lib/game/journeyWorlds.test.ts src/lib/game/specialTiles.test.ts src/lib/game/core/modeEngine.test.ts src/lib/game/core/puzzleValidator.test.ts src/lib/intelligence/playerIntelligence.test.ts",
     "test:game": "node --experimental-strip-types --test src/lib/game/*.test.ts src/lib/game/core/*.test.ts src/lib/intelligence/*.test.ts",
     "lint": "eslint .",
     "format": "prettier --write .",
