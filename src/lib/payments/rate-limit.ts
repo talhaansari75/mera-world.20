@@ -1,0 +1,2 @@
+type Bucket={count:number;resetAt:number}; const buckets=new Map<string,Bucket>();
+export function paymentRateLimit(key:string,limit=20,windowMs=60000){const now=Date.now();const c=buckets.get(key);if(!c||c.resetAt<=now){buckets.set(key,{count:1,resetAt:now+windowMs});return{allowed:true,retryAfterSeconds:0};}c.count++;return{allowed:c.count<=limit,retryAfterSeconds:Math.ceil((c.resetAt-now)/1000)};}
