@@ -1,5 +1,5 @@
 -- Player/admin analytics: stable player numbers + activity/play-time tracking.
-create sequence if not exists player_number_seq start 100001;
+create sequence if not exists player_number_seq start 100001;\n\nalter table "user" add column if not exists "username" text;
 
 create table if not exists player_profile (
   user_id text primary key references "user" ("id") on delete cascade,
