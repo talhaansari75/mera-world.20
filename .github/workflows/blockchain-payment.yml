@@ -1,0 +1,23 @@
+name: Blockchain Payment Checks
+
+on:
+  push:
+    branches: [main, blockchain-payment-v1-hardening]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  blockchain-payment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: node --experimental-strip-types --test src/lib/payments/blockchain.test.ts
