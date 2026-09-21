@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import { authMiddleware } from "@/lib/auth/middleware";\nimport { getPrisma } from "@/lib/db";
+import { authMiddleware } from "@/lib/auth/middleware";
+import { getPrisma } from "@/lib/db";
 import { createRoom, joinRoom, getRoom } from "@/lib/multiplayer/roomService";
 const GAME_MODES = new Set(["classic","timed","survival","blitz","zen","daily","endless","fog","mirror","category","boss","rush","precision","hardcore","double_reward","no_hints","small_grid","giant_grid","reverse_only","diagonal","orthogonal","chaos","streak","treasure","nightmare","focus","speedrun","marathon","random_rules"]);
 
