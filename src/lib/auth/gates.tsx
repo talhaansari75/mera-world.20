@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Navigate } from "@tanstack/react-router";
-import { GROK_PROVIDERS, authEnabled, signIn, signOut } from "./client";
+import { GROK_PROVIDERS, authClient, authEnabled, signIn, signOut } from "./client";
 import { hasGateSessionMarker } from "./gate-session-marker";
 import { resolveSignInGateState } from "./sign-in-gate";
 import { useCurrentUser, useCurrentUserState } from "./use-current-user";
