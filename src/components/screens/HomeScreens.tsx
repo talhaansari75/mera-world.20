@@ -1,14 +1,11 @@
-import { Bell, BookOpen, ChevronRight, Crown, Flame, Gift, Map, PawPrint, Settings, ShoppingBag, Sparkles, Swords, Target, Trophy, User, Users, Wallet } from "lucide-react";
+import { Bell, ChevronRight, Crown, Flame, Gift, Map, PawPrint, ShoppingBag, Swords, Target, Trophy, User, Wallet } from "lucide-react";
 import { useGame, playerLevel } from "@/lib/store";
 import { xpForLevel } from "@/lib/game/economy";
-import { HudChips, TileButton, useT } from "./chrome";
+import { TileButton, useT } from "./chrome";
 import { unlockAudio, startMusic } from "@/lib/game/audio";
 import { todayKey, worldOf } from "@/lib/game/levels";
-import { WORD_COUNT } from "@/lib/game/words";
 import { DAILY_REWARD_COINS } from "@/lib/game/constants";
-import { DailyRewardPopup, JourneyHero } from "./JourneyPolish";
-import { recommendFor } from "@/lib/intelligence/playerIntelligence";
-import { recommendLiveEvent } from "@/lib/intelligence/liveEventPersonalization";
+import { DailyRewardPopup } from "./JourneyPolish";
 
 export function SplashScreen() {
   const t = useT();
