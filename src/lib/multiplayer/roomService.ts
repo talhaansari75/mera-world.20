@@ -69,7 +69,7 @@ export async function joinRoom(userId: string, displayName: string, id: string) 
 
         const nextCount = await tx.multiplayerMember.count({ where: { roomId: id } });
         if (nextCount >= 2) {
-          await tx.multiplayerRoom.update({ where: { roomId: id }, data: { status: "active" } });
+          await tx.multiplayerRoom.update({ where: { roomId: id }, data: { status: "playing" } });
         }
         return true;
       }, { isolationLevel: "Serializable" });
