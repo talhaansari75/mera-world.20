@@ -102,3 +102,22 @@ export const sendMultiplayerRoomMessage = createServerFn({ method: "POST" })
     await db.multiplayerRoom.update({ where: { roomId: data.roomId }, data: { stateJson: { ...state, messages } } });
     return { ok: true as const };
   });
+
+export const updateMultiplayerScore = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator((d: { roomId: string; score: number }) => ({
+    roomId: clean(d.roomId, 80),
+    score: Math.max(0, Math.min(999, Math.floor(Number(d.score) || 0))),
+  }))
+  .handler(async ({ context, data }) => {
+    const db = getPrisma();
+    // @ts-ignore
+    const room = await db.multiplayerRoom.findUnique({ where: { roomId: data.roomId } });
+    if (!room) return { ok: false as const, error: "room_not_found" };
+    const state = room.stateJson && typeof room.stateJson === "object" ? room.stateJson as Record<string, unknown> : {};
+    const scores = state.scores && typeof state.scores === "object" ? state.scores as Record<string, number> : {};
+    scores[context.userId] = data.score;
+    // @ts-ignore
+    await db.multiplayerRoom.update({ where: { roomId: data.roomId }, data: { stateJson: { ...state, scores, updatedAt: new Date().toISOString() } } });
+    return { ok: true as const, scores };
+  });
