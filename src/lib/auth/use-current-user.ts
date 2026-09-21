@@ -4,6 +4,7 @@ import { authClient, authEnabled } from "./client";
 export type AppUser = {
   id: string;
   displayName: string | null;
+  username: string | null;
   primaryEmail: string | null;
   profileImageUrl: string | null;
   /** True when this is the sandbox/dev fallback (auth not configured). */
@@ -21,6 +22,7 @@ export const DEV_USER: AppUser = {
   id: "dev-user",
   displayName: "Dev User",
   primaryEmail: "dev@example.com",
+  username: "dev-user",
   profileImageUrl: null,
   isDevFallback: true,
 };
@@ -64,6 +66,7 @@ export function useCurrentUserState(): CurrentUserState {
       ? {
           id: user.id,
           displayName: user.name ?? null,
+          username: (user as typeof user & { username?: string | null }).username ?? null,
           primaryEmail: user.email ?? null,
           profileImageUrl: user.image ?? null,
           isDevFallback: false,
