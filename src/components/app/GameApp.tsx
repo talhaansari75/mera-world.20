@@ -64,6 +64,7 @@ import { ReleaseVerifierScreen } from "@/components/v41/ReleaseVerifierScreen";
 import { ReleaseArchiveScreen } from "@/components/v42/ReleaseArchiveScreen";
 import { PublishReadinessScreen } from "@/components/v39/PublishReadinessScreen";
 import { JourneyLoading } from "@/components/screens/JourneyPolish";
+import { trackPlayerActivity } from "@/lib/server/admin";
 
 export function GameApp() {
   const ready = useGame((s) => s.ready);
@@ -134,13 +135,65 @@ export function GameApp() {
   }, [ready, save.equippedTheme, save.settings, save.language]);
 
   useEffect(() => {
-    const onFirst = () => {
+    if (!ready) return;
+    const activateAudio = () => {
       unlockAudio();
       if (useGame.getState().save.settings.music) startMusic();
     };
-    window.addEventListener("pointerdown", onFirst, { once: true });
-    return () => window.removeEventListener("pointerdown", onFirst);
-  }, []);
+    window.addEventListener("pointerdown", activateAudio);
+    window.addEventListener("touchstart", activateAudio, { passive: true });
+    window.addEventListener("keydown", activateAudio);
+    return () => {
+      window.removeEventListener("pointerdown", activateAudio);
+      window.removeEventListener("touchstart", activateAudio);
+      window.removeEventListener("keydown", activateAudio);
+    };
+  }, [ready]);
+
+  useEffect(() => {
+    if (!ready || !user?.id) return;
+    let last = Date.now();
+    let active = document.visibilityState === "visible";
+
+    const send = (eventType: string, force = false) => {
+      const now = Date.now();
+      const seconds = active ? Math.floor((now - last) / 1000) : 0;
+      if (!force && seconds <= 0) return;
+      last = now;
+      void trackPlayerActivity({
+        eventType,
+        screen: useGame.getState().screen,
+        durationSeconds: Math.min(60, Math.max(0, seconds)),
+      }).catch(() => undefined);
+    };
+
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        active = true;
+        send("heartbeat");
+      }
+    }, 30000);
+
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        send("pause", true);
+        active = false;
+      } else {
+        active = true;
+        last = Date.now();
+        send("resume", true);
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    send("session_start", true);
+
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
+      send("session_end", true);
+    };
+  }, [ready, user?.id, screen]);
 
   if (!ready) {
     return (
