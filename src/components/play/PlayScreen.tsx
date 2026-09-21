@@ -37,7 +37,7 @@ export function PlayScreen() {
   const [powerCooldowns, setPowerCooldowns] = useState<Record<string, number>>({});
   const [showSystems, setShowSystems] = useState(false);
   const [feedbackKey, setFeedbackKey] = useState(0);
-  const [multiplayer, setMultiplayer] = useState<{ roomId: string; opponent: string; opponentScore: number } | null>(null);
+  const [multiplayer, setMultiplayer] = useState<{ roomId: string; opponent: string; opponentScore: number; opponentFound: string[] } | null>(null);
   useEffect(() => { if (play?.found.length) setFeedbackKey((n) => n + 1); }, [play?.found.length]);
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export function PlayScreen() {
     if (!roomId && !bot) { setMultiplayer(null); return; }
     if (bot) {
       const opponentScore = Math.min(play.puzzle.words.length, Math.floor(Math.max(0, Date.now() - play.startAt) / 8500));
-      setMultiplayer({ roomId: "practice", opponent: "Practice Opponent", opponentScore });
+      const opponentFound = play.puzzle.words.slice(0, opponentScore);\n      setMultiplayer({ roomId: "practice", opponent: "Practice Bot", opponentScore, opponentFound });
       return;
     }
     let alive = true;
@@ -60,7 +60,7 @@ export function PlayScreen() {
         const other = room.members?.find((m: any) => m.userId !== me);
         const scores = room.state?.scores ?? {};
         const opponentScore = other ? Number(scores[other.userId] ?? 0) : 0;
-        setMultiplayer({ roomId: roomId!, opponent: other?.displayName ?? "Opponent", opponentScore });
+        setMultiplayer({ roomId: roomId!, opponent: other?.displayName ?? "Opponent", opponentScore, opponentFound: [] });
         await updateMultiplayerScore({ data: { roomId: roomId!, score: play.found.length } });
       } catch {}
     };
@@ -198,7 +198,7 @@ export function PlayScreen() {
 
       {multiplayer && (
         <div className="mx-auto flex w-full max-w-xl items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-xs">
-          <span className="font-semibold text-fg">⚔️ Online match · You {play.found.length} — {multiplayer.opponent} {multiplayer.opponentScore}</span>
+          <div className="min-w-0 flex-1"><div className="font-semibold text-fg">⚔️ Live race · You {play.found.length} — {multiplayer.opponent} {multiplayer.opponentScore}</div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-2"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.min(100, (play.found.length / Math.max(1, play.puzzle.words.length)) * 100)}%` }} /></div></div>
           <button type="button" className="text-muted underline" onClick={() => { sessionStorage.removeItem("mwsj.multiplayer.room"); sessionStorage.removeItem("mwsj.multiplayer.bot"); setMultiplayer(null); }}>Leave</button>
         </div>
       )}
@@ -218,6 +218,7 @@ export function PlayScreen() {
           mirror={mirror}
           tileStyle={save.settings.tileStyle}
           disabled={Boolean(overlay)}
+          opponentFound={multiplayer?.opponentFound ?? []}
           onPath={(letters, cells) => useGame.getState().submitPath(letters, cells)}
         />
       </div>
