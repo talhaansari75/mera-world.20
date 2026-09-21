@@ -13,6 +13,7 @@ const CHAIN_ID = Number(process.env.BASE_CHAIN_ID || 84532);
 const TOKEN_ADDRESS = (process.env.BASE_USDC_ADDRESS || "").trim();
 const RECIPIENT_ADDRESS = (process.env.BASE_PAYMENT_RECIPIENT || "").trim();
 const RPC_URL = (process.env.BASE_RPC_URL || (CHAIN_ID === 8453 ? "https://mainnet.base.org" : "https://sepolia.base.org")).trim();
+const REQUIRED_CONFIRMATIONS = Math.max(1, Number(process.env.BASE_REQUIRED_CONFIRMATIONS || 3));
 
 function json(data: unknown, status = 200) { return new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json" } }); }
 function bearer(request: Request) { const value = request.headers.get("authorization"); return value?.startsWith("Bearer ") ? value.slice(7) : undefined; }
@@ -73,6 +74,12 @@ export const Route = createFileRoute("/api/payments/base")({
           const receipt = await rpc("eth_getTransactionReceipt", [body.txHash]);
           if (!tx || !receipt) return json({ error: "Transaction not found yet" }, 202);
           if (tx.blockHash === null || receipt.status !== "0x1") return json({ error: "Transaction is not confirmed successfully" }, 400);
+          const latestBlockHex = await rpc("eth_blockNumber", []);
+          const latestBlock = Number(BigInt(String(latestBlockHex)));
+          const minedBlock = Number(BigInt(String(receipt.blockNumber)));
+          if (!Number.isSafeInteger(latestBlock) || !Number.isSafeInteger(minedBlock) || latestBlock - minedBlock + 1 < REQUIRED_CONFIRMATIONS) {
+            return json({ ok: false, status: "confirming", confirmations: Math.max(0, latestBlock - minedBlock + 1), requiredConfirmations: REQUIRED_CONFIRMATIONS }, 202);
+          }
           if (String(tx.to || "").toLowerCase() !== String(intent.token_address).toLowerCase()) return json({ error: "Transaction did not call the configured USDC contract" }, 400);
 
           const from = String(tx.from || "").toLowerCase(); if(from!==String(intent.payer_address||"").toLowerCase()) return json({error:"Transaction sender does not match the payment intent"},400);
@@ -116,7 +123,7 @@ export const Route = createFileRoute("/api/payments/base")({
             if (!saved.length) throw new Error("Cloud save is not initialized for this account.");
             await txDb.$queryRaw`
               update blockchain_payment_intents
-              set status='paid', tx_hash=${body.txHash}, paid_at=now()
+              set status='paid', tx_hash=${body.txHash}, paid_at=now(), verified_at=now(), block_number=${minedBlock}, block_hash=${receipt.blockHash}, confirmations=${latestBlock - minedBlock + 1}
               where id=${body.intentId} and status='pending'
             `;
             await txDb.purchaseReceipt.upsert({
