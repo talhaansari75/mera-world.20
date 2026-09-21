@@ -71,8 +71,9 @@ export async function joinRoom(userId: string, displayName: string, id: string) 
         if (nextCount >= 2) {
           await tx.multiplayerRoom.update({ where: { roomId: id }, data: { status: "active" } });
         }
-        return getRoom(id);
+        return true;
       }, { isolationLevel: "Serializable" });
+      return getRoom(id);
     } catch (error) {
       if ((error as { code?: string })?.code === "P2034" && attempt < 2) continue;
       throw error;
