@@ -8,7 +8,7 @@ export async function tickBots(matchId:string){
  const puzzle=multiplayerPuzzle(Number(m[0].level_id),String(m[0].mode),Number(m[0].puzzle_seed));
  const bots=await db.$queryRaw`select user_id,bot_skill from multiplayer_members where room_id=${m[0].room_id} and is_bot=true`;
  for(const bot of bots){
-  const skill=String(bot.bot_skill||"steady"),delay=skill==="expert"?3500:skill==="steady"?7500:10000;
+  const skill=String(bot.bot_skill||"steady"),base=skill==="expert"?5200:skill==="steady"?7600:9800,seed=Number(String(bot.user_id).slice(-4),16)||0,delay=base+(seed%1700);
   const target=Math.min(puzzle.words.length,Math.floor((Date.now()-new Date(m[0].started_at).getTime())/delay)); if(target<1)continue;
   const found=await db.$queryRaw`select word from multiplayer_found_words where match_id=${matchId} and user_id=${bot.user_id} order by created_at`;
   if(found.length>=target)continue; const word=puzzle.words.find(w=>!found.some((x:any)=>x.word===w)); if(!word)continue;
