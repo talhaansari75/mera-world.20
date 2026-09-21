@@ -1,4 +1,4 @@
-import { BookOpen, Gift, Map, PawPrint, Settings, ShoppingBag, Sparkles, Swords, Trophy, User } from "lucide-react";
+import { BookOpen, Gift, Map, PawPrint, Settings, ShoppingBag, Sparkles, Swords, Trophy, User, Users } from "lucide-react";
 import { useGame, playerLevel } from "@/lib/store";
 import { HudChips, TileButton, useT } from "./chrome";
 import { unlockAudio, startMusic } from "@/lib/game/audio";
@@ -89,7 +89,7 @@ export function HomeScreen() {
       <div className="grid grid-cols-3 gap-2">
         <TileButton icon={<Map className="size-5" />} label={t("cta.worlds")} onClick={() => useGame.getState().go("worlds")} />
         <TileButton icon={<Sparkles className="size-5" />} label={t("cta.daily")} onClick={() => useGame.getState().go("daily")} />
-        <TileButton icon={<Swords className="size-5" />} label={t("cta.modes")} onClick={() => useGame.getState().go("modes")} />
+        <TileButton icon={<Swords className="size-5" />} label={t("cta.modes")} onClick={() => useGame.getState().go("modes")} />\n        <TileButton icon={<Users className="size-5" />} label="Multiplayer" onClick={() => useGame.getState().go("multiplayer")} />
         <TileButton icon={<ShoppingBag className="size-5" />} label={t("cta.shop")} onClick={() => useGame.getState().go("shop")} />
         <TileButton icon={<PawPrint className="size-5" />} label={t("cta.pets")} onClick={() => useGame.getState().go("pets")} />
         <TileButton icon={<Trophy className="size-5" />} label={t("cta.achievements")} onClick={() => useGame.getState().go("achievements")} />
