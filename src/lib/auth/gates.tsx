@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Navigate } from "@tanstack/react-router";
 import { GROK_PROVIDERS, authEnabled, signIn, signOut } from "./client";
 import { hasGateSessionMarker } from "./gate-session-marker";
@@ -57,8 +57,33 @@ export function SignInGate({
   fallback?: ReactNode;
 }) {
   const { user, isPending } = useCurrentUserState();
+  const [rechecking, setRechecking] = useState(false);
+  const attempted = useRef(false);
+
+  useEffect(() => {
+    if (isPending || user || attempted.current || !authEnabled) return;
+    attempted.current = true;
+    let cancelled = false;
+    setRechecking(true);
+
+    const retry = async () => {
+      for (let i = 0; i < 3; i += 1) {
+        try {
+          const session = await authClient.getSession();
+          if (session.data?.user) break;
+        } catch {}
+        await new Promise((resolve) => window.setTimeout(resolve, 700));
+      }
+      if (!cancelled) setRechecking(false);
+    };
+    void retry();
+    return () => { cancelled = true; };
+  }, [isPending, user]);
+
   const state = resolveSignInGateState({ isPending, hasUser: user !== null });
-  if (state === "pending") return null;
+  if (state === "pending" || rechecking) {
+    return <div className="grid min-h-dvh place-items-center bg-surface px-6 text-sm text-muted">Restoring your journey…</div>;
+  }
   if (state === "signed_in") return <>{children}</>;
   return <>{fallback ?? <SignInButtons />}</>;
 }
