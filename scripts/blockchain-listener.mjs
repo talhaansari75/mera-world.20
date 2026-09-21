@@ -1,0 +1,9 @@
+import {Client} from "pg";
+const rpcUrl=process.env.BASE_RPC_URL,token=process.env.BASE_USDC_ADDRESS?.toLowerCase(),recipient=process.env.BASE_PAYMENT_RECIPIENT?.toLowerCase();
+if(!rpcUrl||!token||!recipient)throw new Error("BASE_RPC_URL, BASE_USDC_ADDRESS and BASE_PAYMENT_RECIPIENT are required");
+const db=new Client({connectionString:process.env.DATABASE_URL});await db.connect();
+async function rpc(method,params){const r=await fetch(rpcUrl,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method,params})});if(!r.ok)throw new Error("RPC unavailable");const b=await r.json();if(b.error)throw new Error(b.error.message||"RPC error");return b.result;}
+const latest=Number(BigInt(String(await rpc("eth_blockNumber",[])))), from=Math.max(0,latest-Number(process.env.BLOCKCHAIN_LISTENER_REORG_WINDOW||12));
+const logs=await rpc("eth_getLogs",[{fromBlock:"0x"+from.toString(16),toBlock:"latest",address:token,topics:["0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"]}]);
+for(const log of logs||[]){const topics=log.topics||[];if(topics.length<3)continue;const to="0x"+String(topics[2]).slice(-40).toLowerCase();if(to!==recipient)continue;const txHash=String(log.transactionHash).toLowerCase(),blockNumber=Number(BigInt(String(log.blockNumber)));await db.query("insert into blockchain_payment_events (chain_id,tx_hash,block_number,event_type,event_key,payload) values ($1,$2,$3,'erc20_transfer',$4,$5) on conflict(event_key) do nothing",[Number(process.env.BASE_CHAIN_ID||84532),txHash,blockNumber,txHash+":"+String(log.logIndex),JSON.stringify(log)]);}
+await db.end();console.log("Blockchain listener scan complete.");
