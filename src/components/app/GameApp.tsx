@@ -193,7 +193,7 @@ export function GameApp() {
       document.removeEventListener("visibilitychange", onVisibility);
       send("session_end", true);
     };
-  }, [ready, user?.id, screen]);
+  }, [ready, user?.id]);
 
   if (!ready) {
     return (
