@@ -95,131 +95,108 @@ export function PetsScreen() {
 export function ProfileScreen() {
   const t = useT();
   const save = useGame((s) => s.save);
+  const user = useCurrentUser();
   const lv = playerLevel(save.xp);
   const next = xpForLevel(lv + 1);
+  const xpBase = xpForLevel(lv);
+  const progress = Math.min(100, Math.max(0, ((save.xp - xpBase) / Math.max(1, next - xpBase)) * 100));
+
   return (
     <Screen title={t("profile.title")}>
-      <div className="panel rounded-2xl p-4">
-        <label className="text-xs text-muted">Name</label>
-        <input
-          className="mt-1 w-full rounded-xl border border-border bg-surface-2 px-3 py-2 text-fg"
-          value={save.playerName}
-          maxLength={24}
-          onChange={(e) => useGame.getState().setName(e.target.value)}
-        />
-        <p className="mt-3 text-sm text-muted">
-          Rank {lv} · {save.xp} xp · next {next}
-        </p>
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-2">
-          <div className="h-full bg-primary" style={{ width: `${Math.min(100, (save.xp / Math.max(1, next)) * 100)}%` }} />
-        </div>
-      </div>
-      <p className="mt-4 text-xs uppercase tracking-wider text-muted">Class</p>
-      <div className="mt-2 grid grid-cols-2 gap-2">
-        {CLASSES.map((c) => {
-          const selected = save.classId === c.id;
-          return (
-          <button
-            key={c.id}
-            type="button"
-            className="panel rounded-2xl p-3 text-left"
-            onClick={() => useGame.getState().patchSave((s: any) => ({ ...s, classId: c.id }))}
-            style={selected ? { outline: "2px solid var(--color-primary)" } : undefined}
-          >
-            <p className="font-semibold text-fg">{c.name}{selected ? " ✓" : ""}</p>
-            <p className="text-xs text-muted">{c.blurb}</p>
-          </button>
-          );
-        })}
-      </div>
-      <p className="mt-4 text-xs uppercase tracking-wider text-muted">Avatar</p>
-      <div className="mt-2 grid grid-cols-4 gap-2">
-        {AVATARS.map((a) => {
-          const icons: Record<string, string> = {
-            "ink-1": "🪶",
-            "ink-2": "🏮",
-            "ink-3": "🧭",
-            "ink-4": "⚓",
-            "ink-5": "🦅",
-            "ink-6": "🪷",
-            "ink-7": "🌙",
-            "ink-8": "⛰️",
-            "ink-9": "🌊",
-            "ink-10": "⭐",
-            "ink-11": "🍃",
-            "ink-12": "🔥",
-          };
-          const selected = save.avatarId === a.id;
-          return (
-          <button
-            key={a.id}
-            type="button"
-            onClick={() => useGame.getState().setAvatar(a.id)}
-            className="panel flex aspect-square flex-col items-center justify-center gap-0.5 rounded-xl text-xs font-semibold text-fg"
-            style={selected ? { outline: "2px solid var(--color-primary)" } : undefined}
-            aria-label={a.label}
-          >
-            <span className="text-2xl leading-none" aria-hidden="true">{icons[a.id] ?? "✨"}</span>
-            <span className="text-[10px] opacity-80">{a.label}</span>
-          </button>
-          );
-        })}
-      </div>
-      <div className="mt-6 flex items-center justify-between">
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
-        <SignedOut>
-          <Link to="/login" className="btn-primary max-w-xs">
-            {t("cta.signIn")}
-          </Link>
-        </SignedOut>
-      </div>
-      <CloudRow />
-    </Screen>
-  );
-}
+      <div className="space-y-4 pb-8">
+        <section className="panel overflow-hidden rounded-3xl p-5">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="grid size-20 shrink-0 place-items-center rounded-3xl bg-primary/15 text-4xl">
+              {save.avatarId === "ink-1" ? "🪶" : save.avatarId === "ink-2" ? "🏮" : save.avatarId === "ink-3" ? "🧭" : "✨"}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs uppercase tracking-[0.18em] text-accent">Traveler Profile</p>
+              <h2 className="mt-1 truncate font-display text-2xl text-fg">{save.playerName || "Traveler"}</h2>
+              <p className="mt-1 truncate text-sm text-muted">@{user?.displayName || save.playerName || "traveler"}</p>
+              {user?.primaryEmail && <p className="mt-0.5 truncate text-xs text-muted">{user.primaryEmail}</p>}
+            </div>
+            <div className="rounded-2xl bg-surface-2 px-4 py-3 text-center">
+              <p className="text-[10px] uppercase tracking-wider text-muted">Level</p>
+              <p className="font-display text-2xl text-fg">{lv}</p>
+            </div>
+          </div>
 
-function CloudRow() {
-  const [msg, setMsg] = useState<string | null>(null);
-  return (
-    <div className="mt-4 flex flex-col gap-2">
-      <button
-        type="button"
-        className="btn-ghost"
-        onClick={async () => {
-          try {
-            const remote = await loadCloudSave();
-            if (!(remote as any).ok) {
-              setMsg((remote as any).error);
-              return;
-            }
-            if ((remote as any).save && typeof (remote as any).save === "object") {
-              useGame.getState().applyCloud((remote as any).save as never);
-            } else setMsg("No cloud save yet.");
-          } catch {
-            setMsg("Sign in to sync.");
-          }
-        }}
-      >
-        Pull cloud save
-      </button>
-      <button
-        type="button"
-        className="btn-ghost"
-        onClick={async () => {
-          try {
-            await pushCloudSave({ data: { json: useGame.getState().exportJson() } });
-            setMsg("Saved to cloud.");
-          } catch {
-            setMsg("Sign in to sync.");
-          }
-        }}
-      >
-        Push cloud save
-      </button>
-      {msg && <p className="text-sm text-muted">{msg}</p>}
-    </div>
+          <div className="mt-5">
+            <div className="mb-1 flex justify-between text-xs text-muted">
+              <span>{save.xp} XP</span><span>{next} XP</span>
+            </div>
+            <div className="h-3 overflow-hidden rounded-full bg-surface-2">
+              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              ["Words", save.stats.wordsFound],
+              ["Games", save.stats.gamesPlayed],
+              ["Wins", save.stats.gamesWon],
+              ["Hours", (save.stats.playTimeMs / 3600000).toFixed(1)],
+            ].map(([label, value]) => (
+              <div key={String(label)} className="rounded-2xl bg-surface-2 p-3">
+                <p className="text-[10px] uppercase tracking-wider text-muted">{label}</p>
+                <p className="mt-1 text-lg font-bold text-fg">{value}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="panel rounded-3xl p-5">
+          <p className="text-xs uppercase tracking-wider text-accent">Identity</p>
+          <label className="mt-3 block text-xs text-muted">Display name</label>
+          <input
+            className="mt-1 w-full rounded-xl border border-border bg-surface-2 px-3 py-3 text-fg"
+            value={save.playerName}
+            maxLength={24}
+            onChange={(e) => useGame.getState().setName(e.target.value)}
+          />
+          <div className="mt-3 grid gap-2 text-sm">
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-2 p-3">
+              <span className="text-muted">Account</span><span className="max-w-[65%] truncate text-fg">{user?.primaryEmail || "Local profile"}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-2 p-3">
+              <span className="text-muted">Class</span><span className="capitalize text-fg">{save.classId}</span>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <p className="mb-2 text-xs uppercase tracking-wider text-muted">Choose your class</p>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {CLASSES.map((c) => {
+              const selected = save.classId === c.id;
+              return (
+                <button key={c.id} type="button" className="panel rounded-2xl p-4 text-left" onClick={() => useGame.getState().patchSave((s: any) => ({ ...s, classId: c.id }))} style={selected ? { outline: "2px solid var(--color-primary)" } : undefined}>
+                  <p className="font-semibold text-fg">{c.name}{selected ? " ✓" : ""}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted">{c.blurb}</p>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section>
+          <p className="mb-2 text-xs uppercase tracking-wider text-muted">Avatar</p>
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+            {AVATARS.map((a) => {
+              const icons: Record<string, string> = {"ink-1":"🪶","ink-2":"🏮","ink-3":"🧭","ink-4":"⚓","ink-5":"🦅","ink-6":"🪷","ink-7":"🌙","ink-8":"⛰️","ink-9":"🌊","ink-10":"⭐","ink-11":"🍃","ink-12":"🔥"};
+              const selected = save.avatarId === a.id;
+              return <button key={a.id} type="button" onClick={() => useGame.getState().setAvatar(a.id)} className="panel flex aspect-square flex-col items-center justify-center rounded-2xl text-xs text-fg" style={selected ? { outline: "2px solid var(--color-primary)" } : undefined}><span className="text-2xl">{icons[a.id] ?? "✨"}</span><span className="mt-1 text-[10px] opacity-80">{a.label}</span></button>;
+            })}
+          </div>
+        </section>
+
+        <div className="flex items-center justify-between gap-3">
+          <SignedIn><UserButton /></SignedIn>
+          <SignedOut><Link to="/login" className="btn-primary max-w-xs">{t("cta.signIn")}</Link></SignedOut>
+        </div>
+        <CloudRow />
+      </div>
+    </Screen>
   );
 }
 
