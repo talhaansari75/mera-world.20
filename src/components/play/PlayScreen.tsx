@@ -66,7 +66,7 @@ export function PlayScreen() {
     void poll();
     const timer = window.setInterval(poll, 2000);
     return () => { alive = false; window.clearInterval(timer); };
-  }, [play?.found.length, play?.puzzle.id, user?.id]);
+  }, [play?.found.length, play?.puzzle.id, user?.id, tick]);
   const adFree = useAdFree();
 
   useEffect(() => {
