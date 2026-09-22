@@ -18,6 +18,10 @@ export type AppUser = {
  * `"dev-user"` — the SAME id `verify.server.ts` returns server-side — so per-user
  * rows written in that mode belong to one consistent owner.
  */
+export const GUEST_USER: AppUser = {
+  id: "guest-user", displayName: "Guest Traveler", primaryEmail: null, username: "guest", profileImageUrl: null, isDevFallback: false,
+};
+
 export const DEV_USER: AppUser = {
   id: "dev-user",
   displayName: "Dev User",
@@ -58,6 +62,7 @@ export type CurrentUserState = {
  */
 export function useCurrentUserState(): CurrentUserState {
   if (!authEnabled) return { user: DEV_USER, isPending: false };
+  if (typeof window !== "undefined" && localStorage.getItem("mera-world.guest") === "1") return { user: GUEST_USER, isPending: false };
   // eslint-disable-next-line react-hooks/rules-of-hooks -- authEnabled is constant for the app's lifetime
   const { data, isPending } = authClient.useSession();
   const user = data?.user;
