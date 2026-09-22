@@ -85,6 +85,7 @@ export function SignInGate({
     return <div className="grid min-h-dvh place-items-center bg-surface px-6 text-sm text-muted">Restoring your journey…</div>;
   }
   if (state === "signed_in") return <>{children}</>;
+  if (typeof window !== "undefined" && localStorage.getItem("mera-world.guest") === "1") return <>{children}</>;
   return <>{fallback ?? <SignInButtons />}</>;
 }
 
