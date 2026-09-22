@@ -11,7 +11,7 @@ export async function createRoom(userId: string, displayName: string, mode: stri
 
   const id = roomId();
   const db = getPrisma();
-  await db.$transaction(async (tx) => {
+  await db.$transaction(async (tx: any) => {
     await tx.multiplayerRoom.create({
       data: {
         roomId: id,
