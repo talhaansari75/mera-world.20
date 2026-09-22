@@ -5,7 +5,7 @@ import { isAdminUser } from "@/lib/v13/admin/access";
 
 export const getAdminDashboard = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
-  .handler(async ({ context }) => {
+  .handler(async ({ context }): Promise<any> => {
     if (!(await isAdminUser(context.userId))) throw new Error("Forbidden: admin access required");
     const sql = await getSql();
 
