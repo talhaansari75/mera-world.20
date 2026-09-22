@@ -111,7 +111,13 @@ function main(argv) {
     process.exit(2);
   }
   const env = mergeAppEnv(readAppEnv(projectRoot()), process.env);
-  const child = spawn(command, args, { stdio: "inherit", env });
+  // Windows npm scripts expose CLI shims as .cmd files. Node's spawn does not
+  // consistently resolve those shims when invoked without an extension.
+  const spawnCommand =
+    process.platform === "win32" && !/[\\/][^\\/]+\\.(?:cmd|exe|bat)$/i.test(command) && ["vite", "npm", "npx"].includes(command)
+      ? `${command}.cmd`
+      : command;
+  const child = spawn(spawnCommand, args, { stdio: "inherit", env });
   // The dev server is long-running and is stopped by signalling this wrapper.
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) {
     process.on(signal, () => child.kill(signal));
