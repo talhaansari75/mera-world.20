@@ -106,6 +106,12 @@ export const Route = createFileRoute("/api/payments/base")({
           if (!matched) return json({ error: "Payment amount, sender or recipient does not match the intent" }, 400);
 
           const item = product(String(intent.product_id));
+          const existingTx = await db.$queryRaw`
+            select id, user_id, status from blockchain_payment_intents
+            where tx_hash = ${body.txHash} and id <> ${body.intentId}
+            limit 1
+          `;
+          if ((existingTx as any[]).length) return json({ error: "Transaction hash is already associated with another payment intent" }, 409);
           await db.$transaction(async (txDb: any) => {
             const credited = await txDb.$queryRaw`
               insert into blockchain_currency_ledger (user_id, intent_id, tx_hash, currency, amount)
@@ -128,10 +134,17 @@ export const Route = createFileRoute("/api/payments/base")({
               returning user_id
             `;
             if (!saved.length) throw new Error("Cloud save is not initialized for this account.");
-            await txDb.$queryRaw`
+            const finalized = await txDb.$queryRaw`
               update blockchain_payment_intents
               set status='paid', tx_hash=${body.txHash}, paid_at=now(), verified_at=now(), block_number=${minedBlock}, block_hash=${receipt.blockHash}, confirmations=${latestBlock - minedBlock + 1}
-              where id=${body.intentId} and status='pending'
+              where id=${body.intentId} and status='pending' and tx_hash is null
+              returning id
+            `;
+            if (!(finalized as any[]).length) throw new Error("Payment intent was already finalized or claimed.");
+            await txDb.$queryRaw`
+              insert into blockchain_payment_events(intent_id, chain_id, tx_hash, block_number, event_type, event_key, payload)
+              values(${body.intentId}, ${CHAIN_ID}, ${body.txHash}, ${minedBlock}, 'verified_transfer', ${"base:" + CHAIN_ID + ":" + body.txHash}, ${JSON.stringify({ from, recipient: intent.recipient_address, amountAtomic: String(intent.amount_atomic), confirmations: latestBlock - minedBlock + 1 })}::jsonb)
+              on conflict(event_key) do nothing
             `;
             await txDb.purchaseReceipt.upsert({
               where: { provider_externalId: { provider: "base-usdc", externalId: body.txHash } },
