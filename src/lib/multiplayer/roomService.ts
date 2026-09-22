@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { getPrisma } from "@/lib/db";
 import { audit } from "@/lib/server/v3/audit";
 import { consumeRateLimit } from "@/lib/server/v3/rateLimit";
@@ -42,7 +41,7 @@ export async function joinRoom(userId: string, displayName: string, id: string) 
   const db = getPrisma();
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      return await db.$transaction(async (tx: Prisma.TransactionClient) => {
+      return await db.$transaction(async (tx) => {
         const room = await tx.multiplayerRoom.findUnique({ where: { roomId: id } });
         if (!room || room.status !== "open") throw new Error("room_unavailable");
 
