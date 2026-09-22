@@ -108,7 +108,7 @@ export function HomeScreen() {
         <span className="dashboard-claim">Claim</span>
       </button>}
 
-      <section>
+      <section className="dashboard-quick-travel">
         <div className="mb-3 flex items-end justify-between"><div><p className="dashboard-kicker">Quick travel</p><h3 className="font-display text-2xl text-fg">Your World</h3></div><button type="button" className="text-xs font-bold uppercase tracking-[0.15em] text-accent" onClick={() => useGame.getState().go("worlds")}>View map</button></div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
           <TileButton icon={<Map className="size-5" />} label="World Map" onClick={() => useGame.getState().go("worldMap")} />
