@@ -9,7 +9,7 @@ const json=(d:unknown,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{
 const text=(v:unknown,max=240)=>typeof v==="string"?v.trim().slice(0,max):"";
 export const Route=createFileRoute("/api/multiplayer/action")({server:{handlers:{POST:async({request})=>{try{
  const userId=await requireUserId(); const limited=await consumeRateLimit(userId,"multiplayer_action",120,60); if(!limited.allowed)return json({error:"rate_limited"},429); const b=await request.json().catch(()=>({})) as Record<string,unknown>,db=getPrisma();
- const roomId=text(b.roomId,80),action=text(b.action,30),matchId=text(b.matchId,80),payload=(b.payload&&typeof b.payload==="object"?b.payload:{}) as Record<string,unknown>;
+ const roomId=text(b.roomId,80),action=text(b.action,30),matchId=text(b.matchId,80),clientActionId=text(b.clientActionId,120),payload=(b.payload&&typeof b.payload==="object"?b.payload:{}) as Record<string,unknown>;
  if(!roomId)return json({error:"roomId required"},400);
  const room=await db.$queryRaw`select room_id from multiplayer_rooms where room_id=${roomId} and exists(select 1 from multiplayer_members where room_id=${roomId} and user_id=${userId} and is_bot=false)`;
  if(!room.length)return json({error:"Room not found"},404);
