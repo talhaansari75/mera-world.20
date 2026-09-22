@@ -126,6 +126,16 @@ export function MoreScreen() {
       ],
     },
     {
+      id: "monetization",
+      title: "Monetization",
+      description: "Purchases and optional rewarded ads",
+      icon: CreditCard,
+      items: [
+        { id: "payments" as const, label: "Purchases & Entitlements", icon: CreditCard },
+        { id: "rewardedAds" as const, label: "Watch Ads & Earn", icon: Smartphone },
+      ],
+    },
+    {
       id: "account",
       title: "Account",
       description: "Saves, purchases and account data",
