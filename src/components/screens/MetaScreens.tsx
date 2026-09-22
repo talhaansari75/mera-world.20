@@ -20,30 +20,37 @@ import { BUILDINGS } from "@/lib/game/baseCrafting";
 export function ShopScreen() {
   const t = useT();
   const owned = useGame((s) => s.save.ownedThemes);
+  const featured = SHOP.filter((item) => item.kind === "coins" || item.kind === "energy").slice(0, 6);
+  const cosmetics = SHOP.filter((item) => item.kind === "theme");
   return (
     <Screen title={t("shop.title")}>
       <HudChips />
-      <div className="mt-4 flex flex-col gap-2">
-        {SHOP.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className="panel flex items-center justify-between rounded-2xl p-4 text-left"
-            onClick={() => useGame.getState().buy(item.id)}
-          >
-            <span>
-              <span className="block font-semibold text-fg">{item.name}</span>
-              <span className="text-xs text-muted">
-                {"theme" in item && item.theme && owned.includes(item.theme as ThemeId) ? "Owned" : item.kind}
-              </span>
-            </span>
-            <span className="text-sm font-semibold text-gold">
-              {item.coins ? `${item.coins}c` : ""}
-              {item.diamonds ? `${item.diamonds}d` : ""}
-            </span>
+      <section className="arcade-shop-hero mt-4">
+        <div><span className="dashboard-kicker text-yellow-200">DAILY MARKET</span><h2>Power up your journey</h2><p>Coins, energy, hints and colorful themes — all earned or bought inside the game.</p></div>
+        <span className="arcade-shop-gem">✦</span>
+      </section>
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {featured.map((item, index) => (
+          <button key={item.id} type="button" className={`arcade-shop-card shop-card-${index % 3}`} onClick={() => useGame.getState().buy(item.id)}>
+            <span className="arcade-shop-icon">{item.kind === "energy" ? "ϟ" : "◈"}</span>
+            <b>{item.name}</b>
+            <small>{item.kind === "energy" ? `+${item.amount} energy` : `+${item.amount} coins`}</small>
+            <strong>{item.coins ? `${item.coins} coins` : `${item.diamonds} diamonds`}</strong>
           </button>
         ))}
       </div>
+      <section className="mt-5">
+        <div className="mb-2 flex items-end justify-between"><div><span className="dashboard-kicker">COSMETICS</span><h3 className="font-display text-2xl text-fg">World themes</h3></div><span className="text-xs text-muted">{cosmetics.length} styles</span></div>
+        <div className="grid gap-2">
+          {cosmetics.map((item) => (
+            <button key={item.id} type="button" className="arcade-theme-row" onClick={() => useGame.getState().buy(item.id)}>
+              <span className="arcade-theme-swatch" />
+              <span className="min-w-0 flex-1 text-left"><b>{item.name}</b><small>{item.theme && owned.includes(item.theme as ThemeId) ? "OWNED" : "Unlock a new visual world"}</small></span>
+              <strong>{item.coins ? `${item.coins}c` : `${item.diamonds}d`}</strong>
+            </button>
+          ))}
+        </div>
+      </section>
     </Screen>
   );
 }
