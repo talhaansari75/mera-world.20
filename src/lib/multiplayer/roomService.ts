@@ -41,7 +41,7 @@ export async function joinRoom(userId: string, displayName: string, id: string) 
   const db = getPrisma();
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      return await db.$transaction(async (tx) => {
+      return await db.$transaction(async (tx: typeof db) => {
         const room = await tx.multiplayerRoom.findUnique({ where: { roomId: id } });
         if (!room || room.status !== "open") throw new Error("room_unavailable");
 
