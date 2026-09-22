@@ -302,9 +302,9 @@ function ScreenView({ screen }: { screen: ScreenId }) {
     case "systems":
       return <SystemsScreen />;
     case "multiplayer":
-      return <MultiplayerScreen onBack={() => useGame.getState().setScreen("more")} />;
+      return <MultiplayerScreen onBack={() => useGame.getState().setScreen("home")} />;
     case "admin":
-      return <AdminScreen onBack={() => useGame.getState().setScreen("more")} />;
+      return <AdminScreen onBack={() => useGame.getState().setScreen("home")} />;
     case "payments":
       return <PaymentsScreen />;
     case "content":
