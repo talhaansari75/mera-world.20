@@ -125,11 +125,11 @@ export function HomeScreen() {
       </section>
 
       <nav className="dashboard-bottom-nav" aria-label="Main navigation">
-        <button type="button" className="active" onClick={() => useGame.getState().go("home")}><Map className="size-5" /><span>Home</span></button>
-        <button type="button" onClick={() => useGame.getState().go("worlds")}><Target className="size-5" /><span>Worlds</span></button>
-        <button type="button" onClick={() => useGame.getState().startLevel(save.unlockedLevel)}><Swords className="size-5" /><span>Play</span></button>
         <button type="button" onClick={() => useGame.getState().go("shop")}><ShoppingBag className="size-5" /><span>Shop</span></button>
-        <button type="button" onClick={() => useGame.getState().go("profile")}><User className="size-5" /><span>Profile</span></button>
+        <button type="button" onClick={() => useGame.getState().go("social")}><User className="size-5" /><span>Friends</span></button>
+        <button type="button" className="active" onClick={() => useGame.getState().go("home")}><Map className="size-5" /><span>Home</span></button>
+        <button type="button" onClick={() => useGame.getState().go("multiplayer")}><Swords className="size-5" /><span>Clubs</span></button>
+        <button type="button" onClick={() => useGame.getState().go("inventory")}><Gift className="size-5" /><span>Chest</span></button>
       </nav>
     </div>
   );
