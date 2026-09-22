@@ -43,10 +43,10 @@ export const GUEST_BLOCKED_SCREENS = new Set<ScreenId>([
   "releasePackage", "releaseVerifier", "releaseArchive", "publishReadiness",
 ]);
 function guestSession(): boolean {
-  return typeof localStorage !== "undefined" && localStorage.getItem("mera-world.guest") === "1";
+  return typeof sessionStorage !== "undefined" && sessionStorage.getItem("mera-world.guest") === "1";
 }
 function guestDailyUsed(): boolean {
-  return typeof localStorage !== "undefined" && localStorage.getItem("mera-world.guest.daily") === todayKey();
+  return typeof sessionStorage !== "undefined" && sessionStorage.getItem("mera-world.guest.daily") === todayKey();
 }
 function guestNotice(set: any, message: string): void {
   flash(set, message);
@@ -404,7 +404,7 @@ export const useGame = create<GameState>((set, get) => ({
       dailyChallenge: challenge,
     };
     persistPlay(play);
-    if (guestSession()) localStorage.setItem("mera-world.guest.daily", day);
+    if (guestSession()) sessionStorage.setItem("mera-world.guest.daily", day);
     set({ play, screen: "play", overlay: null, save });
     if (typeof navigator !== "undefined" && navigator.onLine) {
       const startPromise = startGameplaySession({ data: { kind: "daily", level: 0, day, mode: "daily", language: save.language, dailyChallengeId: challenge.id } })
