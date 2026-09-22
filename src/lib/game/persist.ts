@@ -206,6 +206,7 @@ export function mergeSaves(a: PlayerSave, b: PlayerSave): PlayerSave {
   return {
     ...a,
     playerName: a.playerName || b.playerName,
+    profileImage: a.profileImage || b.profileImage,
     xp: Math.max(a.xp, b.xp),
     coins: Math.max(a.coins, b.coins),
     diamonds: Math.max(a.diamonds, b.diamonds),
