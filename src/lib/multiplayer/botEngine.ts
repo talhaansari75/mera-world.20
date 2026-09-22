@@ -11,7 +11,7 @@ export async function tickBots(matchId:string){
   const skill=String(bot.bot_skill||"steady"),delay=skill==="expert"?3500:skill==="steady"?7500:10000;
   const target=Math.min(puzzle.words.length,Math.floor((Date.now()-new Date(m[0].started_at).getTime())/delay)); if(target<1)continue;
   const found=await db.$queryRaw`select word from multiplayer_found_words where match_id=${matchId} and user_id=${bot.user_id} order by created_at`;
-  if(found.length>=target)continue; const word=puzzle.words.find(w=>!found.some((x:any)=>x.word===w)); if(!word)continue;
+  if(found.length>=target)continue; const word=puzzle.words.find((w: string)=>!found.some((x:any)=>x.word===w)); if(!word)continue;
   await db.$queryRaw`insert into multiplayer_found_words(match_id,user_id,word) values(${matchId},${bot.user_id},${word}) on conflict do nothing`;
   const count=await db.$queryRaw`select count(*)::int as n from multiplayer_found_words where match_id=${matchId} and user_id=${bot.user_id}`;
   const n=Number(count[0].n),score=n*100+Math.max(0,word.length-3)*20;
