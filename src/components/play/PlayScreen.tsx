@@ -172,7 +172,7 @@ export function PlayScreen() {
   }));
 
   return (
-    <div className="app-shell safe-pad flex h-dvh min-h-0 flex-col gap-1 overflow-hidden sm:gap-2">
+    <div className="app-shell safe-pad flex min-h-dvh flex-col gap-1 overflow-y-auto sm:gap-2">
       <header className="flex items-center gap-2">
         <button
           type="button"
