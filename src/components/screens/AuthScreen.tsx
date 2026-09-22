@@ -13,6 +13,7 @@ export function AuthScreen() {
   const [msg, setMsg] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,6 +57,10 @@ export function AuthScreen() {
       }
 
       if (mode === "signup") {
+        if (!termsAccepted) {
+          setMsg("Please accept the Terms & Conditions to create your account.");
+          return;
+        }
         if (!name.trim()) {
           setMsg("Please enter your name.");
           return;
@@ -99,7 +104,8 @@ export function AuthScreen() {
   };
 
   const continueAsGuest = () => {
-    localStorage.setItem("mera-world.guest", "1");
+    sessionStorage.setItem("mera-world.guest", "1");
+    sessionStorage.removeItem("mera-world.guest.daily");
     window.location.href = "/";
   };
 
@@ -177,6 +183,13 @@ export function AuthScreen() {
             </div>
           )}
 
+          {mode === "signup" && (
+            <label className="flex items-start gap-2 text-xs text-muted">
+              <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="mt-0.5" />
+              <span>I agree to the <a href="/legal" className="underline text-fg">Terms & Conditions</a> and Privacy Policy.</span>
+            </label>
+          )}
+
           <button
             className="btn-primary w-full py-3.5 text-base font-semibold disabled:opacity-60"
             onClick={() => void submit()}
@@ -199,6 +212,17 @@ export function AuthScreen() {
               disabled={loading}
             >
               Continue with Google
+            </button>
+          )}
+
+          {mode !== "forgot" && (
+            <button
+              type="button"
+              className="w-full rounded-2xl border border-border bg-surface-2 py-3.5 text-sm font-semibold text-fg hover:bg-surface"
+              onClick={() => void signInWithProvider("grok-facebook", { callbackURL: "/" }).catch((e) => setMsg(e instanceof Error ? e.message : "Facebook sign-in failed."))}
+              disabled={loading}
+            >
+              Continue with Facebook
             </button>
           )}
 
