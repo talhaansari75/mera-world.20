@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { useGame, playerLevel, xpForLevel } from "@/lib/store";
 import { Screen, HudChips, useT } from "./chrome";
 import { SHOP, SPIN_TABLE } from "@/lib/game/economy";
@@ -16,6 +17,11 @@ import { loadCloudSave, pushCloudSave } from "@/lib/server/cloud";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
 import { Link } from "@tanstack/react-router";
 import { BUILDINGS } from "@/lib/game/baseCrafting";
+
+function CloudRow() {
+  const signedIn = Boolean(useCurrentUser()?.id);
+  return <div className="panel rounded-2xl p-4 text-sm text-muted">{signedIn ? "Cloud account connected." : "Sign in to enable cloud save."}</div>;
+}
 
 export function ShopScreen() {
   const t = useT();
@@ -680,7 +686,7 @@ export function EquipmentScreen() {
             {save.equipment.length === 0 ? (
               <div className="panel rounded-2xl p-5 text-sm text-muted">No equipment yet. Gather materials, then craft your first item.</div>
             ) : save.equipment.map((item: any) => {
-              const active = save.equippedEquipment[item.slot] === item.id;
+              const active = save.equippedEquipment[item.slot as EquipmentSlot] === item.id;
               return (
                 <button key={item.id} type="button" className="panel flex items-center gap-3 rounded-2xl p-4 text-left" onClick={() => equip(item.id)}>
                   <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-surface-2 text-xl">{item.slot === "weapon" ? "⚔️" : item.slot === "armor" ? "🛡️" : "💠"}</span>
