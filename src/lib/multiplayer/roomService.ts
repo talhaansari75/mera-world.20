@@ -2,6 +2,8 @@ import { getPrisma } from "@/lib/db";
 import { audit } from "@/lib/server/v3/audit";
 import { consumeRateLimit } from "@/lib/server/v3/rateLimit";
 
+type DbClient = ReturnType<typeof getPrisma>;
+
 const roomId = () => crypto.randomUUID();
 const clean = (v: string, max: number) => v.trim().slice(0, max);
 
@@ -11,7 +13,7 @@ export async function createRoom(userId: string, displayName: string, mode: stri
 
   const id = roomId();
   const db = getPrisma();
-  await db.$transaction(async (tx: any) => {
+  await db.$transaction(async (tx: DbClient) => {
     await tx.multiplayerRoom.create({
       data: {
         roomId: id,
