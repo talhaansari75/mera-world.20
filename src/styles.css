@@ -612,3 +612,26 @@ body {
   .dashboard-currency { padding: 9px 8px; }
   .dashboard-currency b { font-size: 13px; }
 }
+
+/* Arcade splash + shop */
+.splash-logo-orbit{position:relative;display:grid;place-items:center;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,#ffcf4a 0 10%,#ff2f9f 11% 34%,#71109b 35% 68%,transparent 69%);box-shadow:0 0 0 12px rgb(255 47 159 / .08),0 0 80px rgb(255 47 159 / .45);animation:mw-float 3s ease-in-out infinite}
+.splash-logo-orbit::before{content:"";position:absolute;inset:12px;border:2px dashed rgb(255 216 77 / .55);border-radius:50%;animation:mw-spin 12s linear infinite}
+.splash-die{font-size:68px;color:#fff;text-shadow:0 7px 0 #7b146d,0 0 30px rgb(255 216 77 / .9);transform:rotate(-12deg)}
+.splash-logo-orbit i{position:absolute;font-style:normal;color:#fff27a;font-size:20px}.splash-logo-orbit i:nth-of-type(1){top:5%;left:48%}.splash-logo-orbit i:nth-of-type(2){right:3%;top:48%;color:#5cff7a}.splash-logo-orbit i:nth-of-type(3){bottom:8%;left:18%;color:#63d7ff}.splash-logo-orbit i:nth-of-type(4){left:5%;top:28%;color:#ff8bd0}
+.splash-brand h1{text-shadow:0 5px 0 #6a0b79,0 0 25px rgb(255 47 159 / .5)}
+.splash-loading{width:min(88vw,380px);padding:5px;border:2px solid rgb(255 216 77 / .35);border-radius:999px;background:#42064f;box-shadow:inset 0 2px 5px rgb(0 0 0 / .35)}
+.splash-loading span{display:block;height:16px;width:72%;border-radius:999px;background:linear-gradient(90deg,#34ef58,#baff48,#ffcf3a);box-shadow:0 0 16px rgb(57 239 104 / .65);animation:splash-load 1.8s ease-out both}
+.splash-loading b{display:block;margin-top:5px;font-size:9px;letter-spacing:.2em;color:#ffd9f0}
+.arcade-shop-hero{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px;border-radius:28px;border:2px solid rgb(255 216 77 / .35);background:radial-gradient(circle at 85% 25%,rgb(255 216 77 / .24),transparent 26%),linear-gradient(135deg,#f05b31,#d80b86 52%,#6910a0);box-shadow:0 18px 45px -25px rgb(255 47 159 / .85)}
+.arcade-shop-hero h2{margin-top:4px;font-family:var(--font-display);font-size:30px;font-weight:900;color:#fff}
+.arcade-shop-hero p{margin-top:4px;max-width:38ch;font-size:12px;color:#ffe4f6}
+.arcade-shop-gem{display:grid;place-items:center;flex:0 0 68px;height:68px;border-radius:24px;background:linear-gradient(145deg,#48ef5d,#00a94a);font-size:38px;color:#d9ff8b;box-shadow:0 12px 25px -12px #48ef5d}
+.arcade-shop-card{position:relative;display:flex;min-height:180px;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;overflow:hidden;border-radius:24px;border:2px solid rgb(255 216 77 / .26);padding:14px;text-align:center;color:#fff;box-shadow:0 18px 35px -22px #000;transition:transform .16s ease}
+.arcade-shop-card:active{transform:scale(.97)}.arcade-shop-card b{font-size:15px}.arcade-shop-card small{font-size:10px;color:#ffe0f2}.arcade-shop-card strong{margin-top:5px;border-radius:12px;padding:7px 10px;background:linear-gradient(135deg,#48ef5d,#13b94b);color:#08220d;font-size:11px}
+.shop-card-0{background:linear-gradient(160deg,#ff7c48,#e61b7e 62%,#7212a2)}.shop-card-1{background:linear-gradient(160deg,#37bfff,#6f2be8 60%,#6e0a91)}.shop-card-2{background:linear-gradient(160deg,#ffd84d,#ff6c35 45%,#db0a82)}
+.arcade-shop-icon{display:grid;place-items:center;width:76px;height:76px;border-radius:26px;background:rgb(255 255 255 / .16);font-size:42px;color:#fff36a;text-shadow:0 4px 0 rgb(115 0 80 / .45);box-shadow:0 0 0 1px rgb(255 255 255 / .18) inset,0 14px 25px -15px #000}
+.arcade-theme-row{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border-radius:18px;border:1px solid rgb(255 216 77 / .22);background:linear-gradient(135deg,rgb(105 10 111 / .95),rgb(50 5 68 / .98));color:#fff;text-align:left}
+.arcade-theme-row b{display:block;font-size:13px}.arcade-theme-row small{display:block;margin-top:3px;color:#e4a8d5;font-size:9px;text-transform:uppercase;letter-spacing:.08em}.arcade-theme-row strong{color:#ffd84d;font-size:12px}
+.arcade-theme-swatch{width:48px;height:48px;flex:0 0 48px;border-radius:15px;background:linear-gradient(135deg,#ff2f9f,#7d22d8,#28b7ff);box-shadow:0 0 0 2px rgb(255 255 255 / .1) inset}
+@keyframes mw-spin{to{transform:rotate(360deg)}}@keyframes mw-float{50%{transform:translateY(-7px) rotate(2deg)}}@keyframes splash-load{from{width:0}} 
+@media (prefers-reduced-motion:reduce){.splash-logo-orbit,.splash-logo-orbit::before{animation:none}.splash-loading span{animation:none;width:72%}}
