@@ -64,6 +64,9 @@ import { ReleaseArchiveScreen } from "@/components/v42/ReleaseArchiveScreen";
 import { PublishReadinessScreen } from "@/components/v39/PublishReadinessScreen";
 import { JourneyLoading } from "@/components/screens/JourneyPolish";
 import { trackPlayerActivity } from "@/lib/server/admin";
+import { loadCloudSave, pushCloudSave } from "@/lib/server/cloud";
+import { mergeSaves } from "@/lib/game/persist";
+import type { PlayerSave } from "@/lib/game/types";
 
 export function GameApp() {
   const ready = useGame((s) => s.ready);
@@ -148,6 +151,28 @@ export function GameApp() {
       window.removeEventListener("keydown", activateAudio);
     };
   }, [ready]);
+
+  useEffect(() => {
+    if (!ready || !user?.id || user.isDevFallback || user.id === "guest-user") return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const local = useGame.getState().save;
+        const remote = await loadCloudSave();
+        if (cancelled) return;
+        if (remote?.save) {
+          const merged = mergeSaves(local, remote.save as PlayerSave);
+          useGame.getState().applyCloud(merged);
+          await pushCloudSave({ json: JSON.stringify(merged), expectedRevision: Number(remote.revision) });
+        } else {
+          await pushCloudSave({ json: JSON.stringify(local), expectedRevision: 0 });
+        }
+      } catch (error) {
+        console.warn("[cloud-sync] initial sync skipped", error);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [ready, user?.id, user?.isDevFallback]);
 
   useEffect(() => {
     if (!ready || !user?.id) return;
