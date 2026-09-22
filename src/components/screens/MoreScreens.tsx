@@ -136,17 +136,6 @@ export function MoreScreen() {
       ],
     },
     {
-      id: "system",
-      title: "System",
-      description: "Diagnostics, analytics and administration",
-      icon: Activity,
-      items: [
-        { id: "systems" as const, label: "Systems & Diagnostics", icon: Activity },
-        { id: "analytics" as const, label: "Player Analytics", icon: LineChart },
-        { id: "admin" as const, label: "Admin Control", icon: ShieldCheck },
-      ],
-    },
-    {
       id: "help",
       title: "Help & Legal",
       description: "Terms, privacy and important information",
