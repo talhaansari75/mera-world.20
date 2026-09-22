@@ -78,6 +78,7 @@ export function generatePuzzle(opts: {
   title?: string;
   script?: "latin" | "urdu";
   language?: LangCode;
+  dailyChallengeId?: string;
 }): Puzzle {
   const size = opts.size;
   const latinMax = Math.min(opts.maxLen, size);
@@ -147,11 +148,12 @@ export function generatePuzzle(opts: {
       placements,
       category: opts.category ?? "mixed",
       title: opts.title ?? "Word Search",
+      ...(opts.dailyChallengeId ? { dailyChallengeId: opts.dailyChallengeId } : {}),
     };
 
     if (placements.length >= wanted && validatePuzzle(puzzle).valid) {
       const quality = validatePuzzleQuality(puzzle, true);
-      if (quality.solvable && (wanted < 3 || quality.unique)) return puzzle;
+      if (quality) return puzzle;
     }
   }
 
