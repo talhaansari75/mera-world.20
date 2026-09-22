@@ -5,7 +5,7 @@ import { defaultSave } from "@/lib/game/persist";
 
 export const loadCloudSave = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
-  .handler(async ({ context }) => {
+  .handler(async ({ context }): Promise<any> => {
     const row = await getPrisma().playerSave.findUnique({ where: { userId: context.userId } });
     if (!row) return { ok: true as const, save: null, version: 0, revision: 0, updatedAt: null };
     try {
@@ -29,7 +29,7 @@ export const pushCloudSave = createServerFn({ method: "POST" })
       ? Math.max(0, Math.floor(Number(d.expectedRevision)))
       : undefined,
   }))
-  .handler(async ({ context, data }) => {
+  .handler(async ({ context, data }): Promise<any> => {
     let incoming: Record<string, unknown>;
     try {
       const parsed = JSON.parse(data.json);
