@@ -177,8 +177,8 @@ export function PlayScreen() {
         <button
           type="button"
           className="inline-flex h-11 w-11 items-center justify-center rounded-xl panel"
-          onClick={() => useGame.getState().pausePlay()}
-          aria-label={t(lang, "cta.pause")}
+          onClick={() => useGame.getState().quitPlay()}
+          aria-label="Back"
         >
           <ChevronLeft className="size-5" />
         </button>
