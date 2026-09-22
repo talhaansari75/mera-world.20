@@ -159,7 +159,12 @@ export function migrateSave(raw: unknown): PlayerSave {
   return merged;
 }
 
+function isGuestSession(): boolean {
+  return typeof sessionStorage !== "undefined" && sessionStorage.getItem("mera-world.guest.session") === "1";
+}
+
 export function loadSave(): PlayerSave {
+  if (isGuestSession()) return defaultSave();
   if (typeof localStorage === "undefined") return defaultSave();
   try {
     const raw = localStorage.getItem(SAVE_KEY);
@@ -177,6 +182,7 @@ export function loadSave(): PlayerSave {
 }
 
 export function writeSave(save: PlayerSave) {
+  if (isGuestSession()) return;
   if (typeof localStorage === "undefined") return;
   try {
     const prev = localStorage.getItem(SAVE_KEY);
