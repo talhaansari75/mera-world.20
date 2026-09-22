@@ -8,7 +8,7 @@ export const THEMES: Array<{
   tile: string;
   accent: string;
 }> = [
-  { id: "midnight", name: "Midnight Ink", bg: "#0b0f18", fg: "#ece8dc", tile: "#1c2436", accent: "#667eea" },
+  { id: "midnight", name: "Starlight Arena", bg: "#080b14", fg: "#f4f0e6", tile: "#171f35", accent: "#8ea0ff" },
   { id: "parchment", name: "Parchment", bg: "#e8dcc8", fg: "#2a2418", tile: "#f4efe2", accent: "#6b4f2a" },
   { id: "ocean", name: "Tidepool", bg: "#07161c", fg: "#d7f0ea", tile: "#123039", accent: "#3dba9a" },
   { id: "forest", name: "Canopy", bg: "#10160f", fg: "#e6edd8", tile: "#1c2a18", accent: "#7aa35a" },
