@@ -56,6 +56,7 @@ export function HomeScreen() {
         <div className="arcade-currencies">
           <button type="button" className="arcade-currency-pill" onClick={() => useGame.getState().go("shop")}><span>◈</span><b>{save.coins.toLocaleString()}</b></button>
           <button type="button" className="arcade-currency-pill" onClick={() => useGame.getState().go("shop")}><span>✦</span><b>{save.diamonds.toLocaleString()}</b></button>
+          <button type="button" className="arcade-currency-pill arcade-energy-pill" onClick={() => useGame.getState().go("shop")}><span>⚡</span><b>{save.energy}</b></button>
           <button type="button" className="arcade-icon-button" onClick={() => useGame.getState().go("settings")} aria-label={t("cta.settings")}>⚙</button>
         </div>
       </header>
@@ -104,6 +105,30 @@ export function HomeScreen() {
         <button type="button" className="arcade-mini-card arcade-mini-vip" onClick={() => useGame.getState().go("progression")}><span>👑</span><b>VIP Journey</b><small>Master your rank</small></button>
       </section>
 
+      <section className="arcade-command-center">
+        <div className="arcade-section-head">
+          <div><span>LIVE HUB</span><h2>Your next moves</h2></div>
+          <button type="button" className="arcade-link-button" onClick={() => useGame.getState().go("liveOps")}>View all ›</button>
+        </div>
+        <div className="arcade-command-grid">
+          <button type="button" className="arcade-command-card daily" onClick={() => useGame.getState().go("daily")}>
+            <span className="arcade-command-icon">🎯</span>
+            <span><small>DAILY CHALLENGE</small><b>{save.lastDaily === todayKey() ? "Completed today" : "Play today's puzzle"}</b><em>{save.lastDaily === todayKey() ? "Come back tomorrow for a fresh reward" : "Earn bonus coins + XP"}</em></span>
+            <strong>{save.lastDaily === todayKey() ? "✓" : "PLAY"}</strong>
+          </button>
+          <button type="button" className="arcade-command-card missions" onClick={() => useGame.getState().go("missions")}>
+            <span className="arcade-command-icon">🏆</span>
+            <span><small>MISSIONS</small><b>Keep your streak alive</b><em>{save.claimedMissions.length} rewards claimed · more objectives await</em></span>
+            <strong>›</strong>
+          </button>
+          <button type="button" className="arcade-command-card ranked" onClick={() => useGame.getState().go("leaderboard")}>
+            <span className="arcade-command-icon">🌍</span>
+            <span><small>GLOBAL RANK</small><b>Climb the leaderboard</b><em>{save.stats.gamesWon} wins · {save.stats.wordsFound.toLocaleString()} words found</em></span>
+            <strong>›</strong>
+          </button>
+        </div>
+      </section>
+
       <section className="arcade-stat-strip">
         <div><b>{streak}</b><span>STREAK</span></div>
         <div><b>{save.stats.levelsCompleted}</b><span>LEVELS</span></div>
@@ -118,6 +143,16 @@ export function HomeScreen() {
           <strong>CLAIM</strong>
         </button>
       )}
+
+      <section className="arcade-adventure-panel">
+        <div className="arcade-section-head"><div><span>ADVENTURE</span><h2>Build your world</h2></div></div>
+        <div className="arcade-adventure-grid">
+          <button type="button" onClick={() => useGame.getState().go("story")}><span>📖</span><b>Story</b><small>Chapter {save.storyChapter}</small></button>
+          <button type="button" onClick={() => useGame.getState().go("base")}><span>🏰</span><b>Home Base</b><small>Upgrade & craft</small></button>
+          <button type="button" onClick={() => useGame.getState().go("pets")}><span>🐉</span><b>Pet Squad</b><small>{save.ownedPets.length} collected</small></button>
+          <button type="button" onClick={() => useGame.getState().go("seasonProgress")}><span>👑</span><b>Season</b><small>{save.claimedSeasonTiers.length} rewards</small></button>
+        </div>
+      </section>
 
       <section className="arcade-quick-panel">
         <div className="arcade-section-head"><div><span>JOURNEY</span><h2>More to explore</h2></div></div>
