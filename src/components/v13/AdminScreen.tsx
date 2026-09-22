@@ -53,12 +53,15 @@ export function AdminScreen({ onBack }: { onBack?: () => void }) {
   const [data, setData] = useState<Dashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [ops, setOps] = useState<any | null>(null);
 
   async function load() {
     setLoading(true);
     setError("");
     try {
-      setData(await getAdminDashboard() as Dashboard);
+      const [dashboard, opsResponse] = await Promise.all([getAdminDashboard() as Promise<Dashboard>, fetch("/api/admin/ops", { cache: "no-store" }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error || "Could not load security operations."); return d; })]);
+      setData(dashboard);
+      setOps(opsResponse);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load admin dashboard.");
     } finally {
@@ -71,6 +74,26 @@ export function AdminScreen({ onBack }: { onBack?: () => void }) {
   return (
     <Screen title="Admin Control" onBack={onBack}>
       <div className="mx-auto w-full max-w-6xl space-y-4 pb-10">
+        <section className="panel rounded-2xl p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-bold text-fg">Security & Operations</h2>
+              <p className="text-xs text-muted">Live payment, refund, chat-report, anti-cheat, voice and replay-protection signals.</p>
+            </div>
+            <span className="hud-chip text-fg">{ops ? "LIVE" : "Loading…"}</span>
+          </div>
+          {ops && <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+            <OpsMetric label="Payments pending" value={ops.payments?.pending ?? 0} />
+            <OpsMetric label="Expired payments" value={ops.payments?.expired ?? 0} />
+            <OpsMetric label="Refund requests" value={ops.refunds?.requested ?? 0} />
+            <OpsMetric label="Open chat reports" value={ops.chatReports?.open ?? 0} />
+            <OpsMetric label="High anti-cheat flags" value={ops.antiCheat?.high_open ?? 0} />
+            <OpsMetric label="Medium anti-cheat flags" value={ops.antiCheat?.medium_open ?? 0} />
+            <OpsMetric label="Voice files" value={ops.voice?.total ?? 0} />
+            <OpsMetric label="Actions / 24h" value={ops.actionReceipts?.last_24h ?? 0} />
+          </div>}
+        </section>
+
         <section className="panel rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-transparent to-gold/10 p-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <AdminTile icon={<CreditCard />} title="Payments" text="Open payment monitoring" onClick={() => window.dispatchEvent(new CustomEvent("mwsj:navigate",{detail:"payments"}))} />
@@ -178,7 +201,7 @@ function AdminTile({icon,title,text,onClick}:{icon:ReactNode;title:string;text:s
   </button>;
 }
 
-function Metric({ icon, label, value }: { icon: ReactNode; label: string; value: number }) {
+function OpsMetric({ label, value }: { label: string; value: number }) {\n  return <div className="rounded-xl border border-border bg-surface-2 p-3"><p className="text-[11px] text-muted">{label}</p><p className="mt-1 text-xl font-bold text-fg">{Number(value)||0}</p></div>;\n}\n\nfunction Metric({ icon, label, value }: { icon: ReactNode; label: string; value: number }) {
   return <section className="panel rounded-2xl p-4"><div className="mb-2 size-5 text-primary">{icon}</div><p className="text-xs text-muted">{label}</p><p className="mt-1 text-2xl font-bold text-fg">{value}</p></section>;
 }
 
