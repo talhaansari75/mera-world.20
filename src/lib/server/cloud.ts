@@ -75,6 +75,8 @@ export const pushCloudSave = createServerFn({ method: "POST" })
       const merged = { ...incoming };
       for (const key of serverOwned) if (key in existing) merged[key] = existing[key];
       const mergedJson = JSON.stringify(merged);
+      await tx.$queryRaw`insert into player_save_backups (user_id, revision, save_json) values (${context.userId}, ${row.revision}, ${row.saveJson})`;
+      await tx.$queryRaw`delete from player_save_backups where user_id = ${context.userId} and id not in (select id from player_save_backups where user_id = ${context.userId} order by created_at desc limit 10)`;
       const updated = await tx.playerSave.updateMany({
         where: { userId: context.userId, revision: row.revision },
         data: { saveJson: mergedJson, version: { increment: 1 }, revision: { increment: 1n } },
