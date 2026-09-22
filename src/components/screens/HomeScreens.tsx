@@ -110,20 +110,12 @@ export function HomeScreen() {
 
       <section className="dashboard-quick-travel mb-6">
         <div className="mb-3 flex items-end justify-between"><div><p className="dashboard-kicker">Quick travel</p><h3 className="font-display text-2xl text-fg">Your World</h3></div><button type="button" className="text-xs font-bold uppercase tracking-[0.15em] text-accent" onClick={() => useGame.getState().go("worlds")}>View map</button></div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <TileButton icon={<Map className="size-5" />} label="World Map" onClick={() => useGame.getState().go("worldMap")} />
           <TileButton icon={<Users className="size-5" />} label="Multiplayer" onClick={() => useGame.getState().go("multiplayer")} />
-          <TileButton icon={<Swords className="size-5" />} label={t("cta.modes")} onClick={() => useGame.getState().go("modes")} />
-          <TileButton icon={<PawPrint className="size-5" />} label={t("cta.pets")} onClick={() => useGame.getState().go("pets")} />
-          <TileButton icon={<ShoppingBag className="size-5" />} label={t("cta.shop")} onClick={() => useGame.getState().go("shop")} />
-          <TileButton icon={<Trophy className="size-5" />} label={t("cta.achievements")} onClick={() => useGame.getState().go("achievements")} />
-        </div>
-      </section>
-
-      <section className="dashboard-footer-card">
-        <div><p className="dashboard-kicker">Traveler profile</p><h3 className="font-display text-xl text-fg">Level {level} Explorer</h3><p className="text-sm text-muted">{save.stats.wordsFound.toLocaleString()} words discovered across {save.stats.gamesWon.toLocaleString()} victories.</p></div>
-        <button type="button" className="dashboard-outline-btn" onClick={() => useGame.getState().go("profile")}><Crown className="size-4" /> Profile</button>
-      </section>
+          <TileButton icon={<Swords className="size-5" />} label="Modes" onClick={() => useGame.getState().go("modes")} />
+          <TileButton icon={<User className="size-5" />} label="Profile" onClick={() => useGame.getState().go("profile")} />
+        </div>     </section>
 
       <nav className="dashboard-bottom-nav" aria-label="Main navigation">
         <button type="button" className="active" onClick={() => useGame.getState().go("home")}><Map className="size-5" /><span>Home</span></button>
