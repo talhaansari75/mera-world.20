@@ -40,7 +40,7 @@ export function HomeScreen() {
   const streak = Math.max(save.dailyStreak, save.stats.currentStreak);
 
   return (
-    <div className="app-shell starfield safe-pad flex h-dvh flex-col overflow-y-auto">
+    <div className="app-shell starfield safe-pad relative flex h-dvh flex-col overflow-y-auto pb-24">
       <header className="flex items-center justify-between gap-3 pb-1">
         <div className="flex min-w-0 items-center gap-3">
           <div className="dashboard-avatar">
