@@ -1,4 +1,4 @@
-import { Bell, ChevronRight, Crown, Flame, Gift, Map, PawPrint, ShoppingBag, Swords, Target, Trophy, User, Wallet } from "lucide-react";
+import { ChevronRight, Flame, Gift, Map, PawPrint, ShoppingBag, Swords, Target, Trophy, User } from "lucide-react";
 import { useGame, playerLevel } from "@/lib/store";
 import { xpForLevel } from "@/lib/game/economy";
 import { TileButton, useT } from "./chrome";
