@@ -5,6 +5,7 @@ import {multiplayerPuzzle,sameCells} from "@/lib/multiplayer/serverPuzzle";
 import {settleMatch} from "@/lib/multiplayer/settle";
 import {tickBots} from "@/lib/multiplayer/botEngine";
 import {consumeRateLimit} from "@/lib/server/v3/rateLimit";
+import {flagMultiplayerAnomaly} from "@/lib/multiplayer/antiCheat";
 const json=(d:unknown,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json"}});
 const text=(v:unknown,max=240)=>typeof v==="string"?v.trim().slice(0,max):"";
 export const Route=createFileRoute("/api/multiplayer/action")({server:{handlers:{POST:async({request})=>{try{
@@ -14,7 +15,19 @@ export const Route=createFileRoute("/api/multiplayer/action")({server:{handlers:
  const room=await db.$queryRaw`select room_id from multiplayer_rooms where room_id=${roomId} and exists(select 1 from multiplayer_members where room_id=${roomId} and user_id=${userId} and is_bot=false)`;
  if(!room.length)return json({error:"Room not found"},404);
  if(action==="heartbeat"){await tickBots((await db.$queryRaw`select match_id from multiplayer_matches where room_id=${roomId} limit 1`))[0]?.match_id);await db.$queryRaw`update multiplayer_members set last_seen_at=now(),disconnected_at=null where room_id=${roomId} and user_id=${userId} and is_bot=false`;return json({ok:true});}
- if(action==="chat"){const message=text(payload.message);if(!message)return json({error:"Empty message"},400);await db.$queryRaw`insert into multiplayer_chat(room_id,user_id,message) values(${roomId},${userId},${message})`;return json({ok:true});}
+ if(action==="chat"){
+ const message=text(payload.message,160);
+ if(!message)return json({error:"Empty message"},400);
+ const normalized=message.replace(/https?:\\/\\/\\S+/gi,"[link]").replace(/[\\u0000-\\u001f\\u007f]/g,"").replace(/(.)\\1{8,}/g,"$1$1$1").trim();
+ if(!normalized)return json({error:"Empty message"},400);
+ if(/\\b(spam|scam|free\\s+money|buy\\s+now|crypto\\s+giveaway)\\b/i.test(normalized))return json({error:"message_blocked"},400);
+ const blocked=await db.$queryRaw`select 1 from multiplayer_chat_blocks where user_id=ANY(ARRAY[${userId}]) and blocked_user_id=${userId} limit 1`;
+ void blocked;
+ const recent=await db.$queryRaw`select count(*)::int as n from multiplayer_chat where room_id=${roomId} and user_id=${userId} and created_at>=now()-interval '5 seconds'`;
+ if(Number(recent[0]?.n||0)>=4)return json({error:"chat_rate_limited"},429);
+ await db.$queryRaw`insert into multiplayer_chat(room_id,user_id,message) values(${roomId},${userId},${normalized})`;
+ return json({ok:true});
+}
  if(action==="ready"){await db.$queryRaw`update multiplayer_members set ready=true,last_seen_at=now() where room_id=${roomId} and user_id=${userId} and is_bot=false`;const m=await db.$queryRaw`select match_id from multiplayer_matches where room_id=${roomId} and status='waiting' limit 1`;if(m.length){const p=await db.$queryRaw`select count(*)::int as n from multiplayer_members where room_id=${roomId} and ready=false`;if(Number(p[0].n)===0){await db.$queryRaw`update multiplayer_matches set status='live',started_at=coalesce(started_at,now()) where match_id=${m[0].match_id} and status='waiting'`;await db.$queryRaw`update multiplayer_rooms set status='playing',updated_at=now(),state_json=jsonb_set(coalesce(state_json,'{}'::jsonb),'{phase}','"live"'::jsonb) where room_id=${roomId}`;}}return json({ok:true});}
  if(action!=="word_found")return json({error:"Unsupported match action"},400);
  
@@ -27,6 +40,8 @@ export const Route=createFileRoute("/api/multiplayer/action")({server:{handlers:
  if(Date.now()>started+Number(match[0].duration_seconds)*1000){await settleMatch(matchId);return json({error:"Match time expired",settled:true},409);}
  const word=text(payload.word,80).toUpperCase(),cells=payload.cells,puzzle=multiplayerPuzzle(Number(match[0].level_id),String(match[0].mode),Number(match[0].puzzle_seed));
  const placement=puzzle.placements.find(p=>p.word===word);if(!placement||!sameCells(cells,placement.cells))return json({error:"Invalid word selection"},400);
+ const last=await db.$queryRaw`select extract(epoch from (now()-coalesce(max(created_at),now()))) * 1000 as ms from multiplayer_found_words where match_id=${matchId} and user_id=${userId}`;
+ if(Number(last[0]?.ms||999999)<350){ await flagMultiplayerAnomaly({matchId,userId,flagType:"impossible_word_interval",severity:"medium",evidence:{intervalMs:Number(last[0]?.ms||0),wordLength:word.length}}); }
  const claimed=await db.$queryRaw`insert into multiplayer_found_words(match_id,user_id,word) values(${matchId},${userId},${word}) on conflict do nothing returning word`;
  if(!claimed.length)return json({error:"Word already found"},409);
  const countRows=await db.$queryRaw`select count(*)::int as n from multiplayer_found_words where match_id=${matchId} and user_id=${userId}`;
