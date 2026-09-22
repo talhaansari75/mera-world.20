@@ -424,7 +424,6 @@ export const useGame = create<GameState>((set, get) => ({
   pausePlay: () => {
     const play = get().play;
     if (!play || play.pausedAt) return;
-    if (play.kind === "daily" && play.dailyChallenge?.id === "speed") { flash(set, "Speed Day cannot be paused."); return; }
     const actionId = newActionId();
     const next = { ...play, pausedAt: Date.now(), actions: [...play.actions, { id: actionId, type: "pause" as const }] };
     persistPlay(next);
