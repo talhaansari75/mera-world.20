@@ -88,7 +88,7 @@
   background-image:
     radial-gradient(ellipse 90% 55% at 50% -18%, color-mix(in oklab, var(--color-primary) 22%, transparent), transparent 70%),
     radial-gradient(ellipse 50% 40% at 100% 100%, color-mix(in oklab, var(--color-primary-deep) 16%, transparent), transparent 70%),
-    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    linear-gradient(180deg, color-mix(in oklab, var(--color-bg) 100%, transparent), color-mix(in oklab, var(--color-bg) 92%, transparent));
 }
 
 .panel {
