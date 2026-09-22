@@ -29,6 +29,7 @@ type Cell = [number, number];
 type Action = { id?: string; type: "found" | "bonus" | "miss" | "hint" | "pause" | "resume"; word?: string; cells?: Cell[]; specialKinds?: string[]; at?: number; hintKind?: "first" | "letter" | "word" };
 type SessionState = { kind:"level"|"daily"; level:number; day:string; mode:GameMode; language:LangCode; dailyChallengeId?: string; words:string[]; grid:string[][]; placements:Array<{word:string;cells:Cell[]}>; actions:Action[]; timeLimitMs:number; adaptiveTier?: "assist"|"steady"|"expert"; adaptiveBonusTarget?: number; startingReveals?: number };
 const safeJson = (v: unknown): Record<string, unknown> => v && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : {};
+const recordValue = (v: unknown): Record<string, unknown> => v && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : {};
 const sameCells = (a: Cell[], b: Cell[]) => JSON.stringify(a) === JSON.stringify(b) || JSON.stringify(a) === JSON.stringify([...b].reverse());
 const canonicalCells = (cells: Cell[]) => {
   const forward = JSON.stringify(cells);
@@ -66,7 +67,7 @@ export const startGameplaySession = createServerFn({ method: "POST" })
     if (data.kind === "level" && data.level > unlocked) return { ok:false as const, error:"Level is locked on the server." };
     const rules = modeRules(data.mode);
     const equippedPet = typeof save.equippedPet === "string" ? save.equippedPet : null;
-    const equippedPetLevel = Number(save.petLevels?.[equippedPet ?? ""] ?? 1);
+    const equippedPetLevel = Number(recordValue(save.petLevels)[equippedPet ?? ""] ?? 1);
     const effects = petEffect(equippedPet, equippedPetLevel);
     const adaptive = data.kind === "level" ? intelligenceAdaptivePlan(save as unknown as import("@/lib/game/types").PlayerSave, data.level) : { tier: "steady" as const, timeMultiplier: 1, startingReveals: 0, bonusTarget: 0, surprise: false };
     const energyCost = Math.max(1, Math.ceil(1 * rules.energyMultiplier * (1 - Number(effects.energyReductionPercent ?? 0) / 100)));
@@ -219,13 +220,13 @@ export const recordGameplayAction = createServerFn({ method:"POST" })
       }
       let hintEconomy: { coins: number; hintsUsed: number } | undefined;
       if (data.type === "hint") {
-        const hintKind = data.hintKind!;
+        const hintKind = data.hintKind as keyof typeof HINT_COST;
         // Serialize economy mutations across every gameplay session for this user.
         await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`hint-economy:${context.userId}`}))`;
         const saveRow = await tx.playerSave.findUnique({where:{userId:context.userId}});
         const save = safeJson(saveRow?.saveJson ? JSON.parse(saveRow.saveJson) : defaultSave());
         const equippedPet = typeof save.equippedPet === "string" ? save.equippedPet : null;
-        const petLevel = Number(save.petLevels?.[equippedPet ?? ""] ?? 1);
+        const petLevel = Number(recordValue(save.petLevels)[equippedPet ?? ""] ?? 1);
         if (modeRules(state.mode).noHints) return {ok:false as const,error:"Hints are disabled in this mode."};
         const cost = Math.max(5, HINT_COST[hintKind] - (equippedPet === "fox" && hintKind !== "word" ? 8 : 0));
         const coins = Number(save.coins ?? 0);
@@ -236,7 +237,7 @@ export const recordGameplayAction = createServerFn({ method:"POST" })
         else await tx.playerSave.create({data:{userId:context.userId,saveJson:JSON.stringify(nextSave),version:1,revision:1n}});
         hintEconomy = { coins: coins - cost, hintsUsed: Number((nextSave.stats as Record<string, unknown>).hintsUsed ?? 0) };
       }
-      state.actions.push({id:data.actionId || undefined,type:data.type,word:data.word,cells:data.cells,specialKinds,at:Date.now(),hintKind:data.hintKind});
+      state.actions.push({id:data.actionId || undefined,type:data.type,word:data.word,cells:data.cells,specialKinds,at:Date.now(),hintKind:data.hintKind as Action["hintKind"]});
       await tx.gameSessionV5.update({where:{id:data.sessionId},data:{stateJson:state as any,updatedAt:BigInt(Date.now())}});
       return {ok:true as const, ...(hintEconomy ? {hintEconomy} : {})};
     }, { isolationLevel: "Serializable" });
@@ -260,10 +261,10 @@ export const startBossSession = createServerFn({ method: "POST" })
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`boss-session:${context.userId}:${data.level}`}))`;
       const existing = await tx.gameSessionV5.findFirst({ where:{userId:context.userId,levelId:data.level,status:"boss_open"}, select:{id:true,stateJson:true} });
       if (existing) return { ok:true as const, sessionId:existing.id, combat:existing.stateJson as CombatState };
-    const gear = Array.isArray(save.equipment) ? save.equipment.reduce((n:any,e:any) => n + ((save.equippedEquipment?.[e.slot] === e.id) ? Number(e.power||0) : 0),0) : 0;
+    const gear = Array.isArray(save.equipment) ? save.equipment.reduce((n:any,e:any) => n + ((recordValue(save.equippedEquipment)[e.slot] === e.id) ? Number(e.power||0) : 0),0) : 0;
     const petId = typeof save.equippedPet === "string" ? save.equippedPet : null;
-    const petLevel = Number(save.petLevels?.[petId ?? ""] ?? 1);
-    const power = playerCombatPower(gear, Number(save.skills?.speed ?? 0), petPower(petId, petLevel));
+    const petLevel = Number(recordValue(save.petLevels)[petId ?? ""] ?? 1);
+    const power = playerCombatPower(gear, Number(recordValue(save.skills).speed ?? 0), petPower(petId, petLevel));
     const combat = startCombat(data.level, power);
     const id = randomUUID(), now=Date.now();
       await tx.gameSessionV5.create({data:{id,userId:context.userId,levelId:data.level,seed:`boss:${data.level}`,status:"boss_open",startedAt:BigInt(now),updatedAt:BigInt(now),score:0,stateJson:{...combat,playerPower:power,petAbility:petProfile(petId)?.ability ?? null} as any}});
@@ -397,7 +398,7 @@ export const verifyGameplayCompletion = createServerFn({ method: "POST" })
       const firstClear=state.kind==="level";
       const dailyMultiplier=state.kind==="daily" ? dailyChallengeRewardMultiplier(dailyChallengeFor(state.day), {perfect:hints===0 && mistakes===0, combo:bestCombo, bonusWords}) : 1;
       const equippedPet = typeof save.equippedPet === "string" ? save.equippedPet : null;
-      const equippedPetLevel = Number(save.petLevels?.[equippedPet ?? ""] ?? 1);
+      const equippedPetLevel = Number(recordValue(save.petLevels)[equippedPet ?? ""] ?? 1);
       const effects = petEffect(equippedPet, equippedPetLevel);
       const rewardKind = state.kind === "daily" ? "challenge" : bestCombo >= 5 ? "speed" : equippedPet ? "pet" : state.level % 25 === 0 ? "collection" : "standard";
       const personalizationMultiplier = personalizedRewardMultiplier(save as unknown as import("@/lib/game/types").PlayerSave, rewardKind);
