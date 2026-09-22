@@ -78,6 +78,14 @@ export function GameApp() {
 
   // Sync auth display name into game profile when still default "Traveler"
   useEffect(() => {
+    if (!user?.id || user.isDevFallback || user.id === "guest-user") return;
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("mera-world.guest");
+      localStorage.removeItem("mera-world.guest.daily");
+    }
+  }, [user?.id, user?.isDevFallback]);
+
+  useEffect(() => {
     if (!ready || !user?.displayName) return;
     const current = useGame.getState().save.playerName;
     if (current === "Traveler") {
