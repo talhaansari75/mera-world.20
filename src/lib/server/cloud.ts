@@ -58,21 +58,7 @@ export const pushCloudSave = createServerFn({ method: "POST" })
         if (data.expectedRevision && data.expectedRevision !== 0) {
           return { ok: false as const, conflict: true as const, error: "Cloud save appeared while syncing" };
         }
-        const baseline = defaultSave() as unknown as Record<string, unknown>;
-        const suspicious = serverOwned.some((key) => {
-          const value = incoming[key];
-          if (value == null) return false;
-          if (key === "_serverVerified") return value === true;
-          const base = baseline[key];
-          if (typeof value === "number" && typeof base === "number") return value !== base;
-          if (key === "energyAt") return false;
-          if (typeof value === "object") return JSON.stringify(value) !== JSON.stringify(base);
-          return value !== base;
-        });
-        if (suspicious) {
-          return { ok: false as const, error: "Initial cloud sync cannot establish server-owned progress. Start from a fresh server save." };
-        }
-        await tx.playerSave.create({
+        // One-time local-to-account migration: the authenticated owner may seed an empty cloud save from this device.\n        await tx.playerSave.create({
           data: { userId: context.userId, saveJson: data.json, version: 1, revision: 1n },
         });
         return { ok: true as const, revision: 1 };
