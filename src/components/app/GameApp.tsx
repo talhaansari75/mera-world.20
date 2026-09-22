@@ -161,9 +161,11 @@ export function GameApp() {
       if (!force && seconds <= 0) return;
       last = now;
       void trackPlayerActivity({
-        eventType,
-        screen: useGame.getState().screen,
-        durationSeconds: Math.min(60, Math.max(0, seconds)),
+        data: {
+          eventType,
+          screen: useGame.getState().screen,
+          durationSeconds: Math.min(60, Math.max(0, seconds)),
+        },
       }).catch(() => undefined);
     };
 
