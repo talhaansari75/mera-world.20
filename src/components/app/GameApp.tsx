@@ -27,6 +27,7 @@ import {
 } from "@/components/screens/MetaScreens";
 import { DictionaryScreen, LeaderboardScreen, LegalScreen, MoreScreen, StoryScreen } from "@/components/screens/MoreScreens";
 import { FeatureTestLabScreen } from "@/components/screens/FeatureTestLabScreen";
+import { RewardedAdsScreen } from "@/components/screens/RewardedAdsScreen";
 import { CombatScreen } from "@/components/screens/CombatScreen";
 import { WorldMapScreen } from "@/components/screens/WorldMapScreen";
 import { StoryQuestScreen } from "@/components/screens/StoryQuestScreen";
@@ -364,6 +365,8 @@ function ScreenView({ screen }: { screen: ScreenId }) {
       return <MoreScreen />;
     case "featureTestLab":
       return <FeatureTestLabScreen />;
+    case "rewardedAds":
+      return <RewardedAdsScreen />;
     default:
       return <HomeScreen />;
   }
