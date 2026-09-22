@@ -107,101 +107,56 @@ export function ProfileScreen() {
   const next = xpForLevel(lv + 1);
   const xpBase = xpForLevel(lv);
   const progress = Math.min(100, Math.max(0, ((save.xp - xpBase) / Math.max(1, next - xpBase)) * 100));
+  const games = Math.max(1, save.stats.gamesPlayed);
+  const winRate = Math.round((save.stats.gamesWon / games) * 100);
+  const rank = lv >= 20 ? "Word Master" : lv >= 10 ? "Journey Expert" : lv >= 5 ? "Explorer" : "Beginner";
+  const streak = Math.max(save.dailyStreak, save.stats.currentStreak);
 
   return (
     <Screen title={t("profile.title")}>
-      <div className="space-y-4 pb-8">
-        <section className="panel overflow-hidden rounded-3xl p-5">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="grid size-20 shrink-0 place-items-center rounded-3xl bg-primary/15 text-4xl">
-              {save.avatarId === "ink-1" ? "🪶" : save.avatarId === "ink-2" ? "🏮" : save.avatarId === "ink-3" ? "🧭" : "✨"}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs uppercase tracking-[0.18em] text-accent">Traveler Profile</p>
-              <h2 className="mt-1 truncate font-display text-2xl text-fg">{save.playerName || "Traveler"}</h2>
-              <p className="mt-1 truncate text-sm text-muted">@{user?.username || user?.displayName || save.playerName || "traveler"}</p>
-              {user?.primaryEmail && <p className="mt-0.5 truncate text-xs text-muted">{user.primaryEmail}</p>}
-            </div>
-            <div className="rounded-2xl bg-surface-2 px-4 py-3 text-center">
-              <p className="text-[10px] uppercase tracking-wider text-muted">Level</p>
-              <p className="font-display text-2xl text-fg">{lv}</p>
-            </div>
-          </div>
-
-          <div className="mt-5">
-            <div className="mb-1 flex justify-between text-xs text-muted">
-              <span>{save.xp} XP</span><span>{next} XP</span>
-            </div>
-            <div className="h-3 overflow-hidden rounded-full bg-surface-2">
-              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
-            </div>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {[
-              ["Words", save.stats.wordsFound],
-              ["Games", save.stats.gamesPlayed],
-              ["Wins", save.stats.gamesWon],
-              ["Hours", (save.stats.playTimeMs / 3600000).toFixed(1)],
-            ].map(([label, value]) => (
-              <div key={String(label)} className="rounded-2xl bg-surface-2 p-3">
-                <p className="text-[10px] uppercase tracking-wider text-muted">{label}</p>
-                <p className="mt-1 text-lg font-bold text-fg">{value}</p>
-              </div>
-            ))}
+      <div className="arcade-profile-page">
+        <section className="arcade-profile-hero">
+          <div className="arcade-profile-avatar-wrap"><div className="arcade-profile-avatar">{save.avatarId === "ink-1" ? "🪶" : save.avatarId === "ink-2" ? "🏮" : save.avatarId === "ink-3" ? "🧭" : "✨"}</div><span>★</span></div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2"><span className="arcade-mini-badge">COUNTRY</span><span className="arcade-rank-badge">{rank}</span></div>
+            <h2 className="mt-2 truncate font-display text-2xl font-black text-white">{save.playerName || "Traveler"}</h2>
+            <p className="truncate text-xs font-semibold text-white/65">ID: {user?.username || user?.displayName || save.playerName || "traveler"}</p>
+            <div className="mt-3 flex items-center gap-2"><span className="text-xs font-black uppercase tracking-wider text-white/60">Level</span><b className="text-2xl text-yellow-200">{lv}</b></div>
+            <div className="mt-2 arcade-xp-track"><span style={{ width: progress + "%" }} /></div>
+            <p className="mt-1 text-right text-[10px] font-bold text-white/55">{Math.round(progress)}% XP</p>
           </div>
         </section>
 
-        <section className="panel rounded-3xl p-5">
-          <p className="text-xs uppercase tracking-wider text-accent">Identity</p>
-          <label className="mt-3 block text-xs text-muted">Display name</label>
-          <input
-            className="mt-1 w-full rounded-xl border border-border bg-surface-2 px-3 py-3 text-fg"
-            value={save.playerName}
-            maxLength={24}
-            onChange={(e) => useGame.getState().setName(e.target.value)}
-          />
-          <div className="mt-3 grid gap-2 text-sm">
-            <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-2 p-3">
-              <span className="text-muted">Account</span><span className="max-w-[65%] truncate text-fg">{user?.primaryEmail || "Local profile"}</span>
-            </div>
-            <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-2 p-3">
-              <span className="text-muted">Class</span><span className="capitalize text-fg">{save.classId}</span>
-            </div>
-          </div>
+        <section className="arcade-profile-tabs"><span className="active">INFO</span><button type="button" onClick={() => useGame.getState().go("inventory")}>AVATARS</button><button type="button" onClick={() => useGame.getState().go("settings")}>FRAMES</button></section>
+
+        <section className="arcade-profile-club"><span className="arcade-club-icon">◇</span><div><b>NO CLUB</b><small>Join friends and build your word-search crew.</small></div><button type="button" onClick={() => useGame.getState().go("social")}>SOCIAL</button></section>
+
+        <section className="grid gap-3 sm:grid-cols-2">
+          <div className="arcade-loadout-card"><div className="arcade-loadout-art">✦</div><div><b>Blaze</b><small>STANDARD FRAME</small><span><i /> Force <i /> Aim <i /> Time</span></div></div>
+          <div className="arcade-loadout-card dark"><div className="arcade-loadout-art">◉</div><div><b>Black</b><small>STANDARD STYLE</small><span>● ● ● ● ●</span></div></div>
         </section>
 
-        <section>
-          <p className="mb-2 text-xs uppercase tracking-wider text-muted">Choose your class</p>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {CLASSES.map((c) => {
-              const selected = save.classId === c.id;
-              return (
-                <button key={c.id} type="button" className="panel rounded-2xl p-4 text-left" onClick={() => useGame.getState().patchSave((s: any) => ({ ...s, classId: c.id }))} style={selected ? { outline: "2px solid var(--color-primary)" } : undefined}>
-                  <p className="font-semibold text-fg">{c.name}{selected ? " ✓" : ""}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted">{c.blurb}</p>
-                </button>
-              );
-            })}
-          </div>
+        <section className="grid grid-cols-2 gap-3">
+          <div className="arcade-collection-card"><b>MEDALS</b><span>⊘</span><small>{save.stats.perfectClears} perfect clears</small></div>
+          <div className="arcade-collection-card"><b>ALBUM TOKENS</b><span>⊘</span><small>{save.inventory.length} collected</small></div>
         </section>
 
-        <section>
-          <p className="mb-2 text-xs uppercase tracking-wider text-muted">Avatar</p>
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
-            {AVATARS.map((a) => {
-              const icons: Record<string, string> = {"ink-1":"🪶","ink-2":"🏮","ink-3":"🧭","ink-4":"⚓","ink-5":"🦅","ink-6":"🪷","ink-7":"🌙","ink-8":"⛰️","ink-9":"🌊","ink-10":"⭐","ink-11":"🍃","ink-12":"🔥"};
-              const selected = save.avatarId === a.id;
-              return <button key={a.id} type="button" onClick={() => useGame.getState().setAvatar(a.id)} className="panel flex aspect-square flex-col items-center justify-center rounded-2xl text-xs text-fg" style={selected ? { outline: "2px solid var(--color-primary)" } : undefined}><span className="text-2xl">{icons[a.id] ?? "✨"}</span><span className="mt-1 text-[10px] opacity-80">{a.label}</span></button>;
-            })}
-          </div>
+        <div className="arcade-winnings"><span>TOTAL WINNINGS</span><b>{save.stats.coinsEarned.toLocaleString()}</b><em>◈</em></div>
+
+        <section className="arcade-profile-stats">
+          <p>Games Won: <b>{save.stats.gamesWon} out of {save.stats.gamesPlayed}</b></p>
+          <p>Win Rate: <b>{winRate}%</b></p>
+          <p>Current Win Streak: <b>{streak}</b></p>
+          <p>Best Win Streak: <b>{save.stats.bestStreak}</b></p>
+          <p>World Rank Record: <b>—</b></p>
+          <p>Country Rank Record: <b>—</b></p>
         </section>
 
-        <div className="flex items-center justify-between gap-3">
+        <section className="arcade-profile-actions">
           <SignedIn><UserButton /></SignedIn>
-          <SignedOut><Link to="/login" className="btn-primary max-w-xs">{t("cta.signIn")}</Link></SignedOut>
-        </div>
-        <CloudRow />
+          <SignedOut><Link to="/login" className="arcade-primary-cta">SIGN IN</Link></SignedOut>
+          <button type="button" className="arcade-secondary-cta" onClick={() => useGame.getState().go("stats")}>VIEW FULL STATS</button>
+        </section>
       </div>
     </Screen>
   );
@@ -270,171 +225,57 @@ export function SettingsScreen() {
     switch (category) {
       case "gameplay":
         return (
-          <>
-            <SettingHeader title="Gameplay" onBack={() => setCategory(null)} />
-            <ToggleRow
-              label="Personalized gameplay"
-              on={s.personalization}
-              onClick={() => toggle("personalization")}
-            />
-            <p className="-mt-1 mb-3 text-xs text-muted">
-              Uses only in-game behavior such as pace, hints, combos, pets and challenges.
-            </p>
-            <ToggleRow label="Show timer" on={s.showTimer} onClick={() => toggle("showTimer")} />
-            <ToggleRow label="Grid lines" on={s.gridLines} onClick={() => toggle("gridLines")} />
-          </>
-        );
+    <Screen title={t("settings.title")}>
+      {category ? renderCategory() : (
+        <div className="arcade-settings-page">
+          <section className="arcade-settings-ribbon"><span>⚙</span><div><b>GAME SETTINGS</b><small>Customize your Mera World experience</small></div></section>
 
-      case "audio":
-        return (
-          <>
-            <SettingHeader title="Audio" onBack={() => setCategory(null)} />
-            <ToggleRow label="Sound effects" on={s.sfx} onClick={() => toggle("sfx")} />
+          <section className="arcade-settings-section">
+            <h2>ACCOUNT</h2>
+            <div className="arcade-settings-row">
+              <span className="arcade-settings-icon">👤</span><span className="flex-1"><b>Player Account</b><small>{useGame.getState().save.playerName || "Traveler"}</small></span>
+              <SignedIn><UserButton /></SignedIn>
+              <SignedOut><Link to="/login" className="arcade-settings-action blue">LOGIN</Link></SignedOut>
+            </div>
+            <button type="button" className="arcade-settings-row" onClick={() => useGame.getState().go("profile")}><span className="arcade-settings-icon">🏆</span><span className="flex-1"><b>Profile & Progress</b><small>Rank, streaks, medals and stats</small></span><strong>VIEW</strong></button>
+          </section>
+
+          <section className="arcade-settings-section">
+            <h2>SOCIAL</h2>
+            <button type="button" className="arcade-settings-row" onClick={() => useGame.getState().go("social")}><span className="arcade-settings-icon">👥</span><span className="flex-1"><b>Friends & Clans</b><small>Connect with your word-search friends</small></span><strong>VIEW</strong></button>
+            <button type="button" className="arcade-settings-row" onClick={() => useGame.getState().go("multiplayer")}><span className="arcade-settings-icon">⚔️</span><span className="flex-1"><b>Online Arena</b><small>2-player live match with bot fallback</small></span><strong>PLAY</strong></button>
+          </section>
+
+          <section className="arcade-settings-section">
+            <h2>GAME OPTIONS</h2>
+            <ToggleRow label="Sound Effects" on={s.sfx} onClick={() => toggle("sfx")} />
             <ToggleRow label="Music" on={s.music} onClick={() => toggle("music")} />
             <ToggleRow label="Haptics" on={s.haptics} onClick={() => toggle("haptics")} />
-          </>
-        );
+            <ToggleRow label="Show Timer" on={s.showTimer} onClick={() => toggle("showTimer")} />
+            <ToggleRow label="Personalized Gameplay" on={s.personalization} onClick={() => toggle("personalization")} />
+          </section>
 
-      case "appearance":
-        return (
-          <>
-            <SettingHeader title="Appearance" onBack={() => setCategory(null)} />
-
-            <p className="text-xs text-muted">Tile style</p>
-            <div className="mt-2 grid grid-cols-3 gap-2">
-              {(["carved", "ink", "neon"] as const).map((st) => (
-                <button
-                  key={st}
-                  type="button"
-                  className="hud-chip text-fg capitalize"
-                  onClick={() => set("tileStyle", st)}
-                >
-                  {st}
-                </button>
-              ))}
+          <section className="arcade-settings-section">
+            <h2>QUICK SETTINGS</h2>
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" className="arcade-settings-tile" onClick={() => setCategory("appearance")}><span>🎨</span><b>Appearance</b><small>Theme & tiles</small></button>
+              <button type="button" className="arcade-settings-tile" onClick={() => setCategory("accessibility")}><span>♿</span><b>Accessibility</b><small>Motion & text</small></button>
+              <button type="button" className="arcade-settings-tile" onClick={() => setCategory("language")}><span>🌐</span><b>Language</b><small>{lang.toUpperCase()}</small></button>
+              <button type="button" className="arcade-settings-tile" onClick={() => setCategory("data")}><span>💾</span><b>Save & Data</b><small>Backup & reset</small></button>
             </div>
+          </section>
 
-            <p className="mt-5 text-xs text-muted">Theme</p>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              {THEMES.map((th) => (
-                <button
-                  key={th.id}
-                  type="button"
-                  className="panel rounded-xl p-3 text-left"
-                  onClick={() => useGame.getState().equipTheme(th.id as ThemeId)}
-                >
-                  <span className="block text-sm font-semibold text-fg">{th.name}</span>
-                </button>
-              ))}
-            </div>
-          </>
-        );
-
-      case "accessibility":
-        return (
-          <>
-            <SettingHeader title="Accessibility" onBack={() => setCategory(null)} />
-            <ToggleRow label="Reduced motion" on={s.reducedMotion} onClick={() => toggle("reducedMotion")} />
-            <ToggleRow label="High contrast" on={s.highContrast} onClick={() => toggle("highContrast")} />
-            <ToggleRow label="Larger type" on={s.largeText} onClick={() => toggle("largeText")} />
-            <ToggleRow label="Force RTL" on={s.rtlForce} onClick={() => toggle("rtlForce")} />
-          </>
-        );
-
-      case "language":
-        return (
-          <>
-            <SettingHeader title="Language" onBack={() => setCategory(null)} />
-            <label className="text-xs text-muted">App language</label>
-            <select
-              className="mt-2 w-full rounded-xl border border-border bg-surface px-3 py-3 text-fg"
-              value={lang}
-              onChange={(e) => useGame.getState().setLang(e.target.value as typeof lang)}
-            >
-              {LANGS.map((l) => (
-                <option key={l} value={l}>
-                  {tr(l, `lang.${l}`)}
-                </option>
-              ))}
-            </select>
-          </>
-        );
-
-      case "data":
-        return (
-          <>
-            <SettingHeader title="Data" onBack={() => setCategory(null)} />
-
-            <button
-              type="button"
-              className="btn-ghost"
-              onClick={() => {
-                const blob = new Blob([useGame.getState().exportJson()], {
-                  type: "application/json",
-                });
-                const a = document.createElement("a");
-                a.href = URL.createObjectURL(blob);
-                a.download = "mera-word-search.json";
-                a.click();
-              }}
-            >
-              Export save
-            </button>
-
-            <label className="btn-ghost mt-2">
-              Import save
-              <input
-                type="file"
-                accept="application/json"
-                className="hidden"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  useGame.getState().importJson(await file.text());
-                }}
-              />
-            </label>
-
-            <button
-              type="button"
-              className="btn-ghost mt-2 text-danger"
-              onClick={() => useGame.getState().resetProgress()}
-            >
-              Reset progress
-            </button>
-          </>
-        );
-
-      default:
-        return (
-          <div className="mt-4 flex flex-col gap-3">
-            {categories.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setCategory(item.id)}
-                className="panel flex items-center gap-4 rounded-2xl p-4 text-left"
-              >
-                <span className="text-2xl">{item.icon}</span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold text-fg">{item.title}</span>
-                  <span className="mt-1 block text-xs text-muted">{item.description}</span>
-                </span>
-                <span className="text-lg text-muted">›</span>
-              </button>
-            ))}
-          </div>
-        );
-    }
-  };
-
-  return (
-    <Screen title={t("settings.title")}>
-      {renderCategory()}
+          <section className="arcade-settings-section">
+            <h2>INFO</h2>
+            <button type="button" className="arcade-settings-row" onClick={() => useGame.getState().go("legal")}><span className="arcade-settings-icon">📜</span><span className="flex-1"><b>Terms & Privacy</b><small>Game rules and privacy information</small></span><strong>VIEW</strong></button>
+            <button type="button" className="arcade-settings-row" onClick={() => useGame.getState().go("more")}><span className="arcade-settings-icon">ℹ️</span><span className="flex-1"><b>Help & Support</b><small>Guides, systems and game information</small></span><strong>VIEW</strong></button>
+            <div className="arcade-version-row"><span>VERSION</span><b>Mera World · Arcade UI v1</b></div>
+          </section>
+        </div>
+      )}
     </Screen>
   );
 }
-
 function SettingHeader({ title, onBack }: { title: string; onBack: () => void }) {
   return (
     <div className="mb-3 flex items-center gap-3">
