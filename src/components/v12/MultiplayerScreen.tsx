@@ -28,6 +28,20 @@ const BOT_WAIT_MS = 10_000;
 
 export function MultiplayerScreen({ onBack }: Props) {
   const user = useCurrentUser();
+  const isGuest = typeof window !== "undefined" && localStorage.getItem("mera-world.guest") === "1";
+  if (isGuest) {
+    return (
+      <Screen title="Multiplayer" onBack={onBack}>
+        <div className="panel mx-auto max-w-md rounded-3xl p-6 text-center">
+          <Users className="mx-auto size-10 text-primary" />
+          <h2 className="mt-4 font-display text-2xl text-fg">Create a free account to play online</h2>
+          <p className="mt-2 text-sm text-muted">Guest mode is limited to the first 10 levels and local play. Your progress will be restored when you sign up.</p>
+          <button type="button" className="btn-primary mt-5" onClick={() => { localStorage.removeItem("mera-world.guest"); window.location.href = "/login"; }}>Sign in / Create account</button>
+        </div>
+      </Screen>
+    );
+  }
+
   const [room, setRoom] = useState<Room | null>(null);
   const [roomCode, setRoomCode] = useState("");
   const [name, setName] = useState(user?.displayName || "Traveler");
