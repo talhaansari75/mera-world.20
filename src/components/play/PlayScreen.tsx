@@ -173,7 +173,7 @@ export function PlayScreen() {
 
   return (
     <div className="app-shell safe-pad flex min-h-dvh flex-col gap-1 overflow-y-auto sm:gap-2">
-      <header className="flex items-center gap-2">
+      <header className="relative z-10 flex shrink-0 items-center gap-2">
         <button
           type="button"
           className="inline-flex h-11 w-11 items-center justify-center rounded-xl panel"
@@ -217,7 +217,7 @@ export function PlayScreen() {
       {play.kind === "level" && play.adaptiveTier === "assist" && <div className="mx-auto w-full max-w-xl rounded-xl bg-accent/10 px-3 py-1.5 text-center text-[10px] font-semibold text-accent">Smart Assist · the journey is giving you a little breathing room</div>}
       {play.kind === "level" && play.adaptiveTier === "expert" && <div className="mx-auto w-full max-w-xl rounded-xl bg-gold/10 px-3 py-1.5 text-center text-[10px] font-semibold text-gold">Expert Pace · bonus-word mastery challenge active</div>}
 
-      <div key={feedbackKey} className="grid min-h-0 flex-1 place-items-center overflow-hidden gameplay-board-pop">
+      <div key={feedbackKey} className="grid shrink-0 place-items-center overflow-visible py-1 gameplay-board-pop relative z-0">
         <GridBoard
           puzzle={play.puzzle}
           found={play.found}
@@ -299,7 +299,7 @@ export function PlayScreen() {
 
       {aiHint && <p className="text-center text-sm text-muted">{aiHint}</p>}
 
-      <div className="flex shrink-0 gap-2 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
+      <div className="relative z-10 flex shrink-0 gap-2 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
         <HintBtn label="First" cost={HINT_COST.first} onClick={() => useGame.getState().useHint("first")} />
         <HintBtn label="Letter" cost={HINT_COST.letter} onClick={() => useGame.getState().useHint("letter")} />
         <HintBtn label="Word" cost={HINT_COST.word} onClick={() => useGame.getState().useHint("word")} />
