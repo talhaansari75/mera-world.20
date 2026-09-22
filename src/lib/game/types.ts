@@ -153,6 +153,7 @@ export type PlayerSave = {
   version: number;
   playerName: string;
   avatarId: string;
+  profileImage: string | null;
   classId: ClassId;
   xp: number;
   coins: number;
