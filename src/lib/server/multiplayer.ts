@@ -108,6 +108,9 @@ export const sendMultiplayerRoomMessage = createServerFn({ method: "POST" })
   }))
   .handler(async ({ context, data }) => {
     if (!data.message) return { ok: false as const, error: "message_required" };
+    const normalized = data.message.replace(/https?:\/\/\S+/gi, "[link]").replace(/[\u0000-\u001f\u007f]/g, "").replace(/(.)\1{8,}/g, "$1$1$1").trim();
+    const blocked = /\b(spam|scam|free\s+money|buy\s+now)\b/i.test(normalized);
+    if (blocked) return { ok: false as const, error: "message_blocked" };
     const db = getPrisma();
     // @ts-ignore
     const room = await db.multiplayerRoom.findUnique({ where: { roomId: data.roomId } });
@@ -116,7 +119,9 @@ export const sendMultiplayerRoomMessage = createServerFn({ method: "POST" })
     if (!member) return { ok: false as const, error: "not_room_member" };
     const state = room.stateJson && typeof room.stateJson === "object" ? room.stateJson as Record<string, unknown> : {};
     const messages = Array.isArray(state.messages) ? state.messages.slice(-49) : [];
-    messages.push({ id: crypto.randomUUID(), userId: context.userId, message: data.message, createdAt: new Date().toISOString() });
+    const recentMine = messages.filter((m: any) => m.userId === context.userId && Date.now() - new Date(m.createdAt).getTime() < 5000);
+    if (recentMine.length >= 4) return { ok: false as const, error: "chat_rate_limited" };
+    messages.push({ id: crypto.randomUUID(), userId: context.userId, message: normalized, createdAt: new Date().toISOString() });
     // @ts-ignore
     await db.multiplayerRoom.update({ where: { roomId: data.roomId }, data: { stateJson: { ...state, messages } } });
     return { ok: true as const };
