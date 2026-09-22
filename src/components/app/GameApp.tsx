@@ -281,11 +281,11 @@ function ScreenView({ screen }: { screen: ScreenId }) {
     case "admin":
       return <AdminScreen onBack={() => useGame.getState().setScreen("more")} />;
     case "payments":
-      return <PaymentsScreen onBack={() => useGame.getState().setScreen("more")} />;
+      return <PaymentsScreen />;
     case "content":
       return <ContentLanguagesScreen />;
     case "saveSlots":
-      return <SaveSlotsScreen onBack={() => useGame.getState().setScreen("more")} />;
+      return <SaveSlotsScreen />;
     case "creator":
       return <CreatorScreen />;
     case "progression":
