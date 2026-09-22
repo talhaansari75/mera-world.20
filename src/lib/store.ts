@@ -831,7 +831,7 @@ export const useGame = create<GameState>((set, get) => ({
   },
 
   equipPet: (id) => get().patchSave((s) => (s.ownedPets.includes(id) ? { ...s, equippedPet: id } : s)),
-  equipTheme: (id) => get().patchSave((s) => (s.ownedThemes.includes(id) ? { ...s, equippedTheme: id } : s)),
+  equipTheme: (id) => get().patchSave((s) => ({ ...s, ownedThemes: s.ownedThemes.includes(id) ? s.ownedThemes : [...s.ownedThemes, id], equippedTheme: id })),
   setProfileImage: (image) => get().patchSave((s) => ({ ...s, profileImage: image && image.length <= 140000 ? image : null })),
   setAvatar: (id) => get().patchSave((s) => ({ ...s, avatarId: id })),
   setName: (name) => get().patchSave((s) => ({ ...s, playerName: name.slice(0, 24) || s.playerName })),
