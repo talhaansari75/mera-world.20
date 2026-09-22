@@ -35,7 +35,22 @@ import { intelligenceAdaptivePlan } from "./intelligence/adaptiveDifficulty";
 import { personalizedRewardMultiplier } from "./intelligence/rewardPersonalization";
 import { dailyChallengeFor, dailyChallengeRewardMultiplier, dailyChallengeObjective, type DailyChallenge } from "./game/dailyChallenges";
 
-function guestSession(): boolean { return typeof localStorage !== "undefined" && localStorage.getItem("mera-world.guest") === "1"; }
+export const GUEST_LEVEL_LIMIT = 10;
+export const GUEST_DAILY_LIMIT = 1;
+export const GUEST_BLOCKED_SCREENS = new Set<ScreenId>([
+  "multiplayer", "payments", "social", "creator", "creatorCommunity", "creatorPlaytest",
+  "aiPuzzleLab", "voice", "coach", "pushSettings", "analytics", "admin",
+  "releasePackage", "releaseVerifier", "releaseArchive", "publishReadiness",
+]);
+function guestSession(): boolean {
+  return typeof localStorage !== "undefined" && localStorage.getItem("mera-world.guest") === "1";
+}
+function guestDailyUsed(): boolean {
+  return typeof localStorage !== "undefined" && localStorage.getItem("mera-world.guest.daily") === todayKey();
+}
+function guestNotice(set: any, message: string): void {
+  flash(set, message);
+}
 
 export type PlaySession = {
   kind: "level" | "daily" | "endless";
@@ -255,12 +270,17 @@ export const useGame = create<GameState>((set, get) => ({
     gameEvents.emit("save:changed", { version: save.version });
   },
 
-  go: (screen) =>
+  go: (screen) => {
+    if (guestSession() && GUEST_BLOCKED_SCREENS.has(screen)) {
+      guestNotice(set, "This feature needs a free account. You can keep playing the first 10 levels as a guest.");
+      return;
+    }
     set((s) => ({
       prevScreen: s.screen === "play" ? s.prevScreen : s.screen,
       screen,
       overlay: screen === "play" ? s.overlay : null,
-    })),
+    }));
+  },
   setScreen: (screen) => {
     get().go(screen);
   },
@@ -275,7 +295,7 @@ export const useGame = create<GameState>((set, get) => ({
 
   startLevel: (level, mode = "classic") => {
     const { save } = get();
-    if (guestSession() && level > 10) { flash(set, "Guest access is limited to the first 10 levels. Create a free account to continue."); return false; }
+    if (guestSession() && level > GUEST_LEVEL_LIMIT) { guestNotice(set, `Guest access is limited to the first ${GUEST_LEVEL_LIMIT} levels. Create a free account to continue.`); return false; }
     const filled = refillEnergy(save);
     const rules = modeRules(mode);
     const free = rules.free;
@@ -358,6 +378,10 @@ export const useGame = create<GameState>((set, get) => ({
   startDaily: () => {
     const day = todayKey();
     const { save } = get();
+    if (guestSession() && guestDailyUsed()) {
+      guestNotice(set, "Guest daily play is limited to one puzzle per day. Create a free account for full daily access.");
+      return false;
+    }
     const challenge = dailyChallengeFor(day);
     const puzzle = puzzleForDaily(day, save.language, challenge.id);
     const play: PlaySession = {
@@ -380,6 +404,7 @@ export const useGame = create<GameState>((set, get) => ({
       dailyChallenge: challenge,
     };
     persistPlay(play);
+    if (guestSession()) localStorage.setItem("mera-world.guest.daily", day);
     set({ play, screen: "play", overlay: null, save });
     if (typeof navigator !== "undefined" && navigator.onLine) {
       const startPromise = startGameplaySession({ data: { kind: "daily", level: 0, day, mode: "daily", language: save.language, dailyChallengeId: challenge.id } })
@@ -401,6 +426,10 @@ export const useGame = create<GameState>((set, get) => ({
   },
 
   startEndless: () => {
+    if (guestSession()) {
+      guestNotice(set, "Endless mode is available after you create a free account. Guest mode includes the first 10 journey levels and one daily puzzle.");
+      return;
+    }
     const seed = hashSeed("end", get().save.playerName, Date.now() % 99991);
     const puzzle = puzzleEndless(0, seed, get().save.language);
     const play: PlaySession = {
