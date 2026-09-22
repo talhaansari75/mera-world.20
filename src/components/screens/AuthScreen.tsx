@@ -98,6 +98,11 @@ export function AuthScreen() {
     }
   };
 
+  const continueAsGuest = () => {
+    localStorage.setItem("mera-world.guest", "1");
+    window.location.href = "/";
+  };
+
   return (
     <Screen title={mode === "login" ? "Welcome Back" : mode === "signup" ? "Create Account" : "Forgot Password"}>
       <div className="mx-auto max-w-md">
@@ -185,6 +190,15 @@ export function AuthScreen() {
                   ? "Create Account"
                   : "Send Reset Link"}
           </button>
+
+          <button
+            type="button"
+            className="w-full rounded-2xl border border-white/15 bg-white/5 py-3 text-sm font-semibold text-fg hover:bg-white/10"
+            onClick={continueAsGuest}
+          >
+            Continue as Guest
+          </button>
+          <p className="text-center text-[11px] text-muted">Guest access: first 10 levels only. Sign in later to keep your progress in the cloud.</p>
 
           <div className="space-y-2 pt-2 text-center text-sm">
             {mode === "login" && (
