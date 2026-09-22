@@ -1,4 +1,4 @@
-import { Bell, ChevronRight, Crown, Flame, Gift, Map, PawPrint, ShoppingBag, Swords, Target, Trophy, User, Wallet } from "lucide-react";
+import { Bell, ChevronRight, Crown, Flame, Gift, Map, PawPrint, ShoppingBag, Swords, Target, Trophy, User, Users, Wallet } from "lucide-react";
 import { useGame, playerLevel } from "@/lib/store";
 import { xpForLevel } from "@/lib/game/economy";
 import { TileButton, useT } from "./chrome";
@@ -40,7 +40,7 @@ export function HomeScreen() {
   const streak = Math.max(save.dailyStreak, save.stats.currentStreak);
 
   return (
-    <div className="app-shell starfield safe-pad relative flex h-dvh flex-col overflow-y-auto pb-24">
+    <div className="app-shell starfield safe-pad relative flex h-dvh flex-col overflow-y-auto pb-32 sm:pb-36">
       <header className="flex items-center justify-between gap-3 pb-1">
         <div className="flex min-w-0 items-center gap-3">
           <div className="dashboard-avatar">
@@ -110,8 +110,9 @@ export function HomeScreen() {
 
       <section>
         <div className="mb-3 flex items-end justify-between"><div><p className="dashboard-kicker">Quick travel</p><h3 className="font-display text-2xl text-fg">Your World</h3></div><button type="button" className="text-xs font-bold uppercase tracking-[0.15em] text-accent" onClick={() => useGame.getState().go("worlds")}>View map</button></div>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-          <TileButton icon={<Map className="size-5" />} label={t("cta.worlds")} onClick={() => useGame.getState().go("worlds")} />
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          <TileButton icon={<Map className="size-5" />} label="World Map" onClick={() => useGame.getState().go("worldMap")} />
+          <TileButton icon={<Users className="size-5" />} label="Multiplayer" onClick={() => useGame.getState().go("multiplayer")} />
           <TileButton icon={<Swords className="size-5" />} label={t("cta.modes")} onClick={() => useGame.getState().go("modes")} />
           <TileButton icon={<PawPrint className="size-5" />} label={t("cta.pets")} onClick={() => useGame.getState().go("pets")} />
           <TileButton icon={<ShoppingBag className="size-5" />} label={t("cta.shop")} onClick={() => useGame.getState().go("shop")} />
@@ -127,7 +128,7 @@ export function HomeScreen() {
       <nav className="dashboard-bottom-nav" aria-label="Main navigation">
         <button type="button" className="active" onClick={() => useGame.getState().go("home")}><Map className="size-5" /><span>Home</span></button>
         <button type="button" onClick={() => useGame.getState().go("worlds")}><Target className="size-5" /><span>Worlds</span></button>
-        <button type="button" onClick={() => useGame.getState().startLevel(save.unlockedLevel)}><Swords className="size-5" /><span>Play</span></button>
+        <button type="button" onClick={() => useGame.getState().go("multiplayer")}><Users className="size-5" /><span>Multiplayer</span></button>
         <button type="button" onClick={() => useGame.getState().go("shop")}><ShoppingBag className="size-5" /><span>Shop</span></button>
         <button type="button" onClick={() => useGame.getState().go("profile")}><User className="size-5" /><span>Profile</span></button>
       </nav>
