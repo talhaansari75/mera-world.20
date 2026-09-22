@@ -80,8 +80,8 @@ export function GameApp() {
   useEffect(() => {
     if (!user?.id || user.isDevFallback || user.id === "guest-user") return;
     if (typeof window !== "undefined") {
-      localStorage.removeItem("mera-world.guest");
-      localStorage.removeItem("mera-world.guest.daily");
+      sessionStorage.removeItem("mera-world.guest");
+      sessionStorage.removeItem("mera-world.guest.daily");
     }
   }, [user?.id, user?.isDevFallback]);
 
