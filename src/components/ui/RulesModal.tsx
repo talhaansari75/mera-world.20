@@ -31,7 +31,7 @@ export function RulesModal({ isOpen, onClose }: RulesModalProps) {
               <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-accent/20 text-accent font-semibold text-xs">
                 {idx + 1}
               </span>
-              <span>{rule}</span>
+              <span>{typeof rule === "string" ? rule : `${rule.title}: ${rule.points.join(" · ")}`}</span>
             </li>
           ))}
         </ul>
