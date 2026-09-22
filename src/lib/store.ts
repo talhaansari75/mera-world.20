@@ -604,7 +604,7 @@ export const useGame = create<GameState>((set, get) => ({
       mode: play.mode, stars, combo: play.combo, hints: play.hints, mistakes: play.mistakes,
       wordCount: play.puzzle.words.length + play.bonus.length, boss, firstClear,
     }) * rules.rewardMultiplier * dailyMultiplier * personalizationMultiplier * (1 + (petEffect(get().save.equippedPet, get().save.equippedPet ? (get().save.petLevels[get().save.equippedPet as PetId] ?? 1) : 1).coinBonusPercent ?? 0) / 100)) + fastBonus + goldenBonus);
-    const xp = Math.floor(xpForClear({ size: play.puzzle.size, stars, boss }) * (1 + (petEffect(get().save.equippedPet, get().save.equippedPet ? (get().save.petLevels[get().save.equippedPet] ?? 1) : 1).xpBonusPercent ?? 0) / 100));
+    const xp = Math.floor(xpForClear({ size: play.puzzle.size, stars, boss }) * (1 + (petEffect(get().save.equippedPet, get().save.equippedPet ? (get().save.petLevels[get().save.equippedPet as PetId] ?? 1) : 1).xpBonusPercent ?? 0) / 100));
     const dragon = get().save.equippedPet === "dragon" && perfect ? 20 : 0;
     const petId = get().save.equippedPet;
     const petXp = petId && !dailyClaimed ? petXpEarned({ perfect, boss }) : 0;
