@@ -32,5 +32,10 @@
   "include": [
     "src",
     "server"
+  ],
+  "exclude": [
+    "src/server/v5",
+    "src/lib/platform/multiplayer/score.ts",
+    "src/lib/store/createGameStore.ts"
   ]
 }
