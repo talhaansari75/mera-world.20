@@ -12,6 +12,7 @@ import type { ScreenId } from "@/lib/game/types";
 const FEATURES: Array<{ name: string; screen: ScreenId; icon: any }> = [
   { name: "Multiplayer", screen: "multiplayer", icon: Users },
   { name: "Payments", screen: "payments", icon: CreditCard },
+  { name: "Rewarded Ads", screen: "rewardedAds", icon: Smartphone },
   { name: "Save & Recovery", screen: "saveSlots", icon: HardDrive },
   { name: "Settings", screen: "settings", icon: Settings },
   { name: "Accessibility", screen: "accessibility", icon: Accessibility },
@@ -61,7 +62,7 @@ export function FeatureTestLabScreen() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-accent">Temporary QA area</p>
-            <h2 className="mt-1 font-display text-2xl text-fg">Test every game system</h2>
+            <h2 className="mt-1 font-display text-2xl text-fg">Test every game system (including monetization)</h2>
             <p className="mt-1 text-xs text-muted">Open a feature, test it, then mark Pass or Fail. Results stay on this device until reset.</p>
           </div>
           <button type="button" onClick={reset} className="hud-chip flex items-center gap-1 text-xs text-fg"><RotateCcw className="size-3" /> Reset</button>
