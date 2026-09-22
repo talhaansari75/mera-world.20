@@ -35,6 +35,8 @@ import { intelligenceAdaptivePlan } from "./intelligence/adaptiveDifficulty";
 import { personalizedRewardMultiplier } from "./intelligence/rewardPersonalization";
 import { dailyChallengeFor, dailyChallengeRewardMultiplier, dailyChallengeObjective, type DailyChallenge } from "./game/dailyChallenges";
 
+function guestSession(): boolean { return typeof localStorage !== "undefined" && localStorage.getItem("mera-world.guest") === "1"; }
+
 export type PlaySession = {
   kind: "level" | "daily" | "endless";
   level: number;
@@ -90,6 +92,7 @@ type GameState = {
   equipPet: (id: PetId) => void;
   equipTheme: (id: ThemeId) => void;
   setAvatar: (id: string) => void;
+  setProfileImage: (image: string | null) => void;
   setName: (name: string) => void;
   setSetting: <K extends keyof PlayerSave["settings"]>(k: K, v: PlayerSave["settings"][K]) => void;
   setLang: (lang: PlayerSave["language"]) => void;
@@ -272,6 +275,7 @@ export const useGame = create<GameState>((set, get) => ({
 
   startLevel: (level, mode = "classic") => {
     const { save } = get();
+    if (guestSession() && level > 10) { flash(set, "Guest access is limited to the first 10 levels. Create a free account to continue."); return false; }
     const filled = refillEnergy(save);
     const rules = modeRules(mode);
     const free = rules.free;
@@ -828,6 +832,7 @@ export const useGame = create<GameState>((set, get) => ({
 
   equipPet: (id) => get().patchSave((s) => (s.ownedPets.includes(id) ? { ...s, equippedPet: id } : s)),
   equipTheme: (id) => get().patchSave((s) => (s.ownedThemes.includes(id) ? { ...s, equippedTheme: id } : s)),
+  setProfileImage: (image) => get().patchSave((s) => ({ ...s, profileImage: image && image.length <= 140000 ? image : null })),
   setAvatar: (id) => get().patchSave((s) => ({ ...s, avatarId: id })),
   setName: (name) => get().patchSave((s) => ({ ...s, playerName: name.slice(0, 24) || s.playerName })),
   setSetting: (k, v) => get().patchSave((s) => ({ ...s, settings: { ...s.settings, [k]: v } })),
