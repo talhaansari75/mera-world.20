@@ -103,6 +103,7 @@ export function ProfileScreen() {
   const t = useT();
   const save = useGame((s) => s.save);
   const user = useCurrentUser();
+  const profileImage = useGame((s) => s.save.profileImage);
   const lv = playerLevel(save.xp);
   const next = xpForLevel(lv + 1);
   const xpBase = xpForLevel(lv);
@@ -113,9 +114,15 @@ export function ProfileScreen() {
       <div className="space-y-4 pb-8">
         <section className="panel overflow-hidden rounded-3xl p-5">
           <div className="flex flex-wrap items-center gap-4">
-            <div className="grid size-20 shrink-0 place-items-center rounded-3xl bg-primary/15 text-4xl">
-              {save.avatarId === "ink-1" ? "🪶" : save.avatarId === "ink-2" ? "🏮" : save.avatarId === "ink-3" ? "🧭" : "✨"}
-            </div>
+            <label className="group relative grid size-20 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-3xl bg-primary/15 text-4xl ring-1 ring-border">
+              {profileImage ? <img src={profileImage} alt="" className="h-full w-full object-cover" /> : (save.avatarId === "ink-1" ? "🪶" : save.avatarId === "ink-2" ? "🏮" : save.avatarId === "ink-3" ? "🧭" : "✨")}
+              <span className="absolute inset-x-0 bottom-0 bg-black/60 py-1 text-center text-[9px] font-bold uppercase tracking-wider text-white">Photo</span>
+              <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => {
+                const file = e.target.files?.[0]; if (!file) return;
+                if (file.size > 1000000) { window.alert("Profile photo must be under 1 MB."); return; }
+                const reader = new FileReader(); reader.onload = () => useGame.getState().setProfileImage(typeof reader.result === "string" ? reader.result : null); reader.readAsDataURL(file);
+              }} />
+            </label>
             <div className="min-w-0 flex-1">
               <p className="text-xs uppercase tracking-[0.18em] text-accent">Traveler Profile</p>
               <h2 className="mt-1 truncate font-display text-2xl text-fg">{save.playerName || "Traveler"}</h2>
