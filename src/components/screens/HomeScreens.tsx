@@ -117,12 +117,13 @@ export function HomeScreen() {
           <TileButton icon={<User className="size-5" />} label="Profile" onClick={() => useGame.getState().go("profile")} />
         </div>     </section>
 
-      <nav className="dashboard-bottom-nav" aria-label="Main navigation">
+      <nav className="dashboard-bottom-nav dashboard-bottom-nav-6" aria-label="Main navigation">
         <button type="button" className="active" onClick={() => useGame.getState().go("home")}><Map className="size-5" /><span>Home</span></button>
         <button type="button" onClick={() => useGame.getState().go("worlds")}><Target className="size-5" /><span>Worlds</span></button>
+        <button type="button" onClick={() => useGame.getState().go("play")}><Swords className="size-5" /><span>Play</span></button>
         <button type="button" onClick={() => useGame.getState().go("multiplayer")}><Users className="size-5" /><span>Multiplayer</span></button>
         <button type="button" onClick={() => useGame.getState().go("shop")}><ShoppingBag className="size-5" /><span>Shop</span></button>
-        <button type="button" onClick={() => useGame.getState().go("profile")}><User className="size-5" /><span>Profile</span></button>
+        <button type="button" onClick={() => useGame.getState().go("more")}><Wrench className="size-5" /><span>More</span></button>
       </nav>
     </div>
   );
