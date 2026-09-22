@@ -14,6 +14,7 @@ function transferData(to: string, amount: string) {
 }
 
 export function PaymentsScreen() {
+  const isGuest = typeof window !== "undefined" && localStorage.getItem("mera-world.guest") === "1";
   const [config, setConfig] = useState<PaymentConfig | null>(null);
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
@@ -67,6 +68,8 @@ export function PaymentsScreen() {
       setMessage(e instanceof Error ? e.message : "Payment failed");
     } finally { setBusy(false); }
   }
+
+  if (isGuest) return <Screen title="Diamond Vault"><div className="panel mx-auto max-w-md rounded-3xl p-6 text-center"><Wallet className="mx-auto size-10 text-primary" /><h2 className="mt-4 font-display text-2xl text-fg">Sign in to purchase</h2><p className="mt-2 text-sm text-muted">Guest mode has no payments or premium entitlements.</p><button type="button" className="btn-primary mt-5" onClick={() => { localStorage.removeItem("mera-world.guest"); window.location.href = "/login"; }}>Sign in / Create account</button></div></Screen>;
 
   return (
     <Screen title="Diamond Vault">
