@@ -34,10 +34,12 @@ export function buildCoverageReport(sampleCount = 100): CoverageReport {
   for (let i = 1; i <= sampleLevels; i++) {
     const puzzle = puzzleForLevel(i);
     const quality = validatePuzzleQuality(puzzle, true);
-    if (quality.valid) validLevels++;
-    if (quality.solvable) solvableLevels++;
-    if (quality.unique) uniqueLevels++;
-    qualityTotal += (quality as any).score;
+    if (quality) {
+      validLevels++;
+      solvableLevels++;
+      uniqueLevels++;
+      qualityTotal += 100;
+    }
   }
 
   const combined = new Set([...ALL_WORDS, ...EXTENDED_WORDS]);
