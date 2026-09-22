@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Screen } from "./chrome";
-import { authClient } from "@/lib/auth/client";
+import { authClient, signIn as signInWithProvider } from "@/lib/auth/client";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 
 type Mode = "login" | "signup" | "forgot";
@@ -190,6 +190,17 @@ export function AuthScreen() {
                   ? "Create Account"
                   : "Send Reset Link"}
           </button>
+
+          {mode !== "forgot" && (
+            <button
+              type="button"
+              className="w-full rounded-2xl border border-border bg-surface-2 py-3.5 text-sm font-semibold text-fg hover:bg-surface"
+              onClick={() => void signInWithProvider("grok-google", { callbackURL: "/" }).catch((e) => setMsg(e instanceof Error ? e.message : "Google sign-in failed."))}
+              disabled={loading}
+            >
+              Continue with Google
+            </button>
+          )}
 
           <button
             type="button"
