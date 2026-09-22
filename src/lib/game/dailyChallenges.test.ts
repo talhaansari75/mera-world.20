@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { allDailyChallenges, dailyChallengeFor, dailyChallengeRewardMultiplier, dailyChallengeObjective } from "./dailyChallenges.ts";
 import { specialTilesForPuzzle } from "./specialTiles.ts";
+import type { Puzzle } from "./types.ts";
 
 test("daily challenge rotation is deterministic and covers the challenge pool", () => {
   const a = dailyChallengeFor("2026-09-15");
@@ -21,8 +22,9 @@ test("daily challenge bonuses are bounded and condition-aware", () => {
 
 test("ice and bomb daily variants force their signature mechanic", () => {
   const base = { id: "daily", seed: 123, size: 6, grid: Array.from({length:6},()=>Array.from({length:6},()=>"A")), words: ["TREE"], placements: [{word:"TREE", row:0, col:0, dr:0, dc:1, cells:[[0,0],[0,1],[0,2],[0,3]]}], category:"nature", title:"Daily" };
-  const ice = specialTilesForPuzzle({ ...base, dailyChallengeId: "ice" });
-  const bomb = specialTilesForPuzzle({ ...base, dailyChallengeId: "bomb" });
+  const puzzle = base as Puzzle;
+  const ice = specialTilesForPuzzle({ ...puzzle, dailyChallengeId: "ice" });
+  const bomb = specialTilesForPuzzle({ ...puzzle, dailyChallengeId: "bomb" });
   assert.ok(ice.some((x) => x.kind === "ice"));
   assert.ok(bomb.some((x) => x.kind === "bomb"));
 });
