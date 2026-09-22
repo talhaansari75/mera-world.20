@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Activity, Clock3, Gamepad2, Mail, RefreshCw, ShieldCheck, Users } from "lucide-react";
+import { Activity, Clock3, Gamepad2, Mail, RefreshCw, ShieldCheck, Users, CreditCard, Bot, MessageSquare, AlertTriangle } from "lucide-react";
 import { getAdminDashboard } from "@/lib/server/admin";
 import { Screen } from "@/components/screens/chrome";
 
@@ -71,6 +71,15 @@ export function AdminScreen({ onBack }: { onBack?: () => void }) {
   return (
     <Screen title="Admin Control" onBack={onBack}>
       <div className="mx-auto w-full max-w-6xl space-y-4 pb-10">
+        <section className="panel rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-transparent to-gold/10 p-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <AdminTile icon={<CreditCard />} title="Payments" text="Open payment monitoring" onClick={() => window.dispatchEvent(new CustomEvent("mwsj:navigate",{detail:"payments"}))} />
+            <AdminTile icon={<Bot />} title="Bot Monitor" text="Review bot activity & anomalies" />
+            <AdminTile icon={<MessageSquare />} title="Chat Safety" text="Moderation & flood controls" />
+            <AdminTile icon={<AlertTriangle />} title="Security" text="Auth, payment & anti-cheat signals" />
+          </div>
+        </section>
+
         <section className="panel rounded-2xl p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -160,6 +169,13 @@ export function AdminScreen({ onBack }: { onBack?: () => void }) {
       </div>
     </Screen>
   );
+}
+
+function AdminTile({icon,title,text,onClick}:{icon:ReactNode;title:string;text:string;onClick?:()=>void}) {
+  return <button type="button" onClick={onClick} className="rounded-2xl border border-border bg-surface-2 p-3 text-left transition hover:border-primary/40">
+    <span className="mb-2 grid size-8 place-items-center rounded-xl bg-primary/10 text-primary">{icon}</span>
+    <span className="block text-sm font-bold text-fg">{title}</span><span className="mt-1 block text-[11px] text-muted">{text}</span>
+  </button>;
 }
 
 function Metric({ icon, label, value }: { icon: ReactNode; label: string; value: number }) {
