@@ -27,6 +27,7 @@ export type ScreenId =
   | "missions"
   | "legal"
   | "more"
+  | "featureTestLab"
   | "social"
   | "liveOps"
   | "systems"
