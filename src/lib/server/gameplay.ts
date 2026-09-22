@@ -59,7 +59,7 @@ export const startGameplaySession = createServerFn({ method: "POST" })
       if (claimed) return { ok:false as const, error:"Today's daily challenge has already been claimed." };
     }
     const row = await db.playerSave.findUnique({ where:{userId:context.userId} });
-    const save = row?.saveJson
+    const save: any = row?.saveJson
       ? migrateSave(JSON.parse(row.saveJson))
       : defaultSave();
     const unlocked = Number(save.unlockedLevel ?? 1);
