@@ -1,2 +1,2 @@
-export * from './createGameStore';
-export * from './types';
+export * from "../store";
+export * from "./types";
