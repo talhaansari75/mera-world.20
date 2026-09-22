@@ -24,7 +24,7 @@ type Room = {
 
 type Props = { onBack?: () => void };
 
-const BOT_WAIT_MS = 10_000;
+const BOT_WAIT_MS = 5_000;
 
 export function MultiplayerScreen({ onBack }: Props) {
   const user = useCurrentUser();
@@ -83,7 +83,7 @@ export function MultiplayerScreen({ onBack }: Props) {
   const launchBotFallback = () => {
     clearBotTimer();
     setOpponentKind("bot");
-    setNotice("No second player joined. Practice Bot is entering the same race.");
+    setNotice("No player found. Practice Bot is entering the same race.");
     startMatch("bot");
   };
 
