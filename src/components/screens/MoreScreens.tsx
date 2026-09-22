@@ -136,6 +136,15 @@ export function MoreScreen() {
       ],
     },
     {
+      id: "qa",
+      title: "Feature Test Lab",
+      description: "Temporary test panel for every game system",
+      icon: ClipboardCheck,
+      items: [
+        { id: "featureTestLab" as const, label: "Test all 24 features", icon: ClipboardCheck },
+      ],
+    },
+    {
       id: "help",
       title: "Help & Legal",
       description: "Terms, privacy and important information",
