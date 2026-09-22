@@ -33,7 +33,6 @@ import { DialogueScreen } from "@/components/screens/DialogueScreen";
 import { NPCScreen } from "@/components/screens/NPCScreen";
 import { MissionsScreen } from "@/components/screens/RewardsScreens";
 import type { ScreenId } from "@/lib/game/types";
-import { V9Status } from "@/components/v9/V9Status";
 import { SocialScreen } from "@/components/v10/SocialScreen";
 import { LiveOpsScreen } from "@/components/v10/LiveOpsScreen";
 import { installLiveOpsBridge } from "@/lib/v10/liveops/liveOpsBridge";
@@ -205,7 +204,6 @@ export function GameApp() {
 
   return (
     <div className="relative h-dvh overflow-hidden">
-      <V9Status />
       <ScreenView screen={screen} />
       {toast && (
         <div className="pointer-events-none absolute inset-x-0 bottom-8 z-30 flex justify-center px-4">
