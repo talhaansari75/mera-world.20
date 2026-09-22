@@ -40,7 +40,7 @@ export function HomeScreen() {
   const streak = Math.max(save.dailyStreak, save.stats.currentStreak);
 
   return (
-    <div className="app-shell starfield safe-pad relative flex h-dvh flex-col overflow-y-auto pb-32 sm:pb-36">
+    <div className="app-shell starfield safe-pad relative flex h-dvh flex-col overflow-y-auto pb-44 sm:pb-48">
       <header className="flex items-center justify-between gap-3 pb-1">
         <div className="flex min-w-0 items-center gap-3">
           <div className="dashboard-avatar">
@@ -108,7 +108,7 @@ export function HomeScreen() {
         <span className="dashboard-claim">Claim</span>
       </button>}
 
-      <section className="dashboard-quick-travel">
+      <section className="dashboard-quick-travel mb-6">
         <div className="mb-3 flex items-end justify-between"><div><p className="dashboard-kicker">Quick travel</p><h3 className="font-display text-2xl text-fg">Your World</h3></div><button type="button" className="text-xs font-bold uppercase tracking-[0.15em] text-accent" onClick={() => useGame.getState().go("worlds")}>View map</button></div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
           <TileButton icon={<Map className="size-5" />} label="World Map" onClick={() => useGame.getState().go("worldMap")} />
