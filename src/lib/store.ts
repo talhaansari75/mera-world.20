@@ -148,9 +148,9 @@ function queueServerGameplayAction(data: ServerGameplayAction) {
       try {
         const result = await recordGameplayAction({ data });
         if (!result.ok) throw new Error(result.error ?? "Gameplay action rejected by server");
-        if (result.save) get().applyServerSave(result.save as PlayerSave);
+        if (result.save) useGame.getState().applyServerSave(result.save as PlayerSave);
         if (result.hintEconomy) {
-          get().patchSave((s) => ({ ...s, coins: result.hintEconomy!.coins, stats: { ...s.stats, hintsUsed: result.hintEconomy!.hintsUsed } }));
+          useGame.getState().patchSave((s: PlayerSave) => ({ ...s, coins: result.hintEconomy!.coins, stats: { ...s.stats, hintsUsed: result.hintEconomy!.hintsUsed } }));
         }
         return result;
       } catch (error) { last = error; if (attempt < 2) await sleep(75 * 2 ** attempt); }
@@ -603,7 +603,7 @@ export const useGame = create<GameState>((set, get) => ({
     const coins = dailyClaimed ? 0 : Math.max(1, Math.floor(rewardCoins({
       mode: play.mode, stars, combo: play.combo, hints: play.hints, mistakes: play.mistakes,
       wordCount: play.puzzle.words.length + play.bonus.length, boss, firstClear,
-    }) * rules.rewardMultiplier * dailyMultiplier * personalizationMultiplier * (1 + (petEffect(get().save.equippedPet, get().save.equippedPet ? (get().save.petLevels[get().save.equippedPet] ?? 1) : 1).coinBonusPercent ?? 0) / 100)) + fastBonus + goldenBonus);
+    }) * rules.rewardMultiplier * dailyMultiplier * personalizationMultiplier * (1 + (petEffect(get().save.equippedPet, get().save.equippedPet ? (get().save.petLevels[get().save.equippedPet as PetId] ?? 1) : 1).coinBonusPercent ?? 0) / 100)) + fastBonus + goldenBonus);
     const xp = Math.floor(xpForClear({ size: play.puzzle.size, stars, boss }) * (1 + (petEffect(get().save.equippedPet, get().save.equippedPet ? (get().save.petLevels[get().save.equippedPet] ?? 1) : 1).xpBonusPercent ?? 0) / 100));
     const dragon = get().save.equippedPet === "dragon" && perfect ? 20 : 0;
     const petId = get().save.equippedPet;
@@ -1044,7 +1044,7 @@ export const useGame = create<GameState>((set, get) => ({
   claimSeasonTier: async (level) => {
     const tier = Math.max(1, Math.min(10, Math.floor(level)));
     const save = get().save;
-    const key = `${seasonKey()}:${tier}`;
+    const key = `${seasonKey}:${tier}`;
     if (save.claimedSeasonTiers.includes(key)) return false;
     try {
       const remote = await claimSeasonTierServer({ data: { level: tier } });
