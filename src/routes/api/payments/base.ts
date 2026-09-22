@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { randomUUID } from "node:crypto";
 import { getPrisma } from "@/lib/db";
 import { requireUserId } from "@/lib/auth/verify.server";
-import { paymentRateLimit } from "@/lib/payments/rate-limit";
+import { consumeRateLimit } from "@/lib/server/v3/rateLimit";
 
 const PRODUCTS = {
   starter_gems: { name: "Starter Gems", priceUsd: "1.99", amountAtomic: "1990000", diamonds: 250 },
@@ -56,9 +56,9 @@ export const Route = createFileRoute("/api/payments/base")({
           const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
           await db.$queryRaw`
             insert into blockchain_payment_intents
-              (id,user_id,product_id,chain_id,token_address,recipient_address,payer_address,amount_atomic,status,expires_at)
+              (id,user_id,product_id,chain_id,token_address,recipient_address,payer_address,amount_atomic,status,expires_at,idempotency_key)
             values
-              (${id},${userId},${body.productId},${CHAIN_ID},${TOKEN_ADDRESS},${RECIPIENT_ADDRESS},${String(body.payerAddress).toLowerCase()},${item.amountAtomic},'pending',${expiresAt})
+              (${id},${userId},${body.productId},${CHAIN_ID},${TOKEN_ADDRESS},${RECIPIENT_ADDRESS},${String(body.payerAddress).toLowerCase()},${item.amountAtomic},'pending',${expiresAt},${idempotencyKey})
           `;
           return json({ intentId: id, chainId: CHAIN_ID, tokenAddress: TOKEN_ADDRESS, recipientAddress: RECIPIENT_ADDRESS, amountAtomic: item.amountAtomic, product: item, expiresAt });
         }
