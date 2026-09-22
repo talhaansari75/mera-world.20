@@ -84,6 +84,13 @@ export function modeMods(mode: GameMode, spec: LevelSpec): LevelSpec {
   return next;
 }
 
+export function puzzleForSeed(level: number, mode: GameMode = "classic", seed?: number, language: LangCode = "en") {
+  // Multiplayer clients must agree on the same puzzle. The level/mode generator is deterministic;
+  // the optional seed is retained for API compatibility with older multiplayer routes.
+  void seed;
+  return puzzleForLevel(level, mode, language);
+}
+
 export function puzzleForLevel(level: number, mode: GameMode = "classic", language: LangCode = "en") {
   const spec = modeMods(mode, specFor(level));
   const seed = hashSeed("mwsj", level, mode);
