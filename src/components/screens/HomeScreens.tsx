@@ -3,7 +3,7 @@ import { useGame, playerLevel } from "@/lib/store";
 import { xpForLevel } from "@/lib/game/economy";
 import { TileButton, useT } from "./chrome";
 import { unlockAudio, startMusic } from "@/lib/game/audio";
-import { todayKey, worldOf } from "@/lib/game/levels";
+import { todayKey, worldOf, WORLDS } from "@/lib/game/levels";
 import { DAILY_REWARD_COINS } from "@/lib/game/constants";
 import { DailyRewardPopup } from "./JourneyPolish";
 
@@ -69,7 +69,7 @@ export function HomeScreen() {
           <div>
             <div className="mb-3 flex items-center gap-2">
               <span className="dashboard-kicker">Current expedition</span>
-              <span className="dashboard-pill">World {worldOf(save.unlockedLevel).from <= save.unlockedLevel ? worldOf(save.unlockedLevel).id : "meadow"}</span>
+              <span className="dashboard-pill">World {WORLDS.findIndex((w) => w.id === world.id) + 1}</span>
             </div>
             <h2 className="max-w-[16ch] font-display text-4xl leading-none text-fg sm:text-5xl">{world.name}</h2>
             <p className="mt-2 max-w-[48ch] text-sm text-muted">Level {save.unlockedLevel} is waiting. Continue your journey and uncover the next hidden word.</p>
