@@ -12,7 +12,7 @@ export function SplashScreen() {
   return (
     <button
       type="button"
-      className="app-shell starfield safe-pad flex h-dvh w-full flex-col items-center justify-center gap-6 text-center"
+      className="app-shell starfield safe-pad flex h-dvh w-full flex-col items-center justify-center gap-5 overflow-hidden text-center"
       onClick={() => {
         unlockAudio();
         const save = useGame.getState().save;
@@ -20,10 +20,17 @@ export function SplashScreen() {
         useGame.getState().go("home");
       }}
     >
-      <p className="text-xs uppercase tracking-[0.28em] text-accent">Ink & Starlight</p>
-      <h1 className="font-display max-w-[16ch] text-4xl leading-[1.05] text-fg sm:text-5xl">{t("app.title")}</h1>
-      <p className="max-w-[28ch] text-muted">{t("app.tag")}</p>
-      <span className="btn-primary max-w-xs">{t("cta.start")}</span>
+      <div className="splash-logo-orbit" aria-hidden="true">
+        <span className="splash-die">✦</span>
+        <i>★</i><i>◆</i><i>✦</i><i>●</i>
+      </div>
+      <div className="splash-brand">
+        <p className="text-[11px] font-black uppercase tracking-[0.35em] text-yellow-200">MERA WORLD</p>
+        <h1 className="mt-2 font-display text-5xl font-black leading-none text-white drop-shadow-[0_5px_0_rgba(94,4,83,.8)] sm:text-6xl">{t("app.title")}</h1>
+        <p className="mx-auto mt-3 max-w-[30ch] text-sm font-semibold text-pink-100/90">{t("app.tag")}</p>
+      </div>
+      <div className="splash-loading"><span /><b>READY FOR YOUR NEXT JOURNEY</b></div>
+      <span className="btn-primary max-w-xs shadow-[0_18px_40px_-18px_rgba(255,47,159,.95)]">{t("cta.start")}</span>
     </button>
   );
 }
