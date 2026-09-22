@@ -12,6 +12,7 @@ import { todayKey } from "@/lib/game/levels";
 import { dailyChallengeFor } from "@/lib/game/dailyChallenges";
 import { MAX_ENERGY } from "@/lib/game/constants";
 import type { GameSettings, PetId, ThemeId } from "@/lib/game/types";
+import type { EquipmentSlot } from "@/lib/game/baseCrafting";
 import { buildingUpgradeCost } from "@/lib/game/baseCrafting";
 import { loadCloudSave, pushCloudSave } from "@/lib/server/cloud";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
