@@ -58,7 +58,8 @@ export const pushCloudSave = createServerFn({ method: "POST" })
         if (data.expectedRevision && data.expectedRevision !== 0) {
           return { ok: false as const, conflict: true as const, error: "Cloud save appeared while syncing" };
         }
-        // One-time local-to-account migration: the authenticated owner may seed an empty cloud save from this device.\n        await tx.playerSave.create({
+        // One-time local-to-account migration: the authenticated owner may seed an empty cloud save from this device.
+        await tx.playerSave.create({
           data: { userId: context.userId, saveJson: data.json, version: 1, revision: 1n },
         });
         return { ok: true as const, revision: 1 };
