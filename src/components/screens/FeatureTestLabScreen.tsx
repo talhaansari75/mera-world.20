@@ -98,6 +98,8 @@ export function FeatureTestLabScreen() {
 
   useEffect(() => localStorage.setItem(KEY, JSON.stringify(status)), [status]);
 
+
+
   const mark = (name: string, value: TestState) =>
     setStatus((s) => ({ ...s, [name]: { ...s[name], state: value } }));
 
