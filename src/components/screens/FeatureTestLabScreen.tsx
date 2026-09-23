@@ -41,7 +41,7 @@ const FEATURES: Array<{ name: string; screen: ScreenId; icon: any }> = [
 const KEY = "mera-world.feature-test-status";
 
 export function FeatureTestLabScreen() {
-  const go = useGame.getState().go;
+  const goQa = useGame.getState().goQa;
   const [status, setStatus] = useState<Record<string, "pass" | "fail">>(() => {
     try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; }
   });
@@ -62,7 +62,7 @@ export function FeatureTestLabScreen() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-accent">Temporary QA area</p>
-            <h2 className="mt-1 font-display text-2xl text-fg">Test every game system (including monetization)</h2>
+            <h2 className="mt-1 font-display text-2xl text-fg">Test every player-facing game system (including monetization)</h2>
             <p className="mt-1 text-xs text-muted">Open a feature, test it, then mark Pass or Fail. Results stay on this device until reset.</p>
           </div>
           <button type="button" onClick={reset} className="hud-chip flex items-center gap-1 text-xs text-fg"><RotateCcw className="size-3" /> Reset</button>
@@ -87,7 +87,7 @@ export function FeatureTestLabScreen() {
                   <span className="block text-sm font-semibold text-fg">{feature.name}</span>
                   <span className="text-[10px] uppercase tracking-wider text-muted">{state || "Not tested"}</span>
                 </span>
-                <button type="button" className="hud-chip text-xs text-fg" onClick={() => go(feature.screen)}>Test</button>
+                <button type="button" className="hud-chip text-xs text-fg" onClick={() => goQa(feature.screen)}>Test</button>
               </div>
               <div className="mt-2 flex gap-2 pl-[6.75rem]">
                 <button type="button" onClick={() => mark(feature.name, "pass")} className="flex items-center gap-1 text-xs text-green-300"><CheckCircle2 className="size-3" /> Pass</button>
