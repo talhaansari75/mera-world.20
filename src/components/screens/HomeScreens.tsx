@@ -1,4 +1,4 @@
-import { Bell, ChevronRight, Crown, Flame, Gift, Map, PawPrint, ShoppingBag, Swords, Target, Trophy, User, Users, Wallet, Wrench } from "lucide-react";
+import { Bell, ChevronRight, ClipboardCheck, Crown, Flame, Gift, Map, PawPrint, Settings, ShoppingBag, Swords, Target, Trophy, User, Users, Wallet, Wrench } from "lucide-react";
 import { useGame, playerLevel } from "@/lib/store";
 import { xpForLevel } from "@/lib/game/economy";
 import { TileButton, useT } from "./chrome";
@@ -116,6 +116,12 @@ export function HomeScreen() {
           <TileButton icon={<Swords className="size-5" />} label="Modes" onClick={() => useGame.getState().go("modes")} />
           <TileButton icon={<User className="size-5" />} label="Profile" onClick={() => useGame.getState().go("profile")} />
         </div>     </section>
+
+      <section className="mb-3 grid grid-cols-3 gap-2" aria-label="Quick tools">
+        <button type="button" className="panel flex min-h-14 items-center justify-center gap-2 rounded-2xl px-3 text-sm font-semibold text-fg" onClick={() => useGame.getState().go("settings")}><Settings className="size-5 text-primary" /><span>Settings</span></button>
+        <button type="button" className="panel flex min-h-14 items-center justify-center gap-2 rounded-2xl px-3 text-sm font-semibold text-fg" onClick={() => useGame.getState().go("more")}><Wrench className="size-5 text-primary" /><span>More</span></button>
+        <button type="button" className="panel flex min-h-14 items-center justify-center gap-2 rounded-2xl px-3 text-sm font-semibold text-fg" onClick={() => useGame.getState().go("featureTestLab")}><ClipboardCheck className="size-5 text-primary" /><span>Test Lab</span></button>
+      </section>
 
       <nav className="dashboard-bottom-nav dashboard-bottom-nav-6" aria-label="Main navigation">
         <button type="button" className="active" onClick={() => useGame.getState().go("home")}><Map className="size-5" /><span>Home</span></button>
