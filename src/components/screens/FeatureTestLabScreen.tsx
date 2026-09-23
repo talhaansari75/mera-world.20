@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useGame } from "@/lib/store";
 import { Screen } from "./chrome";
+import { getFeatureTestLabAccess } from "@/lib/server/admin";
 import {
   Users, CreditCard, HardDrive, Settings, Accessibility, Globe2, Smartphone, Bell,
   Trophy, Crown, CalendarRange, CalendarDays, UsersRound, PenTool, WandSparkles,
@@ -41,7 +42,26 @@ const FEATURES: Array<{ name: string; screen: ScreenId; icon: any }> = [
 const KEY = "mera-world.feature-test-status";
 
 export function FeatureTestLabScreen() {
+  const go = useGame.getState().go;
   const goQa = useGame.getState().goQa;
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    void getFeatureTestLabAccess()
+      .then((result) => { if (live) setAuthorized(Boolean(result.allowed)); })
+      .catch(() => { if (live) setAuthorized(false); });
+    return () => { live = false; };
+  }, []);
+
+  useEffect(() => {
+    if (authorized === false) go("home");
+  }, [authorized, go]);
+
+  if (authorized === null) {
+    return <Screen title="Feature Test Lab"><div className="panel rounded-2xl p-5 text-sm text-muted">Checking administrator access…</div></Screen>;
+  }
+  if (!authorized) return null;
   const [status, setStatus] = useState<Record<string, "pass" | "fail">>(() => {
     try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; }
   });
@@ -62,8 +82,8 @@ export function FeatureTestLabScreen() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-accent">Temporary QA area</p>
-            <h2 className="mt-1 font-display text-2xl text-fg">Test every player-facing game system (including monetization)</h2>
-            <p className="mt-1 text-xs text-muted">Open a feature, test it, then mark Pass or Fail. Results stay on this device until reset.</p>
+            <h2 className="mt-1 font-display text-2xl text-fg">Administrator-only QA: test every player-facing game system (including monetization)</h2>
+            <p className="mt-1 text-xs text-muted">Administrator-only testing. Open a feature, test it, then mark Pass or Fail. Results stay on this device until reset.</p>
           </div>
           <button type="button" onClick={reset} className="hud-chip flex items-center gap-1 text-xs text-fg"><RotateCcw className="size-3" /> Reset</button>
         </div>
