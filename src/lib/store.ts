@@ -283,14 +283,19 @@ export const useGame = create<GameState>((set, get) => ({
     }));
   },
   goQa: (screen) => {
-    // Feature Test Lab is an explicit QA surface. It may open guest-restricted
-    // player features for testing, but never admin/release/system screens.
+    // Test Lab is already protected by server-side administrator access.
+    // Once an administrator is inside the lab, every player-facing feature
+    // listed by the lab must be testable, including features normally blocked
+    // for guests.
     const qaScreens = new Set<ScreenId>([
+      "home", "worlds", "modes", "play", "shop", "daily", "spin",
       "multiplayer", "payments", "rewardedAds", "saveSlots", "settings",
-      "accessibility", "content", "pwa", "pushSettings", "achievements",
-      "progression", "seasonProgress", "liveOps", "social", "creator",
-      "aiPuzzleLab", "voice", "coach", "journeyPlanner", "profile",
-      "inventory", "pets", "missions", "story", "dictionary", "leaderboard",
+      "accessibility", "content", "pwa", "pushSettings", "profile",
+      "stats", "skills", "achievements", "progression", "seasonProgress",
+      "liveOps", "inventory", "pets", "base", "equipment", "combat",
+      "worldMap", "story", "storyQuests", "npcs", "missions", "dictionary",
+      "leaderboard", "social", "creator", "aiPuzzleLab", "voice", "coach",
+      "journeyPlanner",
     ]);
     if (!qaScreens.has(screen)) {
       guestNotice(set, "This feature is not available from QA.");
