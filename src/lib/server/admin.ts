@@ -3,6 +3,10 @@ import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { isAdminUser } from "@/lib/v13/admin/access";
 
+export const getFeatureTestLabAccess = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => ({ ok: true as const, allowed: await isAdminUser(context.userId) }));
+
 export const getAdminDashboard = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
   .handler(async ({ context }): Promise<any> => {
