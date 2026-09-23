@@ -89,6 +89,7 @@ type GameState = {
   persist: () => void;
   patchSave: (fn: (s: PlayerSave) => PlayerSave) => void;
   go: (screen: ScreenId) => void;
+  goQa: (screen: ScreenId) => void;
   setScreen: (screen: ScreenId) => void;
   back: () => void;
   startLevel: (level: number, mode?: GameMode) => boolean;
@@ -273,6 +274,26 @@ export const useGame = create<GameState>((set, get) => ({
   go: (screen) => {
     if (guestSession() && GUEST_BLOCKED_SCREENS.has(screen)) {
       guestNotice(set, "This feature needs a free account. You can keep playing the first 10 levels as a guest.");
+      return;
+    }
+    set((s) => ({
+      prevScreen: s.screen === "play" ? s.prevScreen : s.screen,
+      screen,
+      overlay: screen === "play" ? s.overlay : null,
+    }));
+  },
+  goQa: (screen) => {
+    // Feature Test Lab is an explicit QA surface. It may open guest-restricted
+    // player features for testing, but never admin/release/system screens.
+    const qaScreens = new Set<ScreenId>([
+      "multiplayer", "payments", "rewardedAds", "saveSlots", "settings",
+      "accessibility", "content", "pwa", "pushSettings", "achievements",
+      "progression", "seasonProgress", "liveOps", "social", "creator",
+      "aiPuzzleLab", "voice", "coach", "journeyPlanner", "profile",
+      "inventory", "pets", "missions", "story", "dictionary", "leaderboard",
+    ]);
+    if (!qaScreens.has(screen)) {
+      guestNotice(set, "This feature is not available from QA.");
       return;
     }
     set((s) => ({
