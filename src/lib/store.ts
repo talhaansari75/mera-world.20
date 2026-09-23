@@ -39,7 +39,7 @@ export const GUEST_LEVEL_LIMIT = 10;
 export const GUEST_DAILY_LIMIT = 1;
 export const GUEST_BLOCKED_SCREENS = new Set<ScreenId>([
   "multiplayer", "payments", "social", "creator", "creatorCommunity", "creatorPlaytest",
-  "aiPuzzleLab", "voice", "coach", "pushSettings", "analytics", "admin",
+  "aiPuzzleLab", "voice", "coach", "pushSettings", "analytics", "admin", "featureTestLab",
   "releasePackage", "releaseVerifier", "releaseArchive", "publishReadiness",
 ]);
 function guestSession(): boolean {
