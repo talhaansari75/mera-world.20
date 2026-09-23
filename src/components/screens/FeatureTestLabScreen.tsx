@@ -90,13 +90,13 @@ export function FeatureTestLabScreen() {
   useEffect(() => {
     if (authorized === false) go("home");
   }, [authorized, go]);
+  useEffect(() => localStorage.setItem(KEY, JSON.stringify(status)), [status]);
 
   if (authorized === null) {
     return <Screen title="Feature Test Lab"><div className="panel rounded-2xl p-5 text-sm text-muted">Checking administrator access…</div></Screen>;
   }
   if (!authorized) return null;
 
-  useEffect(() => localStorage.setItem(KEY, JSON.stringify(status)), [status]);
 
 
 

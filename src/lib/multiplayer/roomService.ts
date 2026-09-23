@@ -74,7 +74,7 @@ export async function joinRoom(userId: string, displayName: string, id: string) 
           await tx.multiplayerRoom.update({ where: { roomId: id }, data: { status: "playing" } });
         }
         return true;
-      }, { isolationLevel: "Serializable" });
+      }, { isolationLevel: "ReadCommitted" });
       return getRoom(id);
     } catch (error) {
       if ((error as { code?: string })?.code === "P2034" && attempt < 2) continue;

@@ -175,7 +175,8 @@ export function MoreScreen() {
     },
   ];
 
-  // Keep Feature Test Lab visible in More. Access to the lab itself remains server-side admin-only.\n  const visibleCategories = categories;
+  // Keep Feature Test Lab visible in More. Access to the lab itself remains server-side admin-only.
+  const visibleCategories = categories;
   const activeCategory = visibleCategories.find((c) => c.id === category);
 
   return (
