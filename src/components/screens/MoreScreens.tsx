@@ -4,6 +4,7 @@ import { Screen, useT } from "./chrome";
 import { CHAPTERS, WORD_OF_DAY } from "@/lib/game/story";
 import { CATEGORIES, CATEGORY_IDS, ALL_WORDS, categoryOf } from "@/lib/game/words";
 import { getDailyBoard, getLeaderboard } from "@/lib/server/leaderboard";
+import { getFeatureTestLabAccess } from "@/lib/server/admin";
 import { todayKey } from "@/lib/game/levels";
 import { BookOpen, BarChart3, Languages, Map, Scale, Sparkles, Swords, Trophy, User, Wrench, Home, Hammer, MessageCircle, Flag, ScrollText, Users, CalendarDays, Activity, ShieldCheck, CreditCard, Globe2, HardDrive, PenTool, Crown, CalendarRange, LineChart, Accessibility, Smartphone, Bell, BrainCircuit, Gauge, Route, Mic, WandSparkles, Eye, ClipboardCheck, PackageCheck, FileCheck2, Archive } from "lucide-react";
 
@@ -11,6 +12,15 @@ export function MoreScreen() {
   const t = useT();
   const go = useGame.getState().go;
   const [category, setCategory] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    let live = true;
+    void getFeatureTestLabAccess()
+      .then((result) => { if (live) setIsAdmin(Boolean(result.allowed)); })
+      .catch(() => { if (live) setIsAdmin(false); });
+    return () => { live = false; };
+  }, []);
 
   const categories = [
     {
@@ -151,7 +161,7 @@ export function MoreScreen() {
       description: "Temporary test panel for every game system",
       icon: ClipboardCheck,
       items: [
-        { id: "featureTestLab" as const, label: "Test all 24 features", icon: ClipboardCheck },
+        { id: "featureTestLab" as const, label: "Test all 26 features", icon: ClipboardCheck },
       ],
     },
     {
@@ -165,13 +175,14 @@ export function MoreScreen() {
     },
   ];
 
-  const activeCategory = categories.find((c) => c.id === category);
+  const visibleCategories = categories.filter((c) => c.id !== "qa" || isAdmin);
+  const activeCategory = visibleCategories.find((c) => c.id === category);
 
   return (
     <Screen title={t("cta.more")}>
       {!activeCategory ? (
         <div className="grid grid-cols-2 gap-3">
-          {categories.map((item) => (
+          {visibleCategories.map((item) => (
             <button
               key={item.id}
               type="button"
