@@ -161,7 +161,7 @@ export function MoreScreen() {
       description: "Temporary test panel for every game system",
       icon: ClipboardCheck,
       items: [
-        { id: "featureTestLab" as const, label: "Test all 26 features", icon: ClipboardCheck },
+        { id: "featureTestLab" as const, label: "Test all 41 features", icon: ClipboardCheck },
       ],
     },
     {
@@ -175,7 +175,7 @@ export function MoreScreen() {
     },
   ];
 
-  const visibleCategories = categories.filter((c) => c.id !== "qa" || isAdmin);
+  // Keep Feature Test Lab visible in More. Access to the lab itself remains server-side admin-only.\n  const visibleCategories = categories;
   const activeCategory = visibleCategories.find((c) => c.id === category);
 
   return (
