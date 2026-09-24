@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using MeraWorld.Session;
 
 namespace MeraWorld.Multiplayer
@@ -14,7 +13,8 @@ namespace MeraWorld.Multiplayer
     }
 
     /// <summary>
-    /// Manages a 1v1 race between player and bot on the same word puzzle.
+    /// Manages a 1v1 race between player and bot on the same puzzle.
+    /// Bot difficulty auto-scales with level. Bot looks like a real player.
     /// Pure C# — game loop calls Update() every frame.
     /// </summary>
     public class RaceMatch
@@ -26,8 +26,42 @@ namespace MeraWorld.Multiplayer
         public float CountdownSeconds { get; private set; } = 3f;
         public float ElapsedSeconds { get; private set; }
 
-        public event Action<string> OnWordFound; // "player:APPLE" or "bot:APPLE"
+        /// <summary>
+        /// Name shown to the player. Always looks like a human — never reveals "bot".
+        /// </summary>
+        public string OpponentDisplayName => Bot.Name;
+
+        /// <summary>
+        /// True if this match is player vs bot (as opposed to a real PvP match).
+        /// Internal only — UI should NOT display this to the player.
+        /// </summary>
+        internal bool IsBotMatch { get; private set; }
+
+        public event Action<string> OnWordFound; // "player:APPLE" or "opponent:APPLE"
         public event Action<RaceStatus> OnRaceEnded;
+
+        /// <summary>
+        /// Create a match. If a real online opponent isn't available, we fill with a bot.
+        /// Player never sees the difference.
+        /// </summary>
+        public static RaceMatch Create(
+            GameSession playerSession,
+            bool realOpponentAvailable,
+            int currentLevel,
+            float countdown = 3f)
+        {
+            if (realOpponentAvailable)
+            {
+                // Real PvP — hook will be added later
+                throw new NotImplementedException("Real PvP will be added in a future update.");
+            }
+
+            // Fallback: create a level-appropriate bot
+            var bot = BotPlayer.CreateForLevel(currentLevel, playerSession.WordsToFind);
+            var match = new RaceMatch(playerSession, bot, countdown);
+            match.IsBotMatch = true;
+            return match;
+        }
 
         public RaceMatch(GameSession playerSession, BotPlayer bot, float countdown = 3f)
         {
@@ -36,9 +70,6 @@ namespace MeraWorld.Multiplayer
             CountdownSeconds = countdown;
         }
 
-        /// <summary>
-        /// Called every frame from the game loop.
-        /// </summary>
         public void Update(float deltaSeconds)
         {
             if (Status == RaceStatus.PlayerWon || Status == RaceStatus.BotWon || Status == RaceStatus.Draw)
@@ -57,26 +88,21 @@ namespace MeraWorld.Multiplayer
 
             ElapsedSeconds += deltaSeconds;
 
-            // Bot's turn
             var botWord = Bot.Update(deltaSeconds);
             if (botWord != null)
-                OnWordFound?.Invoke($"bot:{botWord}");
+            {
+                // Event label says "opponent" — never "bot"
+                OnWordFound?.Invoke($"opponent:{botWord}");
+            }
 
-            // Check end conditions
             bool playerDone = PlayerSession.IsComplete;
             bool botDone = Bot.IsFinished;
 
-            if (playerDone && botDone)
-                EndRace(RaceStatus.Draw);
-            else if (playerDone)
-                EndRace(RaceStatus.PlayerWon);
-            else if (botDone)
-                EndRace(RaceStatus.BotWon);
+            if (playerDone && botDone) EndRace(RaceStatus.Draw);
+            else if (playerDone) EndRace(RaceStatus.PlayerWon);
+            else if (botDone) EndRace(RaceStatus.BotWon);
         }
 
-        /// <summary>
-        /// Called by the player input handler when they select a valid word.
-        /// </summary>
         public bool PlayerFoundWord(string word)
         {
             if (Status != RaceStatus.Playing) return false;
@@ -89,9 +115,9 @@ namespace MeraWorld.Multiplayer
         public string GetProgressSummary()
         {
             int playerFound = PlayerSession.FoundWords.Count;
-            int botFound = Bot.FoundWords.Count;
+            int opponentFound = Bot.FoundWords.Count;
             int total = PlayerSession.WordsToFind.Count;
-            return $"Player: {playerFound}/{total}  |  {Bot.Name}: {botFound}/{total}";
+            return $"You: {playerFound}/{total}   |   {Bot.Name}: {opponentFound}/{total}";
         }
 
         private void EndRace(RaceStatus result)
