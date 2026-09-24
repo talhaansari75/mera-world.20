@@ -14,12 +14,13 @@ namespace MeraWorld.Multiplayer
 
     /// <summary>
     /// A bot that races against the player in word search.
-    /// Bot "finds" words at configurable speed based on difficulty.
-    /// Pure C# — no Unity dependencies.
+    /// - Difficulty scales automatically with level number
+    /// - Behaves like a human (random pauses, occasional mistakes)
+    /// - Has a human-looking name
     /// </summary>
     public class BotPlayer
     {
-        public string Name { get; set; }
+        public string Name { get; private set; }
         public BotDifficulty Difficulty { get; private set; }
         public List<string> FoundWords { get; private set; } = new List<string>();
         public bool IsFinished => FoundWords.Count >= _wordsToFind.Count;
@@ -27,30 +28,76 @@ namespace MeraWorld.Multiplayer
         private readonly IReadOnlyList<string> _wordsToFind;
         private readonly Random _rng;
         private float _timeUntilNextFind;
-        private readonly float _averageSecondsPerWord;
+        private float _averageSecondsPerWord;
+        private int _wordsTriedSinceLastFind;
+        private readonly int _mistakeFrequency;
 
-        // Per difficulty: average seconds the bot takes to find ONE word
-        private static readonly Dictionary<BotDifficulty, float> BaseSpeed = new Dictionary<BotDifficulty, float>
+        // Human-looking names — no "Bot" in the name
+        private static readonly string[] BotNames = new[]
         {
-            { BotDifficulty.Easy,   8.0f },   // slow — player wins easily
-            { BotDifficulty.Medium, 5.0f },   // balanced
-            { BotDifficulty.Hard,   3.0f },   // fast — player must be sharp
-            { BotDifficulty.Expert, 1.5f }    // very fast — for pros
+            "Alex", "Sam", "Riley", "Jordan", "Casey", "Morgan", "Taylor",
+            "Aiden", "Emma", "Liam", "Maya", "Noah", "Zara", "Owen",
+            "Aisha", "Rayan", "Hina", "Bilal", "Sana", "Hamza"
         };
 
-        public BotPlayer(string name, BotDifficulty difficulty, IReadOnlyList<string> wordsToFind, int seed = 0)
+        private static readonly Dictionary<BotDifficulty, float> BaseSpeed = new Dictionary<BotDifficulty, float>
         {
-            Name = name;
+            { BotDifficulty.Easy,   8.0f },
+            { BotDifficulty.Medium, 5.0f },
+            { BotDifficulty.Hard,   3.0f },
+            { BotDifficulty.Expert, 1.8f }
+        };
+
+        public BotPlayer(
+            BotDifficulty difficulty,
+            IReadOnlyList<string> wordsToFind,
+            int seed = 0,
+            string overrideName = null)
+        {
             Difficulty = difficulty;
             _wordsToFind = wordsToFind ?? throw new ArgumentNullException(nameof(wordsToFind));
             _rng = seed == 0 ? new Random() : new Random(seed);
             _averageSecondsPerWord = BaseSpeed[difficulty];
+
+            // Human-like random name
+            Name = overrideName ?? BotNames[_rng.Next(BotNames.Length)];
+
+            // Mistakes: easy bots "try" more before finding
+            _mistakeFrequency = difficulty switch
+            {
+                BotDifficulty.Easy => 3,      // 1 mistake every 3 attempts
+                BotDifficulty.Medium => 5,
+                BotDifficulty.Hard => 10,
+                BotDifficulty.Expert => 20,   // almost never
+                _ => 5
+            };
+
             _timeUntilNextFind = NextFindDelay();
         }
 
         /// <summary>
-        /// Called every frame by the game loop with delta time (seconds).
-        /// Returns the word the bot just found, or null if no find this frame.
+        /// Calculate difficulty based on player's level number.
+        /// Level 1-10 → Easy, 11-50 → Medium, 51-200 → Hard, 200+ → Expert.
+        /// </summary>
+        public static BotDifficulty DifficultyForLevel(int levelNumber)
+        {
+            if (levelNumber <= 10) return BotDifficulty.Easy;
+            if (levelNumber <= 50) return BotDifficulty.Medium;
+            if (levelNumber <= 200) return BotDifficulty.Hard;
+            return BotDifficulty.Expert;
+        }
+
+        /// <summary>
+        /// Factory — create a bot appropriate for the player's current level.
+        /// </summary>
+        public static BotPlayer CreateForLevel(int levelNumber, IReadOnlyList<string> wordsToFind, int seed = 0)
+        {
+            var difficulty = DifficultyForLevel(levelNumber);
+            return new BotPlayer(difficulty, wordsToFind, seed);
+        }
+
+        /// <summary>
+        /// Called every frame. Returns the word the bot just found, or null.
         /// </summary>
         public string Update(float deltaSeconds)
         {
@@ -59,7 +106,18 @@ namespace MeraWorld.Multiplayer
             _timeUntilNextFind -= deltaSeconds;
             if (_timeUntilNextFind > 0f) return null;
 
-            // Time to find the next word
+            // Simulate "trying" a word that might be a mistake
+            _wordsTriedSinceLastFind++;
+            if (_wordsTriedSinceLastFind < _mistakeFrequency)
+            {
+                // Bot "failed" this attempt — small delay and try again
+                _timeUntilNextFind = 0.5f + (float)_rng.NextDouble() * 1.5f;
+                return null;
+            }
+
+            // Success this time
+            _wordsTriedSinceLastFind = 0;
+
             var remaining = RemainingWords();
             if (remaining.Count == 0) return null;
 
@@ -70,13 +128,11 @@ namespace MeraWorld.Multiplayer
             return found;
         }
 
-        /// <summary>
-        /// Reset bot for a new match with the same word list.
-        /// </summary>
         public void Reset()
         {
             FoundWords.Clear();
             _timeUntilNextFind = NextFindDelay();
+            _wordsTriedSinceLastFind = 0;
         }
 
         private List<string> RemainingWords()
@@ -89,13 +145,19 @@ namespace MeraWorld.Multiplayer
         }
 
         /// <summary>
-        /// Adds randomness to bot speed — so it doesn't look robotic.
-        /// ±30% variance around base speed.
+        /// ±30% variance so it looks human, not robotic.
+        /// Occasionally longer "thinking" pause (5% chance).
         /// </summary>
         private float NextFindDelay()
         {
-            float variance = 0.7f + (float)_rng.NextDouble() * 0.6f; // 0.7 to 1.3
-            return _averageSecondsPerWord * variance;
+            float variance = 0.7f + (float)_rng.NextDouble() * 0.6f;
+            float delay = _averageSecondsPerWord * variance;
+
+            // 5% chance of a long pause (like human distracted)
+            if (_rng.NextDouble() < 0.05)
+                delay *= 2.5f;
+
+            return delay;
         }
     }
 }
