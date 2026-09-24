@@ -1,11 +1,11 @@
 # Mera World — Art Style Guide
 
-## Master Prompt (prefix all prompts with this)
+## Master Prompt
 
 > Mobile game UI asset, 2D cartoon style, glossy finish, 
-> vibrant royal blue (#1E5BC6) and gold (#F4C430) palette, 
-> soft outer glow, subtle drop shadow, transparent background, 
-> centered composition, high detail, no text, no watermark
+> vibrant royal blue and gold palette, soft outer glow, 
+> subtle drop shadow, transparent background, centered, 
+> high detail, no text, no watermark
 
 ## Palette
 
@@ -17,26 +17,25 @@
 - Success green: #4CAF50
 - Danger red: #E53935
 
-## Asset list (in progress)
+## Asset checklist
 
 - [x] Primary button (PLAY NOW)
 - [x] Chest button
+- [x] Home mockup reference
 - [ ] Coin icon
 - [ ] Gem icon
 - [ ] Star (empty / half / full)
 - [ ] Lock icon
 - [ ] Settings gear
 - [ ] Sound on/off icons
-- [ ] Pause icon
-- [ ] Hint bulb icon
-- [ ] Home, Back, Next arrows
+- [ ] Pause / Hint / Home icons
 - [ ] Level-select tile
 - [ ] Victory / defeat badges
 
 ## Rules
 
-1. Always request **transparent background** for UI elements
+1. Transparent background for all UI elements
 2. Same palette across all assets
 3. 2D cartoon, glossy, mobile-game look
-4. No text baked into images (Unity text over them)
-5. Export at 2x resolution (e.g. 256x256 for 128x128 icons)
+4. No text baked in (Unity TextMeshPro handles text)
+5. Export at 2x resolution
