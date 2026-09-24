@@ -1,0 +1,20 @@
+name: C# Only Game Policy
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  csharp-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Enforce C# only for game coding
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CSHARP_POLICY_BASE="${{ github.event.pull_request.base.sha }}" node scripts/check-csharp-only.mjs
+          else
+            node scripts/check-csharp-only.mjs
+          fi
