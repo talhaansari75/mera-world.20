@@ -1,4 +1,38 @@
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
 
+# .NET
+bin/
+obj/
+*.dll
+*.exe
+
+# Secrets
+.env.local
+.env
+.env.*.local
+
+# Keep archive tracked (do NOT ignore)
+!_archive/
 !.env.example
 # Extra safety & local environments
 *.local
@@ -18,3 +52,4 @@ dist/
 node_modules/
 .vercel
 .env*
+.env.local 
