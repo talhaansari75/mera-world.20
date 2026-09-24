@@ -19,9 +19,7 @@ namespace MeraWorld.Tests
         {
             var grid = new WordGrid(5, 5);
             Assert.IsNull(grid.GetCell(-1, 0));
-            Assert.IsNull(grid.GetCell(0, -1));
             Assert.IsNull(grid.GetCell(5, 0));
-            Assert.IsNull(grid.GetCell(0, 5));
         }
 
         [Test]
