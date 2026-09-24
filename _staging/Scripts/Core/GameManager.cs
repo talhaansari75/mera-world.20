@@ -1,28 +1,37 @@
 using UnityEngine;
+using System.Collections.Generic;
 using MeraWorld.WordSearch;
 
 namespace MeraWorld.Core
 {
-    /// <summary>
-    /// Temporary bootstrap script to verify Unity setup works.
-    /// Will be replaced with the real game manager later.
-    /// </summary>
     public class GameManager : MonoBehaviour
     {
         [Header("Grid Settings")]
-        public int GridRows = 5;
-        public int GridColumns = 5;
+        public int GridRows = 8;
+        public int GridColumns = 8;
+        public int Seed = 12345;
+
+        [Header("Words")]
+        public List<string> Words = new List<string>
+        {
+            "CAT", "DOG", "SUN", "MOON", "STAR", "FISH", "BIRD", "TREE"
+        };
 
         void Start()
         {
             Debug.Log("=== Mera World: Word Search ===");
 
-            var grid = new WordGrid(GridRows, GridColumns);
-            var rng = new System.Random(12345);
-            grid.FillWithRandomLetters(rng);
+            var result = WordSearchGenerator.Generate(GridRows, GridColumns, Words, Seed);
 
-            Debug.Log($"Created {GridRows}x{GridColumns} grid:");
-            Debug.Log("\n" + grid.ToDisplayString());
+            Debug.Log($"Placed: {result.PlacedWords.Count} / {Words.Count}");
+            foreach (var w in result.PlacedWords)
+                Debug.Log($"  ✅ {w}");
+
+            if (result.FailedWords.Count > 0)
+                foreach (var w in result.FailedWords)
+                    Debug.LogWarning($"  ❌ {w}");
+
+            Debug.Log("\n" + result.Grid.ToDisplayString());
         }
     }
 }
