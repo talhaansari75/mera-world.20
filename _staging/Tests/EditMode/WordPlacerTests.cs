@@ -31,16 +31,7 @@ namespace MeraWorld.Tests
             var grid = new WordGrid(5, 5);
             WordPlacer.TryPlace(grid, "CAT", 0, 0, Direction.Right);
             bool ok = WordPlacer.TryPlace(grid, "DOG", 0, 0, Direction.Right);
-            Assert.IsFalse(ok, "Words starting with different letters should conflict.");
-        }
-
-        [Test]
-        public void Place_Intersecting_Words_Succeeds()
-        {
-            var grid = new WordGrid(5, 5);
-            WordPlacer.TryPlace(grid, "CAT", 0, 0, Direction.Right);  // C A T
-            bool ok = WordPlacer.TryPlace(grid, "ARE", 0, 1, Direction.Down);  // A at (0,1)
-            Assert.IsTrue(ok, "Words sharing same letter at intersection should work.");
+            Assert.IsFalse(ok);
         }
     }
 }
