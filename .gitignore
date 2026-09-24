@@ -53,3 +53,7 @@ node_modules/
 .vercel
 .env*
 .env.local 
+# IMPORTANT: _archive/ ko kabhi ignore nahi karna
+# (yeh hamara "delete mat karo, yahan rakho" safe zone hai)
+!_archive/
+!_archive/**
