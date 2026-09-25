@@ -17,13 +17,19 @@ namespace MeraWorld.Core
             "CAT", "DOG", "SUN", "MOON", "STAR", "FISH", "BIRD", "TREE"
         };
 
+        [HideInInspector]
+        public WordGrid LastGeneratedGrid;
+
         void Start()
         {
             Debug.Log("=== Mera World: Word Search ===");
 
             var result = WordSearchGenerator.Generate(GridRows, GridColumns, Words, Seed);
 
+            LastGeneratedGrid = result.Grid;
+
             Debug.Log($"Placed: {result.PlacedWords.Count} / {Words.Count}");
+
             foreach (var w in result.PlacedWords)
                 Debug.Log($"  ✅ {w}");
 
