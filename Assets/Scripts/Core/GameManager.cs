@@ -9,7 +9,6 @@ namespace MeraWorld.Core
         [Header("Grid Settings")]
         public int GridRows = 8;
         public int GridColumns = 8;
-        public int Seed = 12345;
 
         [Header("Words")]
         public List<string> Words = new List<string>
@@ -20,11 +19,21 @@ namespace MeraWorld.Core
         [HideInInspector]
         public WordGrid LastGeneratedGrid;
 
+        [HideInInspector]
+        public int CurrentLevel = 1;
+
         void Start()
         {
-            Debug.Log("=== Mera World: Word Search ===");
+            // Read current level from PlayerPrefs
+            CurrentLevel = PlayerPrefs.GetInt("CurrentLevel", 1);
 
-            var result = WordSearchGenerator.Generate(GridRows, GridColumns, Words, Seed);
+            // Generate a unique seed per level so grid changes
+            int seed = CurrentLevel * 7919 + 13;
+
+            Debug.Log($"=== Mera World: Level {CurrentLevel} ===");
+            Debug.Log($"Seed: {seed}");
+
+            var result = WordSearchGenerator.Generate(GridRows, GridColumns, Words, seed);
 
             LastGeneratedGrid = result.Grid;
 
