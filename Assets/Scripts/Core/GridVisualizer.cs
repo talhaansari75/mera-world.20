@@ -5,8 +5,9 @@ namespace MeraWorld.Core
 {
     public class GridVisualizer : MonoBehaviour
     {
-        [Header("Grid Reference")]
+        [Header("References")]
         public GameManager GameManager;
+        public SelectionManager SelectionManager;
 
         [Header("Visual Settings")]
         public float CellSize = 1.0f;
@@ -51,24 +52,42 @@ namespace MeraWorld.Core
                         originY - r * (CellSize + CellGap),
                         0f);
 
-                    CreateCellVisual(pos, cell.Letter);
+                    CreateCellVisual(pos, cell.Letter, r, c);
                 }
             }
 
             Debug.Log($"GridVisualizer: Rendered {rows}x{cols} grid.");
         }
 
-        private void CreateCellVisual(Vector3 position, char letter)
+        private void CreateCellVisual(Vector3 position, char letter, int row, int col)
         {
-            var cellObj = new GameObject($"Cell_{letter}");
+            var cellObj = new GameObject($"Cell_{row}_{col}");
             cellObj.transform.SetParent(transform);
             cellObj.transform.position = position;
 
+            // Sprite
             var sr = cellObj.AddComponent<SpriteRenderer>();
             sr.sprite = CreateSquareSprite();
             sr.color = CellColor;
             sr.sortingOrder = 0;
 
+            // Collider for click detection
+            var col2d = cellObj.AddComponent<BoxCollider2D>();
+            col2d.size = new Vector2(CellSize, CellSize);
+
+            // Letter tile behaviour
+            var tile = cellObj.AddComponent<LetterTile>();
+            tile.Row = row;
+            tile.Column = col;
+            tile.Letter = letter;
+
+            if (SelectionManager != null)
+            {
+                tile.Manager = SelectionManager;
+                tile.SetColors(CellColor, SelectionManager.SelectedColor, SelectionManager.FoundColor);
+            }
+
+            // Letter text
             var textObj = new GameObject("Letter");
             textObj.transform.SetParent(cellObj.transform);
             textObj.transform.localPosition = new Vector3(0, 0, -0.1f);
