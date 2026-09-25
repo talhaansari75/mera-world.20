@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 namespace MeraWorld.Core
 {
@@ -11,6 +12,7 @@ namespace MeraWorld.Core
 
         private Canvas _canvas;
         private GameObject _panel;
+        private Text _titleText;
 
         void Start()
         {
@@ -19,15 +21,27 @@ namespace MeraWorld.Core
 
         private void Setup()
         {
+            EnsureEventSystem();
             BuildHiddenPanel();
             if (SelectionManager != null)
                 SelectionManager.OnLevelComplete += ShowWinScreen;
+        }
+
+        private void EnsureEventSystem()
+        {
+            if (EventSystem.current == null)
+            {
+                var es = new GameObject("EventSystem");
+                es.AddComponent<EventSystem>();
+                es.AddComponent<StandaloneInputModule>();
+            }
         }
 
         private void BuildHiddenPanel()
         {
             var canvasObj = new GameObject("WinCanvas");
             canvasObj.transform.SetParent(transform);
+
             _canvas = canvasObj.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _canvas.sortingOrder = 200;
@@ -36,6 +50,9 @@ namespace MeraWorld.Core
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.matchWidthOrHeight = 0.5f;
+
+            // GraphicRaycaster is REQUIRED for button clicks
+            canvasObj.AddComponent<GraphicRaycaster>();
 
             _panel = new GameObject("Overlay");
             _panel.transform.SetParent(_canvas.transform, false);
@@ -49,24 +66,19 @@ namespace MeraWorld.Core
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
-            // Title
-            CreateText(_panel.transform, "LEVEL COMPLETE!",
-                new Vector2(0f, 280f), 90, new Color(1f, 0.85f, 0.3f), FontStyle.Bold);
+            _titleText = CreateText(_panel.transform, "LEVEL 1 COMPLETE!",
+                new Vector2(0f, 280f), 80, new Color(1f, 0.85f, 0.3f), FontStyle.Bold);
 
-            // Subtitle
             CreateText(_panel.transform, "All words found!",
                 new Vector2(0f, 180f), 45, Color.white, FontStyle.Normal);
 
-            // Coins
             CreateText(_panel.transform, "+100 coins",
                 new Vector2(0f, 90f), 55, new Color(1f, 0.9f, 0.4f), FontStyle.Bold);
 
-            // Next Level button
             CreateButton(_panel.transform, "NEXT LEVEL",
                 new Vector2(0f, -80f), new Vector2(500f, 100f),
                 new Color(0.25f, 0.7f, 0.35f), OnNextLevel);
 
-            // Replay button
             CreateButton(_panel.transform, "REPLAY",
                 new Vector2(0f, -220f), new Vector2(500f, 100f),
                 new Color(0.3f, 0.5f, 0.8f), OnReplay);
@@ -74,7 +86,7 @@ namespace MeraWorld.Core
             _panel.SetActive(false);
         }
 
-        private void CreateText(Transform parent, string content, Vector2 pos, int size, Color color, FontStyle style)
+        private Text CreateText(Transform parent, string content, Vector2 pos, int size, Color color, FontStyle style)
         {
             var obj = new GameObject("Text");
             obj.transform.SetParent(parent, false);
@@ -94,6 +106,8 @@ namespace MeraWorld.Core
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos;
             rt.sizeDelta = new Vector2(1000f, 120f);
+
+            return txt;
         }
 
         private void CreateButton(Transform parent, string label, Vector2 pos, Vector2 size, Color color, UnityEngine.Events.UnityAction onClick)
@@ -135,19 +149,33 @@ namespace MeraWorld.Core
 
         private void ShowWinScreen()
         {
-            if (_panel != null) _panel.SetActive(true);
+            if (_panel != null)
+            {
+                if (_titleText != null && GameManager != null)
+                    _titleText.text = $"LEVEL {GameManager.CurrentLevel} COMPLETE!";
+
+                _panel.SetActive(true);
+            }
         }
 
         private void OnNextLevel()
         {
-            if (_panel != null) _panel.SetActive(false);
-            Debug.Log("NEXT LEVEL clicked — will load next level later");
+            int nextLevel = 1;
+            if (GameManager != null) nextLevel = GameManager.CurrentLevel + 1;
+
+            PlayerPrefs.SetInt("CurrentLevel", nextLevel);
+            PlayerPrefs.Save();
+
+            Debug.Log($"➡️ Loading Level {nextLevel}...");
+
+            UnityEngine.SceneManagement.SceneManager.LoadScene(
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
         }
 
         private void OnReplay()
         {
-            if (_panel != null) _panel.SetActive(false);
-            Debug.Log("REPLAY clicked — restarting scene");
+            Debug.Log($"🔄 Replaying Level {(GameManager != null ? GameManager.CurrentLevel : 1)}...");
+
             UnityEngine.SceneManagement.SceneManager.LoadScene(
                 UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
         }
