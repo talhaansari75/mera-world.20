@@ -1,12 +1,10 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using MeraWorld.WordSearch;
 
 namespace MeraWorld.Core
 {
-    /// <summary>
-    /// Tracks letter selection using mouse position (works with new Input System).
-    /// </summary>
     public class SelectionManager : MonoBehaviour
     {
         [Header("References")]
@@ -16,7 +14,11 @@ namespace MeraWorld.Core
         public Color SelectedColor = new Color(0.95f, 0.75f, 0.2f);
         public Color FoundColor = new Color(0.25f, 0.75f, 0.3f);
 
+        public event Action<string> OnWordFound;
+        public event Action OnLevelComplete;
+
         private readonly List<LetterTile> _selection = new List<LetterTile>();
+        private readonly HashSet<string> _foundWords = new HashSet<string>();
         private bool _isDragging;
         private WordGrid _grid;
         private Camera _cam;
@@ -41,7 +43,7 @@ namespace MeraWorld.Core
             if (down)
             {
                 var tile = GetTileUnderMouse();
-                if (tile != null && !tile.IsFound)
+                if (tile != null)
                 {
                     ClearSelection();
                     _isDragging = true;
@@ -64,10 +66,8 @@ namespace MeraWorld.Core
         private LetterTile GetTileUnderMouse()
         {
             if (_cam == null) return null;
-
             Vector3 world = _cam.ScreenToWorldPoint(Input.mousePosition);
             Vector2 point = new Vector2(world.x, world.y);
-
             var hits = Physics2D.OverlapPointAll(point);
             foreach (var h in hits)
             {
@@ -79,7 +79,7 @@ namespace MeraWorld.Core
 
         private void TryAddAdjacent(LetterTile tile)
         {
-            if (tile == null || tile.IsFound) return;
+            if (tile == null) return;
             if (_selection.Contains(tile)) return;
 
             var last = _selection[_selection.Count - 1];
@@ -128,17 +128,50 @@ namespace MeraWorld.Core
 
             var word = WordValidator.ExtractWord(cells);
 
-            if (word != null && WordValidator.IsPlacedWord(_grid, cells))
-            {
-                Debug.Log($"✅ Word found: {word}");
-                foreach (var t in _selection) t.SetFound();
-                _selection.Clear();
-            }
-            else
+            if (word == null || !WordValidator.IsPlacedWord(_grid, cells))
             {
                 Debug.Log($"❌ Not a word: {word ?? "(invalid)"}");
                 ClearSelection();
+                return;
             }
+
+            // Check if already found
+            string normalized = NormalizeWord(word);
+            if (_foundWords.Contains(normalized))
+            {
+                Debug.Log($"↩️ Already found: {word}");
+                ClearSelection();
+                return;
+            }
+
+            // NEW find
+            Debug.Log($"✅ Word found: {word}");
+            _foundWords.Add(normalized);
+
+            foreach (var t in _selection) t.SetFound();
+            _selection.Clear();
+
+            OnWordFound?.Invoke(word);
+
+            if (GameManager != null && _foundWords.Count >= GameManager.Words.Count)
+            {
+                Debug.Log("🎉 LEVEL COMPLETE!");
+                OnLevelComplete?.Invoke();
+            }
+        }
+
+        /// <summary>
+        /// Treat reversed words as the same (STAR == RATS).
+        /// </summary>
+        private string NormalizeWord(string word)
+        {
+            word = word.ToUpperInvariant();
+            var arr = word.ToCharArray();
+            Array.Reverse(arr);
+            var reversed = new string(arr);
+
+            // Pick alphabetically smaller so STAR and RATS match
+            return string.CompareOrdinal(word, reversed) <= 0 ? word : reversed;
         }
     }
 }

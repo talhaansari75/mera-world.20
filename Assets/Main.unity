@@ -130,6 +130,9 @@ GameObject:
   - component: {fileID: 343331812}
   - component: {fileID: 343331813}
   - component: {fileID: 343331814}
+  - component: {fileID: 343331815}
+  - component: {fileID: 343331817}
+  - component: {fileID: 343331816}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -194,6 +197,53 @@ MonoBehaviour:
   CellGap: 0.05
   CellColor: {r: 0.2, g: 0.4, b: 0.8, a: 1}
   LetterColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &343331815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0724678f6977581419e57b6d12b20d31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.WordListUI
+  GameManager: {fileID: 343331813}
+  SelectionManager: {fileID: 420426493}
+  PanelWidth: 250
+  FontSize: 28
+--- !u!114 &343331816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ccee478a95bad147a97d1e2f04b6129, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.WinScreenUI
+  GameManager: {fileID: 343331813}
+  SelectionManager: {fileID: 420426493}
+  WordListUI: {fileID: 343331815}
+--- !u!114 &343331817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0724678f6977581419e57b6d12b20d31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.WordListUI
+  GameManager: {fileID: 343331813}
+  SelectionManager: {fileID: 420426493}
+  PanelWidth: 250
+  FontSize: 28
 --- !u!1 &420426491
 GameObject:
   m_ObjectHideFlags: 0
