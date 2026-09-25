@@ -1,61 +1,75 @@
 # Mera Word Search Journey (Ink & Starlight)
+
 > Words become paths. Paths become adventures.
 
-A hybrid **Word Search + Light RPG** mobile game built in **C# Unity** for Android. Explore 6 magical worlds, solve 2000+ puzzles, defeat bosses, collect pets, and build your own base.
+A hybrid **Word Search + Light RPG** mobile game built in **C# / Unity** for Android.
 
-## 🎮 About The Game
-Mera World is not just a word search. It's a journey. Classic word puzzle mechanics meet light RPG progression.
+![Unity](https://img.shields.io/badge/Unity-2022.3%20LTS-black?logo=unity)
+![C#](https://img.shields.io/badge/C%23-.NET-blue?logo=csharp)
+![Platform](https://img.shields.io/badge/Platform-Android-green?logo=android)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
-## ✨ Key Features
-- 🔤 **2000 Levels** - Across 6 unique worlds (Forest, Desert, Ice, Volcano, Sky & Void)
-- 🎭 **Light RPG Systems**
-    - Pet Collection & Evolution System
-    - Base Building & Customization
-    - Player Progression & Rewards
-- 👹 **Boss Battles** - Epic word-battles at the end of each world
-- 🧠 **Adaptive Difficulty** - Game learns your speed and adjusts
-- ☁️ **Cloud Save & Sync** - Play anywhere with Google Play Games
-- 🎨 **Ink & Starlight Theme** - Beautiful hand-drawn UI
-- 📱 **Offline Play** - No internet needed for core levels
+---
 
-## 🛠️ Tech Stack
-- **Engine:** Unity 2022.3 LTS
-- **Language:** C# (.NET)
-- **Platform:** Android (API 22+)
-- **Backend:** Firebase / Play Games Services
-- **Version Control:** Git + Git LFS
+## About
 
-## 📂 Project Structure
-Assets/_Project/Scripts - Core gameplay logic
-Assets/_Project/Prefabs - Reusable objects
-Assets/_Project/Scenes - 6 Worlds + Menu
-Assets/_Project/Art - Sprites, UI
-ProjectSettings - Unity settings
-docs - Game Design Docs
+Classic word search mechanics meet light RPG progression. Explore magical worlds, solve puzzles, defeat bosses, collect pets, and build your base across 2000+ levels.
 
-## 🚀 Getting Started
-Requirements: Unity Hub + Unity 2022.3 LTS + Android Build Support + Git LFS
+## Features
 
-1. Clone:
+- 2000 Levels across multiple themed worlds
+- Light RPG Systems - pets, base building, progression
+- Boss Battles at world milestones
+- Adaptive Difficulty
+- Cloud Save and Sync
+- Android First
+- Ink and Starlight art direction
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Engine | Unity 2022.3 LTS |
+| Language | C# (.NET) |
+| Platform | Android |
+| License | MIT |
+
+## Project Structure
+
+Assets/Scripts/Core/          GameManager, GridVisualizer, UI
+Assets/Scripts/Data/          LevelData, WorldData, LevelDatabase
+Assets/Scripts/Gameplay/      Level loading, save system
+Assets/Scripts/WordSearch/    Grid generation, validation
+Assets/Scripts/Auth/          Authentication
+Assets/Scripts/Multiplayer/   Bot player, race match
+Assets/Scripts/Session/       Game session state
+Assets/Scenes/Main.unity      Primary scene
+Assets/Tests/EditMode/        Unit tests
+
+## Setup
+
 git clone https://github.com/talhaansari75/mera-world.20.git
-git lfs pull
+cd mera-world.20
 
-2. Open with Unity Hub
-3. Open Assets/_Project/Scenes/MainMenu.unity
-4. Press Play
+Open Assets/Scenes/Main.unity in Unity editor.
 
-## 🗺️ Roadmap
-- [x] Core Word Search Mechanic
-- [x] 6 Worlds Design
-- [ ] Pet System (In Progress)
-- [ ] Boss Battle System
-- [ ] Base Building
-- [ ] Beta Release on Play Store
+## Roadmap
 
-## 📄 License
-MIT License - see LICENSE file.
+- [x] Core Word Search mechanic
+- [x] Grid generation and validation
+- [x] Level data system
+- [ ] 6 Worlds content
+- [ ] Pet system
+- [ ] Boss battles
+- [ ] Base building
+- [ ] Beta on Play Store
 
-## 👨‍💻 Author
-TalHa AnSari - GitHub: @talhaansari75
+## License
+
+MIT - see LICENSE file.
+
+## Author
+
+Talha Ansari - @talhaansari75
 
 Made with love in Karachi, Pakistan
