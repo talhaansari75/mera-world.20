@@ -33,9 +33,11 @@ namespace MeraWorld.WordSearch
             };
         }
 
+        private static readonly Direction[] _all = (Direction[])System.Enum.GetValues(typeof(Direction));
+
         public static Direction[] All()
         {
-            return (Direction[])System.Enum.GetValues(typeof(Direction));
+            return _all;
         }
     }
 }
