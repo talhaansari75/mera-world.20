@@ -1,4 +1,4 @@
-# Unity
+# ===== Unity =====
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -6,65 +6,10 @@
 [Bb]uilds/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
-*.csproj
-*.unityproj
-*.sln
-*.suo
-*.user
-*.userprefs
-*.pidb
-*.booproj
-*.svd
-*.pdb
-*.mdb
-*.opendb
-*.VC.db
+[Mm]emoryCaptures/
+[Rr]ecordings/
 
-# .NET
-bin/
-obj/
-*.dll
-*.exe
-
-# Secrets
-.env.local
-.env
-.env.*.local
-
-# Keep archive tracked (do NOT ignore)
-!_archive/
-!.env.example
-# Extra safety & local environments
-*.local
-*.log
-.DS_Store
-.coverage
-.env
-.env.*
-.github_repo
-.idea/
-.project_id
-.vercel/
-.vscode/
-build/
-coverage/
-dist/
-node_modules/
-.vercel
-.env*
-.env.local 
-# IMPORTANT: _archive/ ko kabhi ignore nahi karna
-# (yeh hamara "delete mat karo, yahan rakho" safe zone hai)
-!_archive/
-!_archive/**
 # Unity generated
-[Ll]ibrary/
-[Tt]emp/
-[Oo]bj/
-[Bb]uild/
-[Bb]uilds/
-[Ll]ogs/
-[Uu]ser[Ss]ettings/
 *.csproj
 *.unityproj
 *.sln
@@ -79,3 +24,35 @@ node_modules/
 *.mdb
 *.opendb
 *.VC.db
+
+# ===== .NET =====
+bin/
+obj/
+*.dll
+*.exe
+
+# ===== Secrets / Env =====
+.env
+.env.*
+.env.local
+*.local
+!.env.example
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.swp
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+*.log
+
+# ===== Coverage / Build =====
+coverage/
+dist/
+node_modules/
+
+# ===== Local junk =====
+.github_repo
+.project_id
