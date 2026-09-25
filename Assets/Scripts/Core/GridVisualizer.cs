@@ -14,6 +14,7 @@ namespace MeraWorld.Core
         public float CellGap = 0.05f;
         public Color CellColor = new Color(0.2f, 0.4f, 0.8f);
         public Color LetterColor = Color.white;
+        private Sprite _squareSprite;
 
         private void Start()
         {
@@ -67,7 +68,7 @@ namespace MeraWorld.Core
 
             // Sprite
             var sr = cellObj.AddComponent<SpriteRenderer>();
-            sr.sprite = CreateSquareSprite();
+            sr.sprite = _squareSprite ?? (_squareSprite = CreateSquareSprite());
             sr.color = CellColor;
             sr.sortingOrder = 0;
 

@@ -68,7 +68,7 @@ namespace MeraWorld.Session
             if (!IsComplete) return 0;
             int stars = 1;
             if (HintsUsed == 0) stars++;
-            if (HintsUsed == 0 && ElapsedSeconds <= 60) stars++;
+            if (HintsUsed == 0 && ElapsedSeconds < 60) stars++;
             return stars > 3 ? 3 : stars;
         }
     }

@@ -21,7 +21,7 @@ namespace MeraWorld.Gameplay
             int stars = 1;
 
             if (hintsUsed == 0) stars++;
-            if (hintsUsed == 0 && timeSeconds <= 60) stars++;
+            if (hintsUsed == 0 && timeSeconds < 60) stars++;
 
             return stars > MaxStars ? MaxStars : stars;
         }

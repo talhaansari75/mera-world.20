@@ -23,6 +23,7 @@ namespace MeraWorld.WordSearch
 
             int dr = Math.Sign(second.Row - first.Row);
             int dc = Math.Sign(second.Column - first.Column);
+            if (dr == 0 && dc == 0) return null;
 
             // Must be a straight line — either dr or dc (or both) is ±1
             if (Math.Abs(second.Row - first.Row) > 1 || Math.Abs(second.Column - first.Column) > 1)
