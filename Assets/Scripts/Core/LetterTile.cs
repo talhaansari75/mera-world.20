@@ -47,8 +47,10 @@ namespace MeraWorld.Core
         private void Refresh()
         {
             if (_renderer == null) return;
-            if (IsFound) _renderer.color = _foundColor;
-            else if (IsSelected) _renderer.color = _selectedColor;
+
+            // Priority: selected > found > default
+            if (IsSelected) _renderer.color = _selectedColor;
+            else if (IsFound) _renderer.color = _foundColor;
             else _renderer.color = _defaultColor;
         }
     }
