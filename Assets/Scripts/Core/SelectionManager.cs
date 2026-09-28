@@ -48,6 +48,7 @@ namespace MeraWorld.Core
                     ClearSelection();
                     _isDragging = true;
                     Add(tile);
+                    if (SoundManager.Instance != null) SoundManager.Instance.PlayLetterSelect();
                 }
             }
             else if (pressed && _isDragging)
@@ -131,11 +132,11 @@ namespace MeraWorld.Core
             if (word == null || !WordValidator.IsPlacedWord(_grid, cells))
             {
                 Debug.Log($"❌ Not a word: {word ?? "(invalid)"}");
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayWordInvalid();
                 ClearSelection();
                 return;
             }
 
-            // Check if already found
             string normalized = NormalizeWord(word);
             if (_foundWords.Contains(normalized))
             {
@@ -144,8 +145,9 @@ namespace MeraWorld.Core
                 return;
             }
 
-            // NEW find
             Debug.Log($"✅ Word found: {word}");
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayWordFound();
+
             _foundWords.Add(normalized);
 
             foreach (var t in _selection) t.SetFound();
@@ -156,21 +158,17 @@ namespace MeraWorld.Core
             if (GameManager != null && _foundWords.Count >= GameManager.Words.Count)
             {
                 Debug.Log("🎉 LEVEL COMPLETE!");
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayLevelComplete();
                 OnLevelComplete?.Invoke();
             }
         }
 
-        /// <summary>
-        /// Treat reversed words as the same (STAR == RATS).
-        /// </summary>
         private string NormalizeWord(string word)
         {
             word = word.ToUpperInvariant();
             var arr = word.ToCharArray();
             Array.Reverse(arr);
             var reversed = new string(arr);
-
-            // Pick alphabetically smaller so STAR and RATS match
             return string.CompareOrdinal(word, reversed) <= 0 ? word : reversed;
         }
     }
