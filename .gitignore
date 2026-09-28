@@ -79,3 +79,8 @@ node_modules/
 *.mdb
 *.opendb
 *.VC.db
+# Unity build temp
+.utmp/
+.utmp/
+*.apk
+*.aab
