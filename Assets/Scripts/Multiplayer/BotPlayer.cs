@@ -51,12 +51,12 @@ namespace MeraWorld.Multiplayer
         public BotPlayer(
             BotDifficulty difficulty,
             IReadOnlyList<string> wordsToFind,
-            int seed = 0,
+            int? seed = null,
             string overrideName = null)
         {
             Difficulty = difficulty;
             _wordsToFind = wordsToFind ?? throw new ArgumentNullException(nameof(wordsToFind));
-            _rng = seed == 0 ? new Random() : new Random(seed);
+            _rng = seed.HasValue ? new Random(seed.Value) : new Random();
             _averageSecondsPerWord = BaseSpeed[difficulty];
 
             // Human-like random name
@@ -90,7 +90,7 @@ namespace MeraWorld.Multiplayer
         /// <summary>
         /// Factory — create a bot appropriate for the player's current level.
         /// </summary>
-        public static BotPlayer CreateForLevel(int levelNumber, IReadOnlyList<string> wordsToFind, int seed = 0)
+        public static BotPlayer CreateForLevel(int levelNumber, IReadOnlyList<string> wordsToFind, int? seed = null)
         {
             var difficulty = DifficultyForLevel(levelNumber);
             return new BotPlayer(difficulty, wordsToFind, seed);

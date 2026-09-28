@@ -52,7 +52,7 @@ namespace MeraWorld.Gameplay
 
             var levels = new List<LevelDefinition>();
             var files = Directory.GetFiles(folderPath, "level-*.txt")
-                                 .OrderBy(f => f)
+                                 .OrderBy(f => int.Parse(System.Text.RegularExpressions.Regex.Match(f, @"\d+").Value))
                                  .ToList();
 
             for (int i = 0; i < files.Count; i++)

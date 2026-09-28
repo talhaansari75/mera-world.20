@@ -58,7 +58,7 @@ namespace MeraWorld.WordSearch
 
         public void RegisterPlacedWord(string word)
         {
-            if (!string.IsNullOrWhiteSpace(word))
+            if (!string.IsNullOrWhiteSpace(word) && !_placedWords.Contains(word.ToUpperInvariant()))
                 _placedWords.Add(word.ToUpperInvariant());
         }
 

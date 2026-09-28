@@ -16,11 +16,11 @@ namespace MeraWorld.WordSearch
             public List<string> FailedWords { get; set; } = new List<string>();
         }
 
-        public static Result Generate(int rows, int columns, IEnumerable<string> words, int seed = 0, int maxAttemptsPerWord = 200)
+        public static Result Generate(int rows, int columns, IEnumerable<string> words, int? seed = null, int maxAttemptsPerWord = 200)
         {
             if (words == null) throw new ArgumentNullException(nameof(words));
 
-            var rng = seed == 0 ? new Random() : new Random(seed);
+            var rng = seed.HasValue ? new Random(seed.Value) : new Random();
             var grid = new WordGrid(rows, columns);
             var result = new Result { Grid = grid };
 
