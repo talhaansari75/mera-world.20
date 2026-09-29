@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 namespace MeraWorld.Core
 {
@@ -48,10 +49,9 @@ namespace MeraWorld.Core
 
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.referenceResolution = new Vector2(1080, 1920);
             scaler.matchWidthOrHeight = 0.5f;
 
-            // GraphicRaycaster is REQUIRED for button clicks
             canvasObj.AddComponent<GraphicRaycaster>();
 
             _panel = new GameObject("Overlay");
@@ -67,21 +67,25 @@ namespace MeraWorld.Core
             rt.offsetMax = Vector2.zero;
 
             _titleText = CreateText(_panel.transform, "LEVEL 1 COMPLETE!",
-                new Vector2(0f, 280f), 80, new Color(1f, 0.85f, 0.3f), FontStyle.Bold);
+                new Vector2(0f, 400f), 80, new Color(1f, 0.85f, 0.3f), FontStyle.Bold);
 
             CreateText(_panel.transform, "All words found!",
-                new Vector2(0f, 180f), 45, Color.white, FontStyle.Normal);
+                new Vector2(0f, 280f), 45, Color.white, FontStyle.Normal);
 
             CreateText(_panel.transform, "+100 coins",
-                new Vector2(0f, 90f), 55, new Color(1f, 0.9f, 0.4f), FontStyle.Bold);
+                new Vector2(0f, 180f), 55, new Color(1f, 0.9f, 0.4f), FontStyle.Bold);
 
             CreateButton(_panel.transform, "NEXT LEVEL",
-                new Vector2(0f, -80f), new Vector2(500f, 100f),
+                new Vector2(0f, -80f), new Vector2(500f, 110f),
                 new Color(0.25f, 0.7f, 0.35f), OnNextLevel);
 
             CreateButton(_panel.transform, "REPLAY",
-                new Vector2(0f, -220f), new Vector2(500f, 100f),
+                new Vector2(0f, -230f), new Vector2(500f, 110f),
                 new Color(0.3f, 0.5f, 0.8f), OnReplay);
+
+            CreateButton(_panel.transform, "HOME",
+                new Vector2(0f, -380f), new Vector2(500f, 110f),
+                new Color(0.5f, 0.5f, 0.55f), OnHome);
 
             _panel.SetActive(false);
         }
@@ -105,7 +109,7 @@ namespace MeraWorld.Core
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(1000f, 120f);
+            rt.sizeDelta = new Vector2(1000f, 140f);
 
             return txt;
         }
@@ -134,11 +138,10 @@ namespace MeraWorld.Core
             var txt = textObj.AddComponent<Text>();
             txt.text = label;
             txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = 44;
+            txt.fontSize = 48;
             txt.fontStyle = FontStyle.Bold;
             txt.color = Color.white;
             txt.alignment = TextAnchor.MiddleCenter;
-            txt.supportRichText = true;
 
             var trt = textObj.GetComponent<RectTransform>();
             trt.anchorMin = Vector2.zero;
@@ -160,24 +163,46 @@ namespace MeraWorld.Core
 
         private void OnNextLevel()
         {
-            int nextLevel = 1;
-            if (GameManager != null) nextLevel = GameManager.CurrentLevel + 1;
+            int currentLevel = GameManager != null ? GameManager.CurrentLevel : 1;
+            int nextLevel = currentLevel + 1;
 
-            PlayerPrefs.SetInt("CurrentLevel", nextLevel);
+            Debug.Log($"[NEXT LEVEL] {currentLevel} -> {nextLevel}");
+
+            if (PlayerProgressManager.Instance != null)
+            {
+                PlayerProgressManager.Instance.AddCoins(100);
+                PlayerProgressManager.Instance.SetCurrentLevel(nextLevel);
+            }
+            else
+            {
+                PlayerPrefs.SetInt("CurrentLevel", nextLevel);
+                PlayerPrefs.Save();
+            }
+
+            PlayerPrefs.SetInt("SkipHome", 1);
             PlayerPrefs.Save();
 
-            Debug.Log($"➡️ Loading Level {nextLevel}...");
-
-            UnityEngine.SceneManagement.SceneManager.LoadScene(
-                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
         private void OnReplay()
         {
-            Debug.Log($"🔄 Replaying Level {(GameManager != null ? GameManager.CurrentLevel : 1)}...");
+            Debug.Log($"[REPLAY] Restarting level {GameManager?.CurrentLevel}");
 
-            UnityEngine.SceneManagement.SceneManager.LoadScene(
-                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+            PlayerPrefs.SetInt("SkipHome", 1);
+            PlayerPrefs.Save();
+
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        private void OnHome()
+        {
+            Debug.Log("[HOME] Returning to home screen");
+
+            PlayerPrefs.SetInt("SkipHome", 0);
+            PlayerPrefs.Save();
+
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
         void OnDestroy()

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MeraWorld.WordSearch;
@@ -11,14 +12,30 @@ namespace MeraWorld.Core
         public GameManager GameManager;
 
         [Header("Colors")]
-        public Color SelectedColor = new Color(0.95f, 0.75f, 0.2f);
-        public Color FoundColor = new Color(0.25f, 0.75f, 0.3f);
+        public Color SelectedColor = new Color(0.95f, 0.85f, 0.30f, 0.70f);
+        public Color FoundColor = new Color(0.40f, 0.85f, 0.40f, 0.85f);
+
+        [Header("Rewards")]
+        public int CoinsPerWord = 5;
 
         public event Action<string> OnWordFound;
         public event Action OnLevelComplete;
 
+        private static readonly Color[] WordColors = new Color[]
+        {
+            new Color(0.30f, 0.85f, 0.40f, 0.85f),
+            new Color(0.95f, 0.30f, 0.55f, 0.85f),
+            new Color(1.00f, 0.65f, 0.20f, 0.85f),
+            new Color(0.65f, 0.40f, 0.85f, 0.85f),
+            new Color(0.20f, 0.75f, 0.85f, 0.85f),
+            new Color(0.95f, 0.35f, 0.35f, 0.85f),
+            new Color(0.95f, 0.85f, 0.30f, 0.85f),
+            new Color(0.35f, 0.55f, 0.95f, 0.85f),
+        };
+
         private readonly List<LetterTile> _selection = new List<LetterTile>();
         private readonly HashSet<string> _foundWords = new HashSet<string>();
+        private int _colorIndex = 0;
         private bool _isDragging;
         private WordGrid _grid;
         private Camera _cam;
@@ -114,7 +131,8 @@ namespace MeraWorld.Core
 
         private void ClearSelection()
         {
-            foreach (var t in _selection) t.SetSelected(false);
+            foreach (var t in _selection)
+                if (!t.IsFound) t.SetSelected(false);
             _selection.Clear();
         }
 
@@ -131,7 +149,7 @@ namespace MeraWorld.Core
 
             if (word == null || !WordValidator.IsPlacedWord(_grid, cells))
             {
-                Debug.Log($"❌ Not a word: {word ?? "(invalid)"}");
+                Debug.Log($"Not a word: {word ?? "(invalid)"}");
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayWordInvalid();
                 ClearSelection();
                 return;
@@ -140,26 +158,146 @@ namespace MeraWorld.Core
             string normalized = NormalizeWord(word);
             if (_foundWords.Contains(normalized))
             {
-                Debug.Log($"↩️ Already found: {word}");
                 ClearSelection();
                 return;
             }
 
-            Debug.Log($"✅ Word found: {word}");
+            Debug.Log($"Word found: {word}");
             if (SoundManager.Instance != null) SoundManager.Instance.PlayWordFound();
 
             _foundWords.Add(normalized);
 
-            foreach (var t in _selection) t.SetFound();
+            Color wordColor = WordColors[_colorIndex % WordColors.Length];
+            _colorIndex++;
+
+            foreach (var t in _selection) t.SetFound(wordColor);
             _selection.Clear();
+
+            if (PlayerProgressManager.Instance != null)
+            {
+                PlayerProgressManager.Instance.AddCoins(CoinsPerWord);
+                PlayerProgressManager.Instance.AddWordFound();
+            }
 
             OnWordFound?.Invoke(word);
 
             if (GameManager != null && _foundWords.Count >= GameManager.Words.Count)
             {
-                Debug.Log("🎉 LEVEL COMPLETE!");
+                Debug.Log("LEVEL COMPLETE!");
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayLevelComplete();
                 OnLevelComplete?.Invoke();
+            }
+        }
+
+        public string GetRandomUnfoundWord()
+        {
+            if (GameManager == null) return null;
+
+            var unfound = new List<string>();
+            foreach (var w in GameManager.Words)
+            {
+                if (!_foundWords.Contains(NormalizeWord(w)))
+                    unfound.Add(w);
+            }
+
+            if (unfound.Count == 0) return null;
+            return unfound[UnityEngine.Random.Range(0, unfound.Count)];
+        }
+
+        public void HintWord(string word)
+        {
+            if (string.IsNullOrEmpty(word) || _grid == null) return;
+
+            word = word.ToUpperInvariant();
+            var (dr, dc) = FindWordDirection(word);
+            if (dr == 0 && dc == 0) return;
+
+            for (int r = 0; r < _grid.Rows; r++)
+            {
+                for (int c = 0; c < _grid.Columns; c++)
+                {
+                    if (_grid.GetCell(r, c).Letter != word[0]) continue;
+
+                    bool matches = true;
+                    for (int i = 0; i < word.Length; i++)
+                    {
+                        int rr = r + dr * i;
+                        int cc = c + dc * i;
+                        var cell = _grid.GetCell(rr, cc);
+                        if (cell == null || cell.Letter != word[i]) { matches = false; break; }
+                    }
+
+                    if (matches)
+                    {
+                        for (int i = 0; i < word.Length; i++)
+                        {
+                            int rr = r + dr * i;
+                            int cc = c + dc * i;
+                            var tile = GetTileAt(rr, cc);
+                            if (tile != null) StartCoroutine(FlashTile(tile));
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+
+        private (int dr, int dc) FindWordDirection(string word)
+        {
+            var dirs = new (int, int)[]
+            {
+                (0, 1), (0, -1), (1, 0), (-1, 0),
+                (1, 1), (1, -1), (-1, 1), (-1, -1)
+            };
+
+            foreach (var (dr, dc) in dirs)
+            {
+                for (int r = 0; r < _grid.Rows; r++)
+                {
+                    for (int c = 0; c < _grid.Columns; c++)
+                    {
+                        if (_grid.GetCell(r, c).Letter != word[0]) continue;
+
+                        bool matches = true;
+                        for (int i = 0; i < word.Length; i++)
+                        {
+                            int rr = r + dr * i;
+                            int cc = c + dc * i;
+                            var cell = _grid.GetCell(rr, cc);
+                            if (cell == null || cell.Letter != word[i]) { matches = false; break; }
+                        }
+
+                        if (matches) return (dr, dc);
+                    }
+                }
+            }
+            return (0, 0);
+        }
+
+        private LetterTile GetTileAt(int row, int col)
+        {
+            var allTiles = FindObjectsByType<LetterTile>(FindObjectsSortMode.None);
+            foreach (var t in allTiles)
+            {
+                if (t.Row == row && t.Column == col) return t;
+            }
+            return null;
+        }
+
+        private IEnumerator FlashTile(LetterTile tile)
+        {
+            var sr = tile.GetComponent<SpriteRenderer>();
+            if (sr == null) yield break;
+
+            Color original = sr.color;
+            Color flash = new Color(1f, 0.85f, 0.20f, 1f);
+
+            for (int i = 0; i < 3; i++)
+            {
+                sr.color = flash;
+                yield return new WaitForSeconds(0.25f);
+                sr.color = original;
+                yield return new WaitForSeconds(0.25f);
             }
         }
 

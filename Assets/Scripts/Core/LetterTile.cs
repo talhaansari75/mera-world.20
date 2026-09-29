@@ -12,11 +12,11 @@ namespace MeraWorld.Core
 
         public bool IsSelected { get; private set; }
         public bool IsFound { get; private set; }
+        public Color FoundColor { get; private set; }
 
         private SpriteRenderer _renderer;
         private Color _defaultColor;
         private Color _selectedColor;
-        private Color _foundColor;
 
         void Awake()
         {
@@ -27,20 +27,22 @@ namespace MeraWorld.Core
         {
             _defaultColor = defaultCol;
             _selectedColor = selectedCol;
-            _foundColor = foundCol;
+            FoundColor = foundCol;
             Refresh();
         }
 
         public void SetSelected(bool selected)
         {
+            if (IsFound) return;
             IsSelected = selected;
             Refresh();
         }
 
-        public void SetFound()
+        public void SetFound(Color color)
         {
             IsFound = true;
             IsSelected = false;
+            FoundColor = color;
             Refresh();
         }
 
@@ -48,9 +50,8 @@ namespace MeraWorld.Core
         {
             if (_renderer == null) return;
 
-            // Priority: selected > found > default
-            if (IsSelected) _renderer.color = _selectedColor;
-            else if (IsFound) _renderer.color = _foundColor;
+            if (IsFound) _renderer.color = FoundColor;
+            else if (IsSelected) _renderer.color = _selectedColor;
             else _renderer.color = _defaultColor;
         }
     }

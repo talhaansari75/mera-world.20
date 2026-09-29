@@ -1,0 +1,6 @@
+<linker>
+  <!-- Prevent linker from trying to resolve test assemblies -->
+  <assembly fullname="nunit.framework" ignoreIfMissing="1" />
+  <assembly fullname="UnityEngine.TestRunner" ignoreIfMissing="1" />
+  <assembly fullname="UnityEditor.TestRunner" ignoreIfMissing="1" />
+</linker>

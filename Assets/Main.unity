@@ -131,8 +131,12 @@ GameObject:
   - component: {fileID: 343331813}
   - component: {fileID: 343331814}
   - component: {fileID: 343331815}
-  - component: {fileID: 343331817}
   - component: {fileID: 343331816}
+  - component: {fileID: 343331818}
+  - component: {fileID: 343331820}
+  - component: {fileID: 343331819}
+  - component: {fileID: 343331821}
+  - component: {fileID: 343331822}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -169,7 +173,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.GameManager
   GridRows: 8
   GridColumns: 8
-  Seed: 12345
   Words:
   - CAT
   - DOG
@@ -179,6 +182,7 @@ MonoBehaviour:
   - FISH
   - BIRD
   - TREE
+  CurrentLevel: 1
 --- !u!114 &343331814
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -193,10 +197,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.GridVisualizer
   GameManager: {fileID: 343331813}
   SelectionManager: {fileID: 420426493}
-  CellSize: 1
-  CellGap: 0.05
-  CellColor: {r: 0.2, g: 0.4, b: 0.8, a: 1}
-  LetterColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &343331815
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -211,8 +211,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.WordListUI
   GameManager: {fileID: 343331813}
   SelectionManager: {fileID: 420426493}
-  PanelWidth: 250
-  FontSize: 28
 --- !u!114 &343331816
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -227,8 +225,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.WinScreenUI
   GameManager: {fileID: 343331813}
   SelectionManager: {fileID: 420426493}
-  WordListUI: {fileID: 343331815}
---- !u!114 &343331817
+--- !u!114 &343331818
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -237,13 +234,68 @@ MonoBehaviour:
   m_GameObject: {fileID: 343331811}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0724678f6977581419e57b6d12b20d31, type: 3}
+  m_Script: {fileID: 11500000, guid: 6acd4fb2eda284947897cea5b80713f1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.WordListUI
-  GameManager: {fileID: 343331813}
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.SoundManager
+  SfxVolume: 0.5
+--- !u!114 &343331819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80d30fd37c6e1f34bb650fbd361d3a67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.TopBarUI
+  Progress: {fileID: 343331820}
+--- !u!114 &343331820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba50f5cf690459f42acbeba9c071b33a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.PlayerProgressManager
+  Coins: 0
+  CurrentLevel: 1
+  HighestLevelUnlocked: 1
+  TotalStars: 0
+  TotalWordsFound: 0
+--- !u!114 &343331821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f66d3a6f258f9e419aa1ea73637a0b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.HintButtonUI
   SelectionManager: {fileID: 420426493}
-  PanelWidth: 250
-  FontSize: 28
+  Progress: {fileID: 343331820}
+  HintCost: 50
+--- !u!114 &343331822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50e814d7e04215f46b7bb5c81ea23218, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.HomeScreenUI
+  Progress: {fileID: 343331820}
 --- !u!1 &420426491
 GameObject:
   m_ObjectHideFlags: 0
@@ -291,6 +343,7 @@ MonoBehaviour:
   GameManager: {fileID: 1622648239}
   SelectedColor: {r: 0.95, g: 0.75, b: 0.2, a: 1}
   FoundColor: {r: 0.25, g: 0.75, b: 0.3, a: 1}
+  CoinsPerWord: 5
 --- !u!1 &1487051996
 GameObject:
   m_ObjectHideFlags: 0
@@ -414,7 +467,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.GameManager
   GridRows: 8
   GridColumns: 8
-  Seed: 12345
   Words:
   - CAT
   - DOG
@@ -424,6 +476,7 @@ MonoBehaviour:
   - FISH
   - BIRD
   - TREE
+  CurrentLevel: 1
 --- !u!4 &1622648240
 Transform:
   m_ObjectHideFlags: 0
