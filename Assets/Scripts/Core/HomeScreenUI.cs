@@ -159,8 +159,66 @@ namespace MeraWorld.Core
             if (SoundManager.Instance != null)
                 SoundManager.Instance.PlayButtonClick();
 
+            // Multiplayer / Social = online-only
+            if (categoryId == "social")
+            {
+                if (!InternetChecker.QuickCheck())
+                {
+                    ShowOfflineToast("Multiplayer requires internet.");
+                    return;
+                }
+            }
+
             var menu = FindFirstObjectByType<CategoryMenuUI>();
             if (menu != null) menu.Show(categoryId);
+        }
+
+        private void ShowOfflineToast(string message)
+        {
+            Debug.LogWarning($"[Home] {message}");
+
+            var canvasObj = new GameObject("OfflineToast");
+            var canvas = canvasObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 999;
+
+            var scaler = canvasObj.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1080, 1920);
+            scaler.matchWidthOrHeight = 0.5f;
+            canvasObj.AddComponent<GraphicRaycaster>();
+
+            var panel = new GameObject("Panel");
+            panel.transform.SetParent(canvas.transform, false);
+            var img = panel.AddComponent<Image>();
+            img.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.85f, 0.30f, 0.30f), 256, 40);
+            img.type = Image.Type.Sliced;
+            img.color = Color.white;
+
+            var rt = panel.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta = new Vector2(800f, 160f);
+
+            var textObj = new GameObject("Text");
+            textObj.transform.SetParent(panel.transform, false);
+            var txt = textObj.AddComponent<Text>();
+            txt.text = message;
+            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.fontSize = 32;
+            txt.fontStyle = FontStyle.Bold;
+            txt.color = Color.white;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.raycastTarget = false;
+            var trt = textObj.GetComponent<RectTransform>();
+            trt.anchorMin = Vector2.zero;
+            trt.anchorMax = Vector2.one;
+            trt.offsetMin = Vector2.zero;
+            trt.offsetMax = Vector2.zero;
+
+            Object.Destroy(canvasObj, 2.5f);
         }
 
         private void CreateStatsCard(Transform parent, Vector2 pos, int coins, int stars)

@@ -11,6 +11,7 @@ namespace MeraWorld.Core
         private GameObject _panel;
         private GameObject _gridParent;
         private Text _titleText;
+        private Text _offlineNoteText;
         private string _activeCategory = "";
 
         private class MenuItem
@@ -18,6 +19,7 @@ namespace MeraWorld.Core
             public string Label;
             public Color Color;
             public UnityEngine.Events.UnityAction OnClick;
+            public bool RequiresOnline;
         }
 
         void Awake()
@@ -71,8 +73,14 @@ namespace MeraWorld.Core
             _titleText = CreateText(_panel.transform, "CATEGORY", new Vector2(0f, 830f), 70,
                 new Color(1f, 0.85f, 0.3f), FontStyle.Bold);
 
+            // Back button
             CreateSmallButton(_panel.transform, "◀ BACK", new Vector2(-380f, 830f),
                 new Color(0.5f, 0.5f, 0.55f), OnBack);
+
+            // Offline note (hidden by default)
+            _offlineNoteText = CreateText(_panel.transform, "", new Vector2(0f, 740f), 26,
+                new Color(1f, 0.55f, 0.55f), FontStyle.Normal);
+            _offlineNoteText.gameObject.SetActive(false);
 
             // Grid parent
             _gridParent = new GameObject("GridParent");
@@ -106,16 +114,29 @@ namespace MeraWorld.Core
             string title = "MENU";
             switch (categoryId)
             {
-                case "social": title = "SOCIAL"; break;
+                case "social": title = "ONLINE"; break;
                 case "shop": title = "SHOP & STORE"; break;
                 case "progress": title = "PROGRESS"; break;
             }
             _titleText.text = title;
 
+            // Online status
+            bool online = InternetChecker.QuickCheck();
+
+            if (categoryId == "social" && !online)
+            {
+                _offlineNoteText.text = "You are offline. Online features disabled.";
+                _offlineNoteText.gameObject.SetActive(true);
+            }
+            else
+            {
+                _offlineNoteText.gameObject.SetActive(false);
+            }
+
             // Populate items
             var items = GetItemsForCategory(categoryId);
             foreach (var item in items)
-                CreateMenuItem(item);
+                CreateMenuItem(item, online);
 
             _panel.SetActive(true);
         }
@@ -128,24 +149,28 @@ namespace MeraWorld.Core
             {
                 case "social":
                     list.Add(new MenuItem {
-                        Label = "VERSUS",
+                        Label = "ONLINE MATCH",
                         Color = new Color(0.75f, 0.30f, 0.30f),
-                        OnClick = () => OpenPanel<MultiplayerMenuUI>("VERSUS")
+                        OnClick = () => OpenPanel<MultiplayerMenuUI>("ONLINE MATCH"),
+                        RequiresOnline = true
                     });
                     list.Add(new MenuItem {
                         Label = "FRIENDS",
                         Color = new Color(0.35f, 0.75f, 0.55f),
-                        OnClick = () => OpenPanel<FriendListUI>("FRIENDS")
+                        OnClick = () => OpenPanel<FriendListUI>("FRIENDS"),
+                        RequiresOnline = true
                     });
                     list.Add(new MenuItem {
                         Label = "TOURNEY",
                         Color = new Color(0.85f, 0.35f, 0.35f),
-                        OnClick = () => OpenPanel<TournamentModeUI>("TOURNAMENT")
+                        OnClick = () => OpenPanel<TournamentModeUI>("TOURNAMENT"),
+                        RequiresOnline = true
                     });
                     list.Add(new MenuItem {
                         Label = "INVITE",
                         Color = new Color(0.85f, 0.30f, 0.50f),
-                        OnClick = () => OpenPanel<ReferralSystemUI>("INVITE")
+                        OnClick = () => OpenPanel<ReferralSystemUI>("INVITE"),
+                        RequiresOnline = true
                     });
                     break;
 
@@ -153,27 +178,26 @@ namespace MeraWorld.Core
                     list.Add(new MenuItem {
                         Label = "SHOP",
                         Color = new Color(0.90f, 0.55f, 0.20f),
-                        OnClick = () => OpenPanel<ShopUI>("SHOP")
-                    });
-                    list.Add(new MenuItem {
-                        Label = "PETS",
-                        Color = new Color(0.55f, 0.35f, 0.75f),
-                        OnClick = () => OpenPanel<PetSystemUI>("PETS")
+                        OnClick = () => OpenPanel<ShopUI>("SHOP"),
+                        RequiresOnline = false
                     });
                     list.Add(new MenuItem {
                         Label = "SPIN",
                         Color = new Color(1f, 0.70f, 0.20f),
-                        OnClick = () => OpenPanel<SpinWheelUI>("SPIN")
+                        OnClick = () => OpenPanel<SpinWheelUI>("SPIN"),
+                        RequiresOnline = false
                     });
                     list.Add(new MenuItem {
                         Label = "SEASON",
                         Color = new Color(0.85f, 0.55f, 0.25f),
-                        OnClick = () => OpenPanel<SeasonPassUI>("SEASON PASS")
+                        OnClick = () => OpenPanel<SeasonPassUI>("SEASON PASS"),
+                        RequiresOnline = false
                     });
                     list.Add(new MenuItem {
                         Label = "FREE COINS",
                         Color = new Color(0.30f, 0.75f, 0.55f),
-                        OnClick = () => OpenPanel<AdRewardTiersUI>("FREE COINS")
+                        OnClick = () => OpenPanel<AdRewardTiersUI>("FREE COINS"),
+                        RequiresOnline = false
                     });
                     break;
 
@@ -181,32 +205,38 @@ namespace MeraWorld.Core
                     list.Add(new MenuItem {
                         Label = "AWARDS",
                         Color = new Color(0.85f, 0.40f, 0.55f),
-                        OnClick = () => OpenPanel<AchievementsUI>("AWARDS")
+                        OnClick = () => OpenPanel<AchievementProgressBarUI>("AWARDS"),
+                        RequiresOnline = false
                     });
                     list.Add(new MenuItem {
                         Label = "STATS",
                         Color = new Color(0.30f, 0.65f, 0.80f),
-                        OnClick = () => OpenPanel<StatisticsUI>("STATS")
+                        OnClick = () => OpenPanel<StatisticsUI>("STATS"),
+                        RequiresOnline = false
                     });
                     list.Add(new MenuItem {
                         Label = "MISSIONS",
                         Color = new Color(0.30f, 0.55f, 0.85f),
-                        OnClick = () => OpenPanel<MissionsSystem>("MISSIONS")
+                        OnClick = () => OpenPanel<MissionsSystem>("MISSIONS"),
+                        RequiresOnline = false
                     });
                     list.Add(new MenuItem {
                         Label = "WORLDS",
                         Color = new Color(0.50f, 0.70f, 0.95f),
-                        OnClick = () => OpenPanel<WorldMapUI>("WORLDS")
+                        OnClick = () => OpenPanel<WorldMapUI>("WORLDS"),
+                        RequiresOnline = false
                     });
                     list.Add(new MenuItem {
                         Label = "NEWS",
                         Color = new Color(0.75f, 0.65f, 0.30f),
-                        OnClick = () => OpenPanel<NewsFeedUI>("NEWS")
+                        OnClick = () => OpenPanel<NewsFeedUI>("NEWS"),
+                        RequiresOnline = false
                     });
                     list.Add(new MenuItem {
                         Label = "NOTIFS",
                         Color = new Color(0.65f, 0.45f, 0.75f),
-                        OnClick = () => OpenPanel<NotificationCenterUI>("NOTIFICATIONS")
+                        OnClick = () => OpenPanel<NotificationCenterUI>("NOTIFICATIONS"),
+                        RequiresOnline = false
                     });
                     break;
             }
@@ -218,20 +248,44 @@ namespace MeraWorld.Core
         {
             Debug.Log($"[Category] Opening {label}");
             _panel.SetActive(false);
-            return FindFirstObjectByType<T>();
+
+            var target = FindFirstObjectByType<T>();
+            if (target == null)
+            {
+                Debug.LogWarning($"[Category] No {typeof(T).Name} found in scene!");
+                return null;
+            }
+
+            // Try to call Show() if it exists
+            var showMethod = typeof(T).GetMethod("Show",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance,
+                null, System.Type.EmptyTypes, null);
+
+            if (showMethod != null)
+                showMethod.Invoke(target, null);
+            else
+                target.gameObject.SetActive(true);
+
+            return target;
         }
 
-        private void CreateMenuItem(MenuItem item)
+        private void CreateMenuItem(MenuItem item, bool online)
         {
+            bool disabled = item.RequiresOnline && !online;
+
             var rootObj = new GameObject($"Item_{item.Label}");
             rootObj.transform.SetParent(_gridParent.transform, false);
+
+            Color displayColor = disabled
+                ? new Color(0.30f, 0.32f, 0.38f)
+                : item.Color;
 
             // Bottom shadow
             var shadowObj = new GameObject("BottomShadow");
             shadowObj.transform.SetParent(rootObj.transform, false);
             var bShadowImg = shadowObj.AddComponent<Image>();
             bShadowImg.sprite = UISpriteFactory.Create3DButtonSprite(
-                Color.Lerp(item.Color, Color.black, 0.55f), 256, 40);
+                Color.Lerp(displayColor, Color.black, 0.55f), 256, 40);
             bShadowImg.type = Image.Type.Sliced;
             bShadowImg.raycastTarget = false;
             var shRt = shadowObj.GetComponent<RectTransform>();
@@ -245,16 +299,29 @@ namespace MeraWorld.Core
             var btnObj = new GameObject("Button");
             btnObj.transform.SetParent(rootObj.transform, false);
             var btnImg = btnObj.AddComponent<Image>();
-            btnImg.sprite = UISpriteFactory.Create3DButtonSprite(item.Color, 256, 40);
+            btnImg.sprite = UISpriteFactory.Create3DButtonSprite(displayColor, 256, 40);
             btnImg.type = Image.Type.Sliced;
             btnImg.color = Color.white;
 
             var btn = btnObj.AddComponent<Button>();
-            btn.onClick.AddListener(() =>
+            btn.interactable = !disabled;
+
+            if (!disabled)
             {
-                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-                item.OnClick?.Invoke();
-            });
+                btn.onClick.AddListener(() =>
+                {
+                    if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+
+                    // Double check: online required
+                    if (item.RequiresOnline && !InternetChecker.QuickCheck())
+                    {
+                        Debug.LogWarning($"[Category] {item.Label} requires internet.");
+                        return;
+                    }
+
+                    item.OnClick?.Invoke();
+                });
+            }
 
             var btnRt = btnObj.GetComponent<RectTransform>();
             btnRt.anchorMin = Vector2.zero;
@@ -266,11 +333,11 @@ namespace MeraWorld.Core
             var textObj = new GameObject("Label");
             textObj.transform.SetParent(btnObj.transform, false);
             var txt = textObj.AddComponent<Text>();
-            txt.text = item.Label;
+            txt.text = disabled ? $"{item.Label}\n(ONLINE ONLY)" : item.Label;
             txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = 40;
+            txt.fontSize = disabled ? 30 : 40;
             txt.fontStyle = FontStyle.Bold;
-            txt.color = Color.white;
+            txt.color = disabled ? new Color(0.75f, 0.75f, 0.80f) : Color.white;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.raycastTarget = false;
 
