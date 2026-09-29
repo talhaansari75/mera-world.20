@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace MeraWorld.Core
 {
-    [DefaultExecutionOrder(-100)]  // Runs before all other scripts
+    [DefaultExecutionOrder(-100)]
     public class SoundManager : MonoBehaviour
     {
         public static SoundManager Instance { get; private set; }
@@ -30,26 +30,69 @@ namespace MeraWorld.Core
 
         public void PlayLetterSelect()
         {
-            PlayTone(880f, 0.06f, 0.3f);
-            Debug.Log("[Sound] Letter select");
+            PlayTone(1200f, 0.05f, 0.25f);
         }
 
         public void PlayWordFound()
         {
-            PlayTone(1200f, 0.15f, 0.5f);
-            Debug.Log("[Sound] Word found");
+            // Two-tone chime
+            PlayTone(880f, 0.10f, 0.35f);
+            Invoke(nameof(PlayWordFoundSecond), 0.10f);
+        }
+
+        private void PlayWordFoundSecond()
+        {
+            PlayTone(1320f, 0.15f, 0.35f);
         }
 
         public void PlayWordInvalid()
         {
-            PlayTone(220f, 0.15f, 0.4f);
-            Debug.Log("[Sound] Invalid word");
+            PlayTone(220f, 0.20f, 0.30f);
         }
 
         public void PlayLevelComplete()
         {
-            PlayTone(660f, 0.5f, 0.6f);
-            Debug.Log("[Sound] Level complete");
+            // Three-tone fanfare
+            PlayTone(523f, 0.12f, 0.40f);
+            Invoke(nameof(PlayLevelCompleteSecond), 0.12f);
+            Invoke(nameof(PlayLevelCompleteThird), 0.24f);
+        }
+
+        private void PlayLevelCompleteSecond()
+        {
+            PlayTone(659f, 0.12f, 0.40f);
+        }
+
+        private void PlayLevelCompleteThird()
+        {
+            PlayTone(784f, 0.30f, 0.40f);
+        }
+
+        public void PlayButtonClick()
+        {
+            PlayTone(600f, 0.04f, 0.20f);
+        }
+
+        public void PlayCoinCollect()
+        {
+            PlayTone(1600f, 0.08f, 0.30f);
+            Invoke(nameof(PlayCoinCollectSecond), 0.06f);
+        }
+
+        private void PlayCoinCollectSecond()
+        {
+            PlayTone(2000f, 0.10f, 0.30f);
+        }
+
+        public void PlayStarEarned()
+        {
+            PlayTone(1046f, 0.15f, 0.35f);
+            Invoke(nameof(PlayStarSecond), 0.10f);
+        }
+
+        private void PlayStarSecond()
+        {
+            PlayTone(1568f, 0.20f, 0.35f);
         }
 
         private void PlayTone(float frequency, float duration, float volume)
@@ -63,7 +106,9 @@ namespace MeraWorld.Core
             {
                 float t = (float)i / sampleRate;
                 float env = 1f - (float)i / sampleCount;
-                data[i] = Mathf.Sin(2f * Mathf.PI * frequency * t) * env * volume;
+                // Fade in/out for cleaner sound
+                float fadeIn = Mathf.Min(1f, i / (sampleRate * 0.005f));
+                data[i] = Mathf.Sin(2f * Mathf.PI * frequency * t) * env * volume * fadeIn;
             }
 
             clip.SetData(data, 0);

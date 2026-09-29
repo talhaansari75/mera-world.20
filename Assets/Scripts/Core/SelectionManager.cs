@@ -66,6 +66,7 @@ namespace MeraWorld.Core
                     _isDragging = true;
                     Add(tile);
                     if (SoundManager.Instance != null) SoundManager.Instance.PlayLetterSelect();
+                    if (VibrationManager.Instance != null) VibrationManager.Instance.VibrateLight();
                 }
             }
             else if (pressed && _isDragging)
@@ -151,6 +152,8 @@ namespace MeraWorld.Core
             {
                 Debug.Log($"Not a word: {word ?? "(invalid)"}");
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayWordInvalid();
+                if (VibrationManager.Instance != null) VibrationManager.Instance.VibrateMedium();
+                if (ScreenShakeUI.Instance != null) ScreenShakeUI.Instance.Shake(0.2f, 0.08f);
                 ClearSelection();
                 return;
             }
@@ -164,6 +167,7 @@ namespace MeraWorld.Core
 
             Debug.Log($"Word found: {word}");
             if (SoundManager.Instance != null) SoundManager.Instance.PlayWordFound();
+            if (VibrationManager.Instance != null) VibrationManager.Instance.VibrateMedium();
 
             _foundWords.Add(normalized);
 
@@ -179,12 +183,34 @@ namespace MeraWorld.Core
                 PlayerProgressManager.Instance.AddWordFound();
             }
 
+            if (ComboSystem.Instance != null)
+                ComboSystem.Instance.RegisterWordFound();
+
+            if (AchievementManager.Instance != null)
+            {
+                AchievementManager.Instance.AddProgress("first_word", 1);
+                AchievementManager.Instance.AddProgress("word_hunter", 1);
+                AchievementManager.Instance.AddProgress("word_master", 1);
+            }
+
             OnWordFound?.Invoke(word);
 
             if (GameManager != null && _foundWords.Count >= GameManager.Words.Count)
             {
                 Debug.Log("LEVEL COMPLETE!");
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayLevelComplete();
+                if (VibrationManager.Instance != null) VibrationManager.Instance.VibrateHeavy();
+
+                if (AchievementManager.Instance != null)
+                {
+                    AchievementManager.Instance.AddProgress("first_level", 1);
+                    AchievementManager.Instance.AddProgress("level_5", 1);
+                    AchievementManager.Instance.AddProgress("level_10", 1);
+                }
+
+                if (ComboSystem.Instance != null)
+                    ComboSystem.Instance.ResetCombo();
+
                 OnLevelComplete?.Invoke();
             }
         }

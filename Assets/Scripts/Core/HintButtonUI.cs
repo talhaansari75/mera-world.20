@@ -8,6 +8,7 @@ namespace MeraWorld.Core
         [Header("References")]
         public SelectionManager SelectionManager;
         public PlayerProgressManager Progress;
+        public WinScreenUI WinScreen;
 
         [Header("Settings")]
         public int HintCost = 50;
@@ -26,6 +27,7 @@ namespace MeraWorld.Core
         {
             if (Progress == null) Progress = PlayerProgressManager.Instance;
             if (SelectionManager == null) SelectionManager = FindFirstObjectByType<SelectionManager>();
+            if (WinScreen == null) WinScreen = FindFirstObjectByType<WinScreenUI>();
 
             BuildCanvas();
             BuildHintButton();
@@ -130,6 +132,11 @@ namespace MeraWorld.Core
 
             Debug.Log($"[Hint] Showing hint for: {word}");
             SelectionManager.HintWord(word);
+
+            // Track hint count for star rating
+            if (WinScreen != null)
+                WinScreen.HintsUsed++;
+
             UpdateButtonState();
         }
 

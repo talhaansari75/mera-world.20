@@ -9,10 +9,10 @@ namespace MeraWorld.Core
         public GameManager GameManager;
         public SelectionManager SelectionManager;
 
-        private const float CellSize = 0.60f;
-        private const float CellGap  = 0.10f;
+        private const float CellSize = 0.50f;
+        private const float CellGap  = 0.08f;
         private const float GridOffsetX = 0f;
-        private const float GridOffsetY = 0.60f;
+        private const float GridOffsetY = 0.9f;
 
         private static readonly Color TileTop    = new Color(0.42f, 0.68f, 1.00f);
         private static readonly Color TileMid    = new Color(0.20f, 0.42f, 0.85f);
@@ -60,12 +60,12 @@ namespace MeraWorld.Core
             float originX = -totalWidth  / 2f + CellSize / 2f;
             float originY =  totalHeight / 2f - CellSize / 2f;
 
-            float padX = CellSize * 1.0f;
-            float padY = CellSize * 1.0f;
+            float padX = CellSize * 0.9f;
+            float padY = CellSize * 0.9f;
             float panelW = totalWidth  + padX;
             float panelH = totalHeight + padY;
 
-            CreateStarfield(panelW * 3.5f, panelH * 3.5f, 60);
+            CreateStarfield(panelW * 4f, panelH * 4f, 60);
 
             var rimObj = new GameObject("GoldRim");
             rimObj.transform.SetParent(transform);
@@ -74,7 +74,7 @@ namespace MeraWorld.Core
             rimSr.sprite = _rimSprite;
             rimSr.color = GoldRim;
             rimSr.sortingOrder = -12;
-            rimObj.transform.localScale = new Vector3(panelW + 0.12f, panelH + 0.12f, 1f);
+            rimObj.transform.localScale = new Vector3(panelW + 0.10f, panelH + 0.10f, 1f);
 
             var rimDarkObj = new GameObject("RimDark");
             rimDarkObj.transform.SetParent(transform);
@@ -83,7 +83,7 @@ namespace MeraWorld.Core
             rimDarkSr.sprite = _rimSprite;
             rimDarkSr.color = new Color(0.02f, 0.03f, 0.08f);
             rimDarkSr.sortingOrder = -11;
-            rimDarkObj.transform.localScale = new Vector3(panelW + 0.06f, panelH + 0.06f, 1f);
+            rimDarkObj.transform.localScale = new Vector3(panelW + 0.05f, panelH + 0.05f, 1f);
 
             var panelObj = new GameObject("GridPanel");
             panelObj.transform.SetParent(transform);
@@ -185,7 +185,7 @@ namespace MeraWorld.Core
             tms.text = letter.ToString();
             tms.color = LetterShadowColor;
             tms.fontSize = 100;
-            tms.characterSize = 0.060f;
+            tms.characterSize = 0.050f;
             tms.anchor = TextAnchor.MiddleCenter;
             tms.alignment = TextAlignment.Center;
             tms.fontStyle = FontStyle.Bold;
@@ -207,7 +207,7 @@ namespace MeraWorld.Core
             tm.text = letter.ToString();
             tm.color = LetterColor;
             tm.fontSize = 100;
-            tm.characterSize = 0.060f;
+            tm.characterSize = 0.050f;
             tm.anchor = TextAnchor.MiddleCenter;
             tm.alignment = TextAlignment.Center;
             tm.fontStyle = FontStyle.Bold;

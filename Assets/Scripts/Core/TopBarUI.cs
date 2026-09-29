@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,7 @@ namespace MeraWorld.Core
         private Canvas _canvas;
         private Text _coinsText;
         private Text _levelText;
+        private RectTransform _coinsRect;
 
         void Start()
         {
@@ -71,7 +73,6 @@ namespace MeraWorld.Core
 
         private void BuildCoinsDisplay()
         {
-            // Coin icon (circle)
             var iconObj = new GameObject("CoinIcon");
             iconObj.transform.SetParent(_canvas.transform, false);
 
@@ -87,7 +88,6 @@ namespace MeraWorld.Core
             iconRt.anchoredPosition = new Vector2(80f, -55f);
             iconRt.sizeDelta = new Vector2(60f, 60f);
 
-            // Inner darker circle for depth
             var innerObj = new GameObject("CoinInner");
             innerObj.transform.SetParent(iconObj.transform, false);
 
@@ -102,7 +102,6 @@ namespace MeraWorld.Core
             innerRt.anchoredPosition = Vector2.zero;
             innerRt.sizeDelta = new Vector2(42f, 42f);
 
-            // Coin text
             var textObj = new GameObject("CoinsText");
             textObj.transform.SetParent(_canvas.transform, false);
 
@@ -114,12 +113,12 @@ namespace MeraWorld.Core
             _coinsText.color = Color.white;
             _coinsText.alignment = TextAnchor.MiddleLeft;
 
-            var rt = textObj.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0f, 1f);
-            rt.anchorMax = new Vector2(0f, 1f);
-            rt.pivot = new Vector2(0f, 0.5f);
-            rt.anchoredPosition = new Vector2(120f, -55f);
-            rt.sizeDelta = new Vector2(300f, 80f);
+            _coinsRect = textObj.GetComponent<RectTransform>();
+            _coinsRect.anchorMin = new Vector2(0f, 1f);
+            _coinsRect.anchorMax = new Vector2(0f, 1f);
+            _coinsRect.pivot = new Vector2(0f, 0.5f);
+            _coinsRect.anchoredPosition = new Vector2(120f, -55f);
+            _coinsRect.sizeDelta = new Vector2(300f, 80f);
         }
 
         private void BuildLevelDisplay()
@@ -145,8 +144,32 @@ namespace MeraWorld.Core
 
         private void UpdateCoins(int amount)
         {
-            if (_coinsText != null)
-                _coinsText.text = amount.ToString();
+            if (_coinsText == null) return;
+
+            _coinsText.text = amount.ToString();
+
+            // Punch animation
+            StopAllCoroutines();
+            StartCoroutine(PunchCoins());
+        }
+
+        private IEnumerator PunchCoins()
+        {
+            float duration = 0.25f;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = elapsed / duration;
+
+                float scale = 1f + Mathf.Sin(t * Mathf.PI) * 0.35f;
+                _coinsRect.localScale = new Vector3(scale, scale, 1f);
+
+                yield return null;
+            }
+
+            _coinsRect.localScale = Vector3.one;
         }
 
         private void UpdateLevel(int level)
