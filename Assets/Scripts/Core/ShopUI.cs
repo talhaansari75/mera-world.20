@@ -73,7 +73,6 @@ namespace MeraWorld.Core
             CreateSmallButton(_panel.transform, "◀ BACK", new Vector2(-380f, 800f),
                 new Color(0.5f, 0.5f, 0.55f), OnBack);
 
-            // Items
             CreateShopItem(_panel.transform, "10 HINTS", "500 coins", 500, 500f, OnBuyHints10);
             CreateShopItem(_panel.transform, "50 HINTS", "2000 coins", 2000, 300f, OnBuyHints50);
             CreateShopItem(_panel.transform, "100 HINTS", "3500 coins", 3500, 100f, OnBuyHints100);
@@ -98,7 +97,6 @@ namespace MeraWorld.Core
             rt.anchoredPosition = new Vector2(0f, yPos);
             rt.sizeDelta = new Vector2(900f, 150f);
 
-            // Icon
             var iconObj = new GameObject("Icon");
             iconObj.transform.SetParent(itemObj.transform, false);
             var iconImg = iconObj.AddComponent<Image>();
@@ -111,7 +109,6 @@ namespace MeraWorld.Core
             iconRt.anchoredPosition = new Vector2(25f, 0f);
             iconRt.sizeDelta = new Vector2(100f, 100f);
 
-            // Name
             var nameObj = new GameObject("Name");
             nameObj.transform.SetParent(itemObj.transform, false);
             var nameTxt = nameObj.AddComponent<Text>();
@@ -129,7 +126,6 @@ namespace MeraWorld.Core
             nameRt.anchoredPosition = new Vector2(150f, 0f);
             nameRt.sizeDelta = new Vector2(-400f, 80f);
 
-            // Price
             var priceObj = new GameObject("Price");
             priceObj.transform.SetParent(itemObj.transform, false);
             var priceTxt = priceObj.AddComponent<Text>();
@@ -146,7 +142,6 @@ namespace MeraWorld.Core
             priceRt.anchoredPosition = new Vector2(150f, 0f);
             priceRt.sizeDelta = new Vector2(-400f, 60f);
 
-            // Buy button
             var btnObj = new GameObject("BuyBtn");
             btnObj.transform.SetParent(itemObj.transform, false);
 
@@ -222,6 +217,9 @@ namespace MeraWorld.Core
             PlayerPrefs.SetInt("RemoveAds", 1);
             PlayerPrefs.Save();
             Debug.Log("[Shop] Ads removed");
+
+            if (NoAdsConfettiUI.Instance != null)
+                NoAdsConfettiUI.Instance.Celebrate();
         }
 
         private void OnBuyGoldenTheme()

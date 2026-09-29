@@ -55,11 +55,10 @@ namespace MeraWorld.Core
             rt.anchoredPosition = Vector2.zero;
             rt.sizeDelta = new Vector2(0f, 120f);
 
-            // Label
             var textObj = new GameObject("AdText");
             textObj.transform.SetParent(_banner.transform, false);
             var txt = textObj.AddComponent<Text>();
-            txt.text = "AD SPACE  •  Remove with SHOP";
+            txt.text = "BANNER AD  •  320x50";
             txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             txt.fontSize = 28;
             txt.fontStyle = FontStyle.Bold;
@@ -79,11 +78,12 @@ namespace MeraWorld.Core
             if (PlayerPrefs.GetInt("RemoveAds", 0) == 1)
             {
                 _banner.SetActive(false);
-                Debug.Log("[Ads] Removed - hidden");
+                Debug.Log("[Ads] Banner hidden (ads removed)");
             }
             else
             {
                 _banner.SetActive(true);
+                Debug.Log("[Ads] Banner shown");
             }
         }
     }

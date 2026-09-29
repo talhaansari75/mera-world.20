@@ -21,6 +21,7 @@ namespace MeraWorld.Core
 
         private static readonly string[][] WordBankByLevel = new string[][]
         {
+            // ========== Levels 1-20 (existing) ==========
             new[] { "CAT", "DOG", "SUN", "MOON", "STAR", "FISH", "BIRD", "TREE" },
             new[] { "BOOK", "GAME", "PLAY", "FOOD", "HOME", "LOVE", "HOPE", "TIME" },
             new[] { "APPLE", "BREAD", "CHAIR", "DANCE", "EAGLE", "FLAME", "GRASS", "HONEY" },
@@ -41,6 +42,42 @@ namespace MeraWorld.Core
             new[] { "TREASURE", "JOURNEY", "ADVENTURE", "DISCOVERY", "EXPEDITION", "EXPLORER", "COMPASS", "MAP" },
             new[] { "TWILIGHT", "ECLIPSE", "PHANTOM", "CRYSTAL", "SILVER", "GOLDEN", "MARBLE", "VELVET" },
             new[] { "INFINITY", "ETERNAL", "COSMIC", "QUANTUM", "PHOTON", "GRAVITY", "MAGNETIC", "SPECTRUM" },
+
+            // ========== Levels 21-30 (NEW) ==========
+            new[] { "GARDEN", "SILVER", "MEADOW", "PUZZLE", "CANDLE", "DESERT", "FOREST", "MIRROR" },
+            new[] { "ANCIENT", "MYSTERY", "WHISPER", "JOURNEY", "BALANCE", "HORIZON", "MAGICAL", "SPARKLE" },
+            new[] { "CRIMSON", "EMERALD", "SAPPHIRE", "OBSIDIAN", "AMETHYST", "TOPAZ", "OPAL", "JADE" },
+            new[] { "WHISKER", "TWINKLE", "GIGGLE", "NIBBLE", "WOBBLE", "SPRINKLE", "CRACKLE", "WIGGLE" },
+            new[] { "FRIENDSHIP", "HAPPINESS", "ADVENTURE", "DISCOVERY", "CHALLENGE", "TRIUMPH", "VICTORY", "FREEDOM" },
+            new[] { "TELESCOPE", "MICROSCOPE", "PERISCOPE", "KALEIDOSCOPE", "STETHOSCOPE", "HOROSCOPE", "GYROSCOPE", "SCOPE" },
+            new[] { "THUNDER", "LIGHTNING", "HURRICANE", "TORNADO", "BLIZZARD", "AVALANCHE", "EARTHQUAKE", "TSUNAMI" },
+            new[] { "BUTTERFLY", "LADYBUG", "FIREFLY", "DRAGONFLY", "GRASSHOPPER", "CRICKET", "BEETLE", "MANTIS" },
+            new[] { "PIANO", "GUITAR", "VIOLIN", "TRUMPET", "SAXOPHONE", "FLUTE", "DRUMS", "HARP" },
+            new[] { "SPAGHETTI", "LASAGNA", "RAVIOLI", "FETTUCCINE", "MACARONI", "PENNE", "RIGATONI", "LINGUINE" },
+
+            // ========== Levels 31-40 (NEW) ==========
+            new[] { "AURORA", "CORONA", "SOLSTICE", "EQUINOX", "ZENITH", "NADIR", "APEX", "VERGE" },
+            new[] { "ANTIQUE", "VINTAGE", "CLASSIC", "MODERN", "FUTURE", "PRESENT", "HISTORY", "LEGACY" },
+            new[] { "SAPPHIRE", "DIAMOND", "EMERALD", "RUBY", "PEARL", "OPAL", "TOPAZ", "AMBER" },
+            new[] { "ELEGANCE", "GRACE", "BEAUTY", "CHARM", "POISE", "STYLE", "FASHION", "GLAMOUR" },
+            new[] { "MOUNTAIN", "VALLEY", "CANYON", "PLATEAU", "CLIFF", "RIDGE", "SUMMIT", "PEAK" },
+            new[] { "ALPHABET", "LANGUAGE", "GRAMMAR", "VOCABULARY", "SENTENCE", "PARAGRAPH", "CHAPTER", "STORY" },
+            new[] { "CRYSTAL", "PRISM", "SPECTRUM", "REFLECT", "REFRACT", "SHIMMER", "GLIMMER", "GLISTEN" },
+            new[] { "COMPASSION", "KINDNESS", "GENEROSITY", "HONESTY", "LOYALTY", "PATIENCE", "COURAGE", "WISDOM" },
+            new[] { "TRIUMPH", "VICTORY", "CHAMPION", "WINNER", "LEGEND", "HERO", "MASTER", "TITAN" },
+            new[] { "STARDUST", "MOONBEAM", "SUNRISE", "SUNSET", "TWILIGHT", "DAWN", "DUSK", "NIGHTFALL" },
+
+            // ========== Levels 41-50 (NEW) ==========
+            new[] { "OBSERVATORY", "LABORATORY", "LIBRARY", "GALLERY", "THEATER", "STADIUM", "MUSEUM", "ACADEMY" },
+            new[] { "MELODIOUS", "HARMONIOUS", "RHYTHMIC", "LYRICAL", "POETIC", "ARTISTIC", "CREATIVE", "MUSICAL" },
+            new[] { "RESPLENDENT", "MAGNIFICENT", "SPLENDID", "GLORIOUS", "MAJESTIC", "GRAND", "SUBLIME", "DIVINE" },
+            new[] { "PERSEVERE", "ENDEAVOR", "PURSUE", "CONQUER", "OVERCOME", "ACHIEVE", "SUCCEED", "PROSPER" },
+            new[] { "WHIMSICAL", "QUIZZICAL", "COMICAL", "FANCIFUL", "CAPRICIOUS", "PLAYFUL", "MISCHIEVOUS", "JOVIAL" },
+            new[] { "TRANQUIL", "SERENE", "PEACEFUL", "CALM", "SOOTHING", "GENTLE", "TENDER", "SOFT" },
+            new[] { "ILLUMINATE", "RADIATE", "GLOWING", "SHIMMERING", "GLISTENING", "SPARKLING", "DAZZLING", "BLAZING" },
+            new[] { "ADVENTUROUS", "COURAGEOUS", "FEARLESS", "DARING", "BOLD", "VALIANT", "HEROIC", "GALLANT" },
+            new[] { "ABUNDANCE", "PROSPERITY", "WEALTH", "FORTUNE", "RICHES", "TREASURE", "PLENTY", "BOUNTY" },
+            new[] { "TRANSCENDENT", "EXTRAORDINARY", "REMARKABLE", "EXCEPTIONAL", "PHENOMENAL", "MIRACULOUS", "WONDROUS", "ASTOUNDING" },
         };
 
         void Start()
@@ -78,6 +115,7 @@ namespace MeraWorld.Core
 
             var list = new List<string>(source);
 
+            // For levels > 50, shuffle the words
             if (level > WordBankByLevel.Length)
             {
                 var rng = new System.Random(level * 9973);

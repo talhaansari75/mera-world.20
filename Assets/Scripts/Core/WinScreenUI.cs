@@ -203,7 +203,6 @@ namespace MeraWorld.Core
                     : new Color(0.25f, 0.25f, 0.30f);
             }
 
-            // Save best stars for this level
             if (GameManager != null)
             {
                 int levelNum = GameManager.CurrentLevel;
@@ -216,6 +215,10 @@ namespace MeraWorld.Core
             }
 
             _panel.SetActive(true);
+
+            // Notify ads manager
+            if (AdsManager.Instance != null)
+                AdsManager.Instance.OnLevelCompleted();
         }
 
         private int CalculateStars(float timeSeconds, int hints)

@@ -45,23 +45,44 @@ namespace MeraWorld.Core
 
             canvasObj.AddComponent<GraphicRaycaster>();
 
+            // 3D container
+            var container = new GameObject("TimerContainer");
+            container.transform.SetParent(_canvas.transform, false);
+
+            var containerImg = container.AddComponent<Image>();
+            containerImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.15f, 0.20f, 0.35f), 128, 20);
+            containerImg.type = Image.Type.Sliced;
+            containerImg.color = Color.white;
+            containerImg.raycastTarget = false;
+
+            var cRt = container.GetComponent<RectTransform>();
+            cRt.anchorMin = new Vector2(0.5f, 1f);
+            cRt.anchorMax = new Vector2(0.5f, 1f);
+            cRt.pivot = new Vector2(0.5f, 1f);
+            cRt.anchoredPosition = new Vector2(0f, -195f);
+            cRt.sizeDelta = new Vector2(260f, 55f);
+
             var textObj = new GameObject("TimerText");
-            textObj.transform.SetParent(_canvas.transform, false);
+            textObj.transform.SetParent(container.transform, false);
 
             _timerText = textObj.AddComponent<Text>();
             _timerText.text = "0:00";
             _timerText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _timerText.fontSize = 42;
+            _timerText.fontSize = 36;
             _timerText.fontStyle = FontStyle.Bold;
             _timerText.color = new Color(0.85f, 0.90f, 1f);
             _timerText.alignment = TextAnchor.MiddleCenter;
+            _timerText.raycastTarget = false;
+
+            var shadow = textObj.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.65f);
+            shadow.effectDistance = new Vector2(2f, -2f);
 
             var rt = textObj.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 1f);
-            rt.anchorMax = new Vector2(0.5f, 1f);
-            rt.pivot = new Vector2(0.5f, 1f);
-            rt.anchoredPosition = new Vector2(0f, -185f);
-            rt.sizeDelta = new Vector2(400f, 50f);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
         }
 
         void Update()
@@ -82,10 +103,7 @@ namespace MeraWorld.Core
                 _timerText.color = new Color(1f, 0.5f, 0.4f);
         }
 
-        private void OnLevelComplete()
-        {
-            _stopped = true;
-        }
+        private void OnLevelComplete() { _stopped = true; }
 
         void OnDestroy()
         {

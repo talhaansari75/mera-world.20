@@ -8,6 +8,8 @@ namespace MeraWorld.Core
 {
     public class SelectionManager : MonoBehaviour
     {
+        public static SelectionManager Instance { get; private set; }
+
         [Header("References")]
         public GameManager GameManager;
 
@@ -39,6 +41,11 @@ namespace MeraWorld.Core
         private bool _isDragging;
         private WordGrid _grid;
         private Camera _cam;
+
+        void Awake()
+        {
+            Instance = this;
+        }
 
         void Start()
         {

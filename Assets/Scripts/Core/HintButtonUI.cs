@@ -14,9 +14,9 @@ namespace MeraWorld.Core
         public int HintCost = 50;
 
         private Canvas _canvas;
+        private GameObject _buttonRoot;
         private Button _button;
         private Text _label;
-        private Image _buttonImage;
 
         void Start()
         {
@@ -62,32 +62,62 @@ namespace MeraWorld.Core
 
         private void BuildHintButton()
         {
-            var btnObj = new GameObject("HintButton");
-            btnObj.transform.SetParent(_canvas.transform, false);
+            _buttonRoot = new GameObject("HintBtnRoot");
+            _buttonRoot.transform.SetParent(_canvas.transform, false);
 
-            _buttonImage = btnObj.AddComponent<Image>();
-            _buttonImage.color = new Color(1f, 0.82f, 0.25f);
+            var rootRt = _buttonRoot.AddComponent<RectTransform>();
+            rootRt.anchorMin = new Vector2(0.5f, 0f);
+            rootRt.anchorMax = new Vector2(0.5f, 0f);
+            rootRt.pivot = new Vector2(0.5f, 0f);
+            rootRt.anchoredPosition = new Vector2(0f, 40f);
+            rootRt.sizeDelta = new Vector2(500f, 120f);
+
+            // Bottom shadow
+            var shadowObj = new GameObject("BottomShadow");
+            shadowObj.transform.SetParent(_buttonRoot.transform, false);
+            var bShadowImg = shadowObj.AddComponent<Image>();
+            bShadowImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.60f, 0.42f, 0.08f), 256, 50);
+            bShadowImg.type = Image.Type.Sliced;
+            bShadowImg.raycastTarget = false;
+            var shRt = shadowObj.GetComponent<RectTransform>();
+            shRt.anchorMin = Vector2.zero;
+            shRt.anchorMax = Vector2.one;
+            shRt.offsetMin = Vector2.zero;
+            shRt.offsetMax = Vector2.zero;
+            shRt.anchoredPosition = new Vector2(0f, -8f);
+
+            // Main button
+            var btnObj = new GameObject("Button");
+            btnObj.transform.SetParent(_buttonRoot.transform, false);
+            var btnImg = btnObj.AddComponent<Image>();
+            btnImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(1f, 0.82f, 0.25f), 256, 50);
+            btnImg.type = Image.Type.Sliced;
+            btnImg.color = Color.white;
 
             _button = btnObj.AddComponent<Button>();
             _button.onClick.AddListener(OnHintClicked);
 
-            var rt = btnObj.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0f);
-            rt.anchorMax = new Vector2(0.5f, 0f);
-            rt.pivot = new Vector2(0.5f, 0f);
-            rt.anchoredPosition = new Vector2(0f, 40f);
-            rt.sizeDelta = new Vector2(500f, 130f);
+            var btnRt = btnObj.GetComponent<RectTransform>();
+            btnRt.anchorMin = Vector2.zero;
+            btnRt.anchorMax = Vector2.one;
+            btnRt.offsetMin = Vector2.zero;
+            btnRt.offsetMax = new Vector2(0f, 8f);
 
+            // Label
             var labelObj = new GameObject("Label");
             labelObj.transform.SetParent(btnObj.transform, false);
-
             _label = labelObj.AddComponent<Text>();
             _label.text = $"HINT ({HintCost})";
             _label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _label.fontSize = 52;
+            _label.fontSize = 48;
             _label.fontStyle = FontStyle.Bold;
             _label.color = new Color(0.15f, 0.10f, 0.05f);
             _label.alignment = TextAnchor.MiddleCenter;
+            _label.raycastTarget = false;
+
+            var shadow = labelObj.AddComponent<Shadow>();
+            shadow.effectColor = new Color(1f, 1f, 1f, 0.35f);
+            shadow.effectDistance = new Vector2(1f, 1f);
 
             var lrt = labelObj.GetComponent<RectTransform>();
             lrt.anchorMin = Vector2.zero;
@@ -102,15 +132,18 @@ namespace MeraWorld.Core
 
             bool canAfford = Progress.Coins >= HintCost;
             _button.interactable = canAfford;
-            _buttonImage.color = canAfford
-                ? new Color(1f, 0.82f, 0.25f)
-                : new Color(0.4f, 0.4f, 0.4f);
+
+            var img = _button.GetComponent<Image>();
+            if (img != null)
+            {
+                img.sprite = UISpriteFactory.Create3DButtonSprite(
+                    canAfford ? new Color(1f, 0.82f, 0.25f) : new Color(0.40f, 0.35f, 0.25f),
+                    256, 50);
+                img.type = Image.Type.Sliced;
+            }
         }
 
-        private void OnCoinsChanged(int amount)
-        {
-            UpdateButtonState();
-        }
+        private void OnCoinsChanged(int amount) { UpdateButtonState(); }
 
         private void OnHintClicked()
         {
@@ -125,7 +158,6 @@ namespace MeraWorld.Core
             var word = SelectionManager.GetRandomUnfoundWord();
             if (string.IsNullOrEmpty(word))
             {
-                Debug.Log("[Hint] All words already found!");
                 Progress.AddCoins(HintCost);
                 return;
             }
@@ -133,9 +165,8 @@ namespace MeraWorld.Core
             Debug.Log($"[Hint] Showing hint for: {word}");
             SelectionManager.HintWord(word);
 
-            // Track hint count for star rating
-            if (WinScreen != null)
-                WinScreen.HintsUsed++;
+            if (WinScreen != null) WinScreen.HintsUsed++;
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayWordFound();
 
             UpdateButtonState();
         }

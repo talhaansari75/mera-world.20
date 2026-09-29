@@ -165,6 +165,60 @@ GameObject:
   - component: {fileID: 343331849}
   - component: {fileID: 343331848}
   - component: {fileID: 343331847}
+  - component: {fileID: 343331855}
+  - component: {fileID: 343331854}
+  - component: {fileID: 343331853}
+  - component: {fileID: 343331852}
+  - component: {fileID: 343331851}
+  - component: {fileID: 343331864}
+  - component: {fileID: 343331863}
+  - component: {fileID: 343331862}
+  - component: {fileID: 343331860}
+  - component: {fileID: 343331859}
+  - component: {fileID: 343331858}
+  - component: {fileID: 343331857}
+  - component: {fileID: 343331856}
+  - component: {fileID: 343331866}
+  - component: {fileID: 343331874}
+  - component: {fileID: 343331873}
+  - component: {fileID: 343331872}
+  - component: {fileID: 343331871}
+  - component: {fileID: 343331870}
+  - component: {fileID: 343331869}
+  - component: {fileID: 343331868}
+  - component: {fileID: 343331867}
+  - component: {fileID: 343331882}
+  - component: {fileID: 343331881}
+  - component: {fileID: 343331880}
+  - component: {fileID: 343331879}
+  - component: {fileID: 343331878}
+  - component: {fileID: 343331877}
+  - component: {fileID: 343331876}
+  - component: {fileID: 343331875}
+  - component: {fileID: 343331890}
+  - component: {fileID: 343331888}
+  - component: {fileID: 343331887}
+  - component: {fileID: 343331886}
+  - component: {fileID: 343331885}
+  - component: {fileID: 343331884}
+  - component: {fileID: 343331892}
+  - component: {fileID: 343331891}
+  - component: {fileID: 343331897}
+  - component: {fileID: 343331896}
+  - component: {fileID: 343331895}
+  - component: {fileID: 343331894}
+  - component: {fileID: 343331893}
+  - component: {fileID: 343331902}
+  - component: {fileID: 343331901}
+  - component: {fileID: 343331900}
+  - component: {fileID: 343331899}
+  - component: {fileID: 343331898}
+  - component: {fileID: 343331907}
+  - component: {fileID: 343331906}
+  - component: {fileID: 343331905}
+  - component: {fileID: 343331904}
+  - component: {fileID: 343331903}
+  - component: {fileID: 343331908}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -691,6 +745,699 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.CoinRainUI
   SelectionManager: {fileID: 420426493}
+--- !u!114 &343331851
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10e7eb473277108498b14db23a6b42b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.LevelUpBadgeUI
+  WinScreen: {fileID: 343331816}
+  Progress: {fileID: 343331820}
+--- !u!114 &343331852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9bdad68862572a41bc89be904bc6b4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.SpeedBonusUI
+  SelectionManager: {fileID: 420426493}
+  Progress: {fileID: 343331820}
+--- !u!114 &343331853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 754ccdb026a0ebb41be1da41fb66a797, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.MilestoneRewardsUI
+  Progress: {fileID: 343331820}
+  Sound: {fileID: 343331818}
+--- !u!114 &343331854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bce7009bcce1f641a2fa55baa146253, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ComboStreakUI
+--- !u!114 &343331855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bce7009bcce1f641a2fa55baa146253, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ComboStreakUI
+--- !u!114 &343331856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a12415050df5444492af298f4fde39e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.SettingsSoundToggle
+--- !u!114 &343331857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2e059683cebcd249bc271e2b7ea10aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ParticleTrailUI
+--- !u!114 &343331858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e1fca7e6f7c24543a416cec3ffaadc7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.NoAdsConfettiUI
+--- !u!114 &343331859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16e78bf4e6d0b5f4a9536a73ae5c08af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.TutorialHintUI
+  GameManager: {fileID: 343331813}
+--- !u!114 &343331860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e1c70b23545ba24c815ad2ba5bdd1f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.HomeStatsAnimationUI
+  Progress: {fileID: 343331820}
+--- !u!114 &343331862
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 269207990b419dc40b372f2ab1b2acd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.BackgroundMusicUI
+--- !u!114 &343331863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb97d01a45f69684b934ab9f83002c5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.LevelProgressBarUI
+  Progress: {fileID: 343331820}
+--- !u!114 &343331864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de90d742ef4ccce48915d7a83b28e6c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.WordCategoryUI
+  GameManager: {fileID: 343331813}
+--- !u!114 &343331866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8db7bdaecbca79e4892f0884ad73350b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.AdsManager
+  InterstitialEveryNLevels: 3
+  RewardedCoinsAmount: 100
+  RewardedCooldownSeconds: 60
+--- !u!114 &343331867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75502e38a03952847b67dc36cbe7534e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.BatteryOptimizer
+  ActiveFPS: 60
+  IdleFPS: 30
+  BackgroundFPS: 15
+  IdleTimeoutSeconds: 30
+--- !u!114 &343331868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82e21209b9de1ba49936e469a96ff8c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.WordDefinitionUI
+  SelectionManager: {fileID: 420426493}
+--- !u!114 &343331869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30b66b18cb9bbcd45a0c88ca7bdf1982, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.LocalNotificationManager
+--- !u!114 &343331870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d81b751cb2b77454886c4a7286c17978, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.LoadingScreenUI
+--- !u!114 &343331871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ec1ddd03dd84534389d243db9124179, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.RateAppUI
+--- !u!114 &343331872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bd2a5b33b1b4c5479fe10f5176194b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.StatisticsUI
+  Progress: {fileID: 343331820}
+  Stats: {fileID: 343331873}
+--- !u!114 &343331873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9b6990b4df71004287d1895058b3540, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.StatisticsTracker
+--- !u!114 &343331874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11e8c4164906a514993f32b5a661e006, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.AccessibilityUI
+--- !u!114 &343331875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 149be0d58ea46d84094d9c985f9c9069, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.BossLevelUI
+  GameManager: {fileID: 0}
+  Sound: {fileID: 0}
+--- !u!114 &343331876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7c2c7891698616478bf0b1bb829b486, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ThemePickerUI
+--- !u!114 &343331877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 654ad2a4233922f4883ba9f2dca4e7ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ThemeManager
+--- !u!114 &343331878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 274ed6abf3d5eee409510ca561fee6ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ProfileUI
+  Progress: {fileID: 343331820}
+  XP: {fileID: 343331882}
+  Stats: {fileID: 343331873}
+--- !u!114 &343331879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bb0242eeb7a86e42b3774d3e58bfb8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.GameModeUI
+--- !u!114 &343331880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bb0fed233eb6b8418e2669f3d8b8c88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.PowerUpSystem
+  SelectionManager: {fileID: 420426493}
+  Progress: {fileID: 343331820}
+  Sound: {fileID: 343331818}
+--- !u!114 &343331881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df561ab1906d8b84e89845d291ccd014, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.LeaderboardUI
+  Progress: {fileID: 343331820}
+  XP: {fileID: 343331882}
+--- !u!114 &343331882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91047e5ef3e75e445805517f8be4ce7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.XPManager
+--- !u!114 &343331884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffc4349667fa199468151cacb570f6b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.LoadingTipsRotator
+--- !u!114 &343331885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2feef39869bbc142b51c7e001ad190a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.StreakCalendarUI
+--- !u!114 &343331886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61f97da537843cf45a4668cd28fee81d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.NotificationBadgeUI
+--- !u!114 &343331887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6d68e288127d724f90b36c9472833c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.CoinDoublerUI
+  SelectionManager: {fileID: 420426493}
+  Progress: {fileID: 343331820}
+--- !u!114 &343331888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3bd4af435ac8224a9a2e509603f93cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ComboTimerBarUI
+--- !u!114 &343331890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbdf1fd02515ed34fb562de6249ddb54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.AboutScreenUI
+--- !u!114 &343331891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85aeca675ee811f4fab0e0859a9237f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.MultiplayerMenuUI
+--- !u!114 &343331892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b90bf73b7eff73a4a984e23c0295013b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.BotRaceMode
+  GameManager: {fileID: 343331813}
+  SelectionManager: {fileID: 420426493}
+  Progress: {fileID: 343331820}
+--- !u!114 &343331893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a41cc62c92944f145bb3e8d17d917876, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ReferralSystemUI
+  Progress: {fileID: 0}
+--- !u!114 &343331894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1197d3ca6dff7f469bbbfdedf6e7b08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.SeasonPassUI
+  Progress: {fileID: 343331820}
+--- !u!114 &343331895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 560816b1c5df11a4caef1a4682b7bc0f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.MissionsSystem
+--- !u!114 &343331896
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba608edad2c7338489d6eddc185c00e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.SpinWheelUI
+  Progress: {fileID: 343331820}
+  Sound: {fileID: 343331818}
+--- !u!114 &343331897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 512a5ae3c297cb64db6e9a95902fc2c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.CloudSaveManager
+--- !u!114 &343331898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7893a5da73c2f824bb3fefa0742f96ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.NewsFeedUI
+--- !u!114 &343331899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad074eebbdf702d4b8bbbe800baf0d17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.WorldMapUI
+  Progress: {fileID: 343331820}
+--- !u!114 &343331900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae9ec0b54b71c5b4a8e3598be89a553c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.NotificationCenterUI
+  Progress: {fileID: 343331820}
+--- !u!114 &343331901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 142d341247d32b942843d52add9fbc99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.FriendListUI
+--- !u!114 &343331902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8c029157f3505e46b0bdcb5fc6c7f30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.TournamentModeUI
+  Progress: {fileID: 343331820}
+--- !u!114 &343331903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 308d7daee4ba2cf48a63d338dcccdc74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.GameplayPausePanel
+--- !u!114 &343331904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29172fcb0704ae94cbb87223ccefec94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.AdRewardTiersUI
+  Progress: {fileID: 343331820}
+  Ads: {fileID: 343331866}
+--- !u!114 &343331905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd6523cf4d97c1e47a01de37c60b75cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.QuickPlayButton
+  Progress: {fileID: 343331820}
+--- !u!114 &343331906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 106676010a8e08345b4531bdb808aafb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.LanguageSettingsUI
+--- !u!114 &343331907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b68124f1e66844248acef4a85b5ca77a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.AvatarPickerUI
+--- !u!114 &343331908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccd3b40b9cdc3f54e9f4cc0b58f18b4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.CategoryMenuUI
 --- !u!1 &420426491
 GameObject:
   m_ObjectHideFlags: 0

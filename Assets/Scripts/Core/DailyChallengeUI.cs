@@ -12,25 +12,25 @@ namespace MeraWorld.Core
         public SoundManager Sound;
 
         private Canvas _canvas;
-        private Text _timerText;
-        private Text _statusText;
-        private Button _playButton;
+        private GameObject _panel;
 
         private const string KEY_LAST_CHALLENGE = "DailyChallenge_LastDate";
         private const string KEY_CHALLENGE_STREAK = "DailyChallenge_Streak";
+        private const string KEY_POPUP_SHOWN_DATE = "DailyChallenge_PopupShown";
 
         void Start()
         {
             if (Progress == null) Progress = PlayerProgressManager.Instance;
             if (Sound == null) Sound = SoundManager.Instance;
 
-            Invoke(nameof(Setup), 0.6f);
+            Invoke(nameof(Setup), 1.5f);
         }
 
         private void Setup()
         {
             BuildCanvas();
-            BuildCard();
+            BuildPanel();
+            TryShowPopup();
         }
 
         private void BuildCanvas()
@@ -39,7 +39,7 @@ namespace MeraWorld.Core
             canvasObj.transform.SetParent(transform);
             _canvas = canvasObj.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _canvas.sortingOrder = 502;
+            _canvas.sortingOrder = 520;
 
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -47,138 +47,82 @@ namespace MeraWorld.Core
             scaler.matchWidthOrHeight = 0.5f;
 
             canvasObj.AddComponent<GraphicRaycaster>();
+
+            if (UnityEngine.EventSystems.EventSystem.current == null)
+            {
+                var es = new GameObject("EventSystem");
+                es.AddComponent<UnityEngine.EventSystems.EventSystem>();
+                es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+            }
         }
 
-        private void BuildCard()
+        private void BuildPanel()
         {
-            var cardObj = new GameObject("DailyChallengeCard");
-            cardObj.transform.SetParent(_canvas.transform, false);
+            _panel = new GameObject("DailyChallengePanel");
+            _panel.transform.SetParent(_canvas.transform, false);
 
-            var bg = cardObj.AddComponent<Image>();
-            bg.color = new Color(0.55f, 0.20f, 0.55f, 0.95f);
+            var bg = _panel.AddComponent<Image>();
+            bg.color = new Color(0f, 0f, 0f, 0.88f);
 
-            var rt = cardObj.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 1f);
-            rt.anchorMax = new Vector2(0.5f, 1f);
-            rt.pivot = new Vector2(0.5f, 1f);
-            rt.anchoredPosition = new Vector2(0f, -130f);
-            rt.sizeDelta = new Vector2(900f, 150f);
+            var rt = _panel.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
 
-            // Title
-            var titleObj = new GameObject("Title");
-            titleObj.transform.SetParent(cardObj.transform, false);
-            var titleTxt = titleObj.AddComponent<Text>();
-            titleTxt.text = "DAILY CHALLENGE";
-            titleTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            titleTxt.fontSize = 32;
-            titleTxt.fontStyle = FontStyle.Bold;
-            titleTxt.color = new Color(1f, 0.90f, 0.55f);
-            titleTxt.alignment = TextAnchor.MiddleLeft;
-            titleTxt.raycastTarget = false;
-            var titleRt = titleObj.GetComponent<RectTransform>();
-            titleRt.anchorMin = new Vector2(0f, 1f);
-            titleRt.anchorMax = new Vector2(1f, 1f);
-            titleRt.pivot = new Vector2(0f, 1f);
-            titleRt.anchoredPosition = new Vector2(30f, -15f);
-            titleRt.sizeDelta = new Vector2(-250f, 40f);
+            // Card
+            var cardObj = new GameObject("Card");
+            cardObj.transform.SetParent(_panel.transform, false);
 
-            // Timer
-            var timerObj = new GameObject("Timer");
-            timerObj.transform.SetParent(cardObj.transform, false);
-            _timerText = timerObj.AddComponent<Text>();
-            _timerText.text = "Resets in 24:00:00";
-            _timerText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _timerText.fontSize = 24;
-            _timerText.color = new Color(0.85f, 0.85f, 1f);
-            _timerText.alignment = TextAnchor.MiddleLeft;
-            _timerText.raycastTarget = false;
-            var timerRt = timerObj.GetComponent<RectTransform>();
-            timerRt.anchorMin = new Vector2(0f, 0.5f);
-            timerRt.anchorMax = new Vector2(1f, 0.5f);
-            timerRt.pivot = new Vector2(0f, 0.5f);
-            timerRt.anchoredPosition = new Vector2(30f, 5f);
-            timerRt.sizeDelta = new Vector2(-250f, 35f);
+            var cardImg = cardObj.AddComponent<Image>();
+            cardImg.color = new Color(0.55f, 0.20f, 0.55f);
 
-            // Status
-            var statusObj = new GameObject("Status");
-            statusObj.transform.SetParent(cardObj.transform, false);
-            _statusText = statusObj.AddComponent<Text>();
-            _statusText.text = "Ready!  •  +500 coins";
-            _statusText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _statusText.fontSize = 22;
-            _statusText.fontStyle = FontStyle.Bold;
-            _statusText.color = new Color(0.65f, 1f, 0.65f);
-            _statusText.alignment = TextAnchor.MiddleLeft;
-            _statusText.raycastTarget = false;
-            var statusRt = statusObj.GetComponent<RectTransform>();
-            statusRt.anchorMin = new Vector2(0f, 0f);
-            statusRt.anchorMax = new Vector2(1f, 0f);
-            statusRt.pivot = new Vector2(0f, 0f);
-            statusRt.anchoredPosition = new Vector2(30f, 15f);
-            statusRt.sizeDelta = new Vector2(-250f, 35f);
+            var cardRt = cardObj.GetComponent<RectTransform>();
+            cardRt.anchorMin = new Vector2(0.5f, 0.5f);
+            cardRt.anchorMax = new Vector2(0.5f, 0.5f);
+            cardRt.pivot = new Vector2(0.5f, 0.5f);
+            cardRt.anchoredPosition = Vector2.zero;
+            cardRt.sizeDelta = new Vector2(900f, 700f);
 
-            // Play button
-            var btnObj = new GameObject("PlayBtn");
-            btnObj.transform.SetParent(cardObj.transform, false);
+            CreateText(cardObj.transform, "DAILY CHALLENGE", new Vector2(0f, 250f), 70,
+                new Color(1f, 0.90f, 0.55f), FontStyle.Bold);
 
-            var btnImg = btnObj.AddComponent<Image>();
-            btnImg.color = new Color(0.25f, 0.75f, 0.35f);
+            CreateText(cardObj.transform, "Complete today's challenge\nand earn 500 coins + 1 star!",
+                new Vector2(0f, 100f), 36, Color.white, FontStyle.Normal);
 
-            _playButton = btnObj.AddComponent<Button>();
-            _playButton.onClick.AddListener(OnPlayClicked);
+            CreateText(cardObj.transform, GetTimerText(), new Vector2(0f, 0f), 28,
+                new Color(0.90f, 0.90f, 1f), FontStyle.Normal);
 
-            var btnRt = btnObj.GetComponent<RectTransform>();
-            btnRt.anchorMin = new Vector2(1f, 0.5f);
-            btnRt.anchorMax = new Vector2(1f, 0.5f);
-            btnRt.pivot = new Vector2(1f, 0.5f);
-            btnRt.anchoredPosition = new Vector2(-25f, 0f);
-            btnRt.sizeDelta = new Vector2(180f, 100f);
+            CreateButton(cardObj.transform, "PLAY NOW", new Vector2(0f, -160f),
+                new Vector2(500f, 130f), new Color(0.25f, 0.75f, 0.35f), OnPlayClicked);
 
-            var btnLabelObj = new GameObject("Label");
-            btnLabelObj.transform.SetParent(btnObj.transform, false);
-            var btnLabel = btnLabelObj.AddComponent<Text>();
-            btnLabel.text = "PLAY";
-            btnLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            btnLabel.fontSize = 32;
-            btnLabel.fontStyle = FontStyle.Bold;
-            btnLabel.color = Color.white;
-            btnLabel.alignment = TextAnchor.MiddleCenter;
-            btnLabel.raycastTarget = false;
-            var btnLabelRt = btnLabelObj.GetComponent<RectTransform>();
-            btnLabelRt.anchorMin = Vector2.zero;
-            btnLabelRt.anchorMax = Vector2.one;
-            btnLabelRt.offsetMin = Vector2.zero;
-            btnLabelRt.offsetMax = Vector2.zero;
+            CreateButton(cardObj.transform, "LATER", new Vector2(0f, -310f),
+                new Vector2(500f, 100f), new Color(0.4f, 0.4f, 0.5f), OnDismiss);
 
-            UpdateStatus();
+            _panel.SetActive(false);
         }
 
-        void Update()
+        private string GetTimerText()
         {
-            if (_timerText == null) return;
-
             DateTime now = DateTime.UtcNow;
             DateTime midnight = now.Date.AddDays(1);
             TimeSpan remaining = midnight - now;
-
-            _timerText.text = $"Resets in {remaining.Hours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
+            return $"Resets in {remaining.Hours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
         }
 
-        private void UpdateStatus()
+        private void TryShowPopup()
         {
-            if (CanPlayToday())
-            {
-                _statusText.text = "Ready!  •  +500 coins";
-                _playButton.interactable = true;
-                _playButton.GetComponent<Image>().color = new Color(0.25f, 0.75f, 0.35f);
-            }
-            else
-            {
-                int streak = PlayerPrefs.GetInt(KEY_CHALLENGE_STREAK, 0);
-                _statusText.text = $"Completed today  •  Streak: {streak} days";
-                _playButton.interactable = false;
-                _playButton.GetComponent<Image>().color = new Color(0.4f, 0.4f, 0.4f);
-            }
+            if (!HomeScreenUI.IsHomeVisible) return;
+            if (!CanPlayToday()) return;
+
+            string today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+            string lastShown = PlayerPrefs.GetString(KEY_POPUP_SHOWN_DATE, "");
+            if (lastShown == today) return;
+
+            _panel.SetActive(true);
+
+            PlayerPrefs.SetString(KEY_POPUP_SHOWN_DATE, today);
+            PlayerPrefs.Save();
         }
 
         private bool CanPlayToday()
@@ -190,11 +134,8 @@ namespace MeraWorld.Core
 
         private void OnPlayClicked()
         {
-            if (!CanPlayToday()) return;
-
             if (Sound != null) Sound.PlayButtonClick();
 
-            // Mark as completed
             string today = DateTime.UtcNow.ToString("yyyy-MM-dd");
             PlayerPrefs.SetString(KEY_LAST_CHALLENGE, today);
 
@@ -203,7 +144,6 @@ namespace MeraWorld.Core
             string yesterday = DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-dd");
             string lastDate = PlayerPrefs.GetString(KEY_LAST_CHALLENGE, "");
 
-            // If last played was yesterday, keep streak; else reset
             if (lastDate == yesterday) streak++;
             else streak = 1;
 
@@ -218,14 +158,71 @@ namespace MeraWorld.Core
 
             Debug.Log($"[DailyChallenge] Played! Streak: {streak}, +500 coins");
 
-            UpdateStatus();
+            _panel.SetActive(false);
 
-            // Start level
             PlayerPrefs.SetInt("SkipHome", 1);
             PlayerPrefs.SetInt("CurrentLevel", 1);
             PlayerPrefs.Save();
 
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        private void OnDismiss()
+        {
+            _panel.SetActive(false);
+        }
+
+        private Text CreateText(Transform parent, string content, Vector2 pos, int size, Color color, FontStyle style)
+        {
+            var obj = new GameObject("Text");
+            obj.transform.SetParent(parent, false);
+            var txt = obj.AddComponent<Text>();
+            txt.text = content;
+            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.fontSize = size;
+            txt.fontStyle = style;
+            txt.color = color;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.supportRichText = true;
+            txt.raycastTarget = false;
+            var rt = obj.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = new Vector2(800f, 200f);
+            return txt;
+        }
+
+        private void CreateButton(Transform parent, string label, Vector2 pos, Vector2 size, Color color, UnityEngine.Events.UnityAction onClick)
+        {
+            var obj = new GameObject($"Btn_{label}");
+            obj.transform.SetParent(parent, false);
+            var img = obj.AddComponent<Image>();
+            img.color = color;
+            var btn = obj.AddComponent<Button>();
+            btn.onClick.AddListener(onClick);
+            var rt = obj.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = size;
+            var textObj = new GameObject("Label");
+            textObj.transform.SetParent(obj.transform, false);
+            var txt = textObj.AddComponent<Text>();
+            txt.text = label;
+            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.fontSize = 40;
+            txt.fontStyle = FontStyle.Bold;
+            txt.color = Color.white;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.raycastTarget = false;
+            var trt = textObj.GetComponent<RectTransform>();
+            trt.anchorMin = Vector2.zero;
+            trt.anchorMax = Vector2.one;
+            trt.offsetMin = Vector2.zero;
+            trt.offsetMax = Vector2.zero;
         }
     }
 }
