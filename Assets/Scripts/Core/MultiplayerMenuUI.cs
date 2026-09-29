@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,12 +9,33 @@ namespace MeraWorld.Core
         private Canvas _canvas;
         private GameObject _panel;
         private Text _statusText;
+        private Text _titleText;
+        private Text _timerText;
+        private Button _findMatchButton;
+        private GameObject _searchingPanel;
+        private bool _isOnline = false;
 
-        private const string KEY_BOT_RACE = "BotRace_Enabled";
+        void Start()
+        {
+            Invoke(nameof(Setup), 1f);
+        }
 
-        void Start() { Invoke(nameof(Setup), 1f); }
+        private void OnEnable()
+        {
+            InternetChecker.OnStatusChanged += HandleOnlineStatusChanged;
+        }
 
-        private void Setup() { BuildCanvas(); BuildPanel(); }
+        private void OnDisable()
+        {
+            InternetChecker.OnStatusChanged -= HandleOnlineStatusChanged;
+        }
+
+        private void Setup()
+        {
+            BuildCanvas();
+            BuildPanel();
+            RefreshOnlineState();
+        }
 
         private void BuildCanvas()
         {
@@ -45,41 +67,237 @@ namespace MeraWorld.Core
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
-            CreateText(_panel.transform, "MULTIPLAYER", new Vector2(0f, 830f), 70,
-                new Color(1f, 0.85f, 0.3f), FontStyle.Bold);
-            CreateSmallButton(_panel.transform, "◀ BACK", new Vector2(-380f, 830f),
+            // Title
+            _titleText = CreateText(_panel.transform, "ONLINE MULTIPLAYER", new Vector2(0f, 830f),
+                60, new Color(1f, 0.85f, 0.30f), FontStyle.Bold);
+
+            // Back button
+            CreateSmallButton(_panel.transform, "< BACK", new Vector2(-380f, 830f),
                 new Color(0.5f, 0.5f, 0.55f), OnBack);
 
-            // Bot Race toggle
-            bool botRace = PlayerPrefs.GetInt(KEY_BOT_RACE, 0) == 1;
+            // Status text (offline / online)
+            _statusText = CreateText(_panel.transform, "", new Vector2(0f, 700f),
+                30, new Color(0.85f, 0.85f, 0.95f), FontStyle.Normal);
 
-            CreateText(_panel.transform, "BOT RACE MODE", new Vector2(0f, 500f), 42,
-                Color.white, FontStyle.Bold);
+            // Info text
+            CreateText(_panel.transform, "Race against players worldwide.\nNo real player? A bot will join after 5 seconds.",
+                new Vector2(0f, 400f), 26, new Color(0.75f, 0.80f, 0.95f), FontStyle.Normal);
 
-            CreateText(_panel.transform, "Race against an AI opponent.\nBot's name and speed look real!",
-                new Vector2(0f, 400f), 26, new Color(0.80f, 0.85f, 1f), FontStyle.Normal);
+            // Find Match button (main CTA)
+            _findMatchButton = CreateBigButton(_panel.transform, "FIND MATCH",
+                new Vector2(0f, 100f), new Vector2(700f, 180f),
+                new Color(0.25f, 0.65f, 0.35f), 55, OnFindMatchClicked);
 
-            CreateToggleButton(_panel.transform, botRace ? "ENABLED" : "DISABLED",
-                new Vector2(0f, 250f), botRace ? new Color(0.25f, 0.75f, 0.35f) : new Color(0.4f, 0.4f, 0.5f),
-                OnToggleBotRace);
-
-            // Online PvP (Coming Soon)
-            CreateText(_panel.transform, "ONLINE PVP", new Vector2(0f, 50f), 42,
-                new Color(0.70f, 0.70f, 0.80f), FontStyle.Bold);
-
-            CreateText(_panel.transform, "Coming in a future update!",
-                new Vector2(0f, -50f), 28, new Color(0.85f, 0.75f, 0.55f), FontStyle.Italic);
-
-            CreateText(_panel.transform, "Race against players worldwide\nwith matchmaking and ranking.",
-                new Vector2(0f, -150f), 24, new Color(0.65f, 0.70f, 0.85f), FontStyle.Normal);
-
-            _statusText = CreateText(_panel.transform, "", new Vector2(0f, -700f), 24,
-                new Color(0.75f, 1f, 0.75f), FontStyle.Normal);
+            // Searching panel (hidden by default)
+            BuildSearchingPanel();
 
             _panel.SetActive(false);
         }
 
-        private Text CreateText(Transform parent, string content, Vector2 pos, int size, Color color, FontStyle style)
+        private void BuildSearchingPanel()
+        {
+            _searchingPanel = new GameObject("SearchingPanel");
+            _searchingPanel.transform.SetParent(_panel.transform, false);
+            var spRt = _searchingPanel.AddComponent<RectTransform>();
+            spRt.anchorMin = new Vector2(0.5f, 0.5f);
+            spRt.anchorMax = new Vector2(0.5f, 0.5f);
+            spRt.pivot = new Vector2(0.5f, 0.5f);
+            spRt.anchoredPosition = new Vector2(0f, 100f);
+            spRt.sizeDelta = new Vector2(700f, 300f);
+
+            var bg = _searchingPanel.AddComponent<Image>();
+            bg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.15f, 0.20f, 0.35f), 256, 40);
+            bg.type = Image.Type.Sliced;
+            bg.color = Color.white;
+
+            CreateText(_searchingPanel.transform, "SEARCHING...", new Vector2(0f, 70f),
+                48, new Color(1f, 0.90f, 0.40f), FontStyle.Bold);
+
+            _timerText = CreateText(_searchingPanel.transform, "5s", new Vector2(0f, 0f),
+                40, Color.white, FontStyle.Bold);
+
+            CreateText(_searchingPanel.transform, "Looking for a real player...", new Vector2(0f, -70f),
+                22, new Color(0.80f, 0.85f, 1f), FontStyle.Normal);
+
+            _searchingPanel.SetActive(false);
+        }
+
+        // --- Online check ---
+
+        private void RefreshOnlineState()
+        {
+            _isOnline = InternetChecker.QuickCheck();
+
+            if (!_isOnline)
+            {
+                if (_statusText != null)
+                    _statusText.text = "You are OFFLINE.\nMultiplayer requires internet.";
+
+                if (_findMatchButton != null)
+                {
+                    _findMatchButton.interactable = false;
+                    var img = _findMatchButton.GetComponent<Image>();
+                    if (img != null)
+                    {
+                        img.sprite = UISpriteFactory.Create3DButtonSprite(
+                            new Color(0.30f, 0.30f, 0.35f), 256, 40);
+                        img.type = Image.Type.Sliced;
+                    }
+                }
+            }
+            else
+            {
+                if (_statusText != null)
+                    _statusText.text = "You are ONLINE.";
+
+                if (_findMatchButton != null)
+                {
+                    _findMatchButton.interactable = true;
+                    var img = _findMatchButton.GetComponent<Image>();
+                    if (img != null)
+                    {
+                        img.sprite = UISpriteFactory.Create3DButtonSprite(
+                            new Color(0.25f, 0.65f, 0.35f), 256, 40);
+                        img.type = Image.Type.Sliced;
+                    }
+                }
+            }
+
+            // Also do a real HTTP check in background
+            StartCoroutine(VerifyInBackground());
+        }
+
+        private IEnumerator VerifyInBackground()
+        {
+            yield return InternetChecker.VerifyConnection();
+            bool online = InternetChecker.IsOnline;
+
+            if (_statusText != null)
+                _statusText.text = online ? "You are ONLINE." : "You are OFFLINE.\nMultiplayer requires internet.";
+
+            if (_findMatchButton != null)
+                _findMatchButton.interactable = online;
+
+            _isOnline = online;
+        }
+
+        private void HandleOnlineStatusChanged(bool online)
+        {
+            _isOnline = online;
+        }
+
+        // --- Actions ---
+
+        private void OnFindMatchClicked()
+        {
+            if (!InternetChecker.QuickCheck())
+            {
+                if (_statusText != null)
+                    _statusText.text = "You are OFFLINE.\nMultiplayer requires internet.";
+                return;
+            }
+
+            StartCoroutine(FindMatchRoutine());
+        }
+
+        private IEnumerator FindMatchRoutine()
+        {
+            if (MatchmakingManager.Instance == null)
+            {
+                var go = new GameObject("MatchmakingManager");
+                go.AddComponent<MatchmakingManager>();
+            }
+
+            _findMatchButton.gameObject.SetActive(false);
+            _searchingPanel.SetActive(true);
+
+            bool matchFound = false;
+            MatchmakingManager.MatchResult result = null;
+            string errorMsg = null;
+
+            MatchmakingManager.Instance.OnMatchFound += (r) => { result = r; matchFound = true; };
+            MatchmakingManager.Instance.OnMatchmakingFailed += (e) => { errorMsg = e; matchFound = true; };
+            MatchmakingManager.Instance.OnSearchTick += UpdateTimer;
+
+            MatchmakingManager.Instance.StartMatchmaking();
+
+            while (!matchFound)
+                yield return null;
+
+            _searchingPanel.SetActive(false);
+            _findMatchButton.gameObject.SetActive(true);
+
+            if (errorMsg != null)
+            {
+                if (_statusText != null) _statusText.text = errorMsg;
+                yield break;
+            }
+
+            if (result != null)
+            {
+                Debug.Log($"[Multiplayer] Match found: {result.OpponentName} (bot: {result.IsBot})");
+
+                // Save bot name so BotRaceMode can use it
+                PlayerPrefs.SetString("BotRace_OpponentName", result.OpponentName);
+                PlayerPrefs.SetInt("BotRace_Enabled", 1);
+                PlayerPrefs.Save();
+
+                // Small delay so player sees the found message
+                if (_statusText != null)
+                    _statusText.text = $"Matched with {result.OpponentName}! Starting...";
+
+                yield return new WaitForSeconds(1.2f);
+
+                Hide();
+                StartBotRace();
+            }
+        }
+
+        private void UpdateTimer(float remaining)
+        {
+            if (_timerText != null)
+                _timerText.text = $"{Mathf.CeilToInt(remaining)}s";
+        }
+
+        private void StartBotRace()
+        {
+            // Load current level to restart with bot race active
+            var progress = PlayerProgressManager.Instance;
+            int level = progress != null ? progress.HighestLevelUnlocked : 1;
+
+            if (progress != null) progress.SetCurrentLevel(level);
+            else
+            {
+                PlayerPrefs.SetInt("CurrentLevel", level);
+                PlayerPrefs.Save();
+            }
+
+            PlayerPrefs.SetInt("SkipHome", 1);
+            PlayerPrefs.Save();
+
+            UnityEngine.SceneManagement.SceneManager.LoadScene(
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+        }
+
+        public void Show()
+        {
+            if (_panel != null) _panel.SetActive(true);
+            RefreshOnlineState();
+        }
+
+        public void Hide()
+        {
+            if (_panel != null) _panel.SetActive(false);
+            if (MatchmakingManager.Instance != null)
+                MatchmakingManager.Instance.CancelMatchmaking();
+        }
+
+        private void OnBack() { Hide(); }
+
+        // --- UI helpers ---
+
+        private Text CreateText(Transform parent, string content, Vector2 pos, int size,
+            Color color, FontStyle style)
         {
             var obj = new GameObject("Text");
             obj.transform.SetParent(parent, false);
@@ -100,28 +318,32 @@ namespace MeraWorld.Core
             return txt;
         }
 
-        private void CreateToggleButton(Transform parent, string label, Vector2 pos, Color color, UnityEngine.Events.UnityAction onClick)
+        private Button CreateBigButton(Transform parent, string label, Vector2 pos, Vector2 size,
+            Color color, int fontSize, UnityEngine.Events.UnityAction onClick)
         {
-            var obj = new GameObject("Toggle");
+            var obj = new GameObject($"Btn_{label}");
             obj.transform.SetParent(parent, false);
             var img = obj.AddComponent<Image>();
-            img.sprite = UISpriteFactory.Create3DButtonSprite(color, 128, 30);
+            img.sprite = UISpriteFactory.Create3DButtonSprite(color, 256, 40);
             img.type = Image.Type.Sliced;
             img.color = Color.white;
+
             var btn = obj.AddComponent<Button>();
             btn.onClick.AddListener(onClick);
+
             var rt = obj.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(500f, 120f);
+            rt.sizeDelta = size;
+
             var textObj = new GameObject("Label");
             textObj.transform.SetParent(obj.transform, false);
             var txt = textObj.AddComponent<Text>();
             txt.text = label;
             txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = 40;
+            txt.fontSize = fontSize;
             txt.fontStyle = FontStyle.Bold;
             txt.color = Color.white;
             txt.alignment = TextAnchor.MiddleCenter;
@@ -131,33 +353,12 @@ namespace MeraWorld.Core
             trt.anchorMax = Vector2.one;
             trt.offsetMin = Vector2.zero;
             trt.offsetMax = Vector2.zero;
+
+            return btn;
         }
 
-        private void OnToggleBotRace()
-        {
-            int current = PlayerPrefs.GetInt(KEY_BOT_RACE, 0);
-            int next = current == 1 ? 0 : 1;
-            PlayerPrefs.SetInt(KEY_BOT_RACE, next);
-            PlayerPrefs.Save();
-
-            // Rebuild to refresh button state
-            foreach (Transform child in _panel.transform)
-                if (child.name == "Toggle") Destroy(child.gameObject);
-
-            bool botRace = next == 1;
-            CreateToggleButton(_panel.transform, botRace ? "ENABLED" : "DISABLED",
-                new Vector2(0f, 250f), botRace ? new Color(0.25f, 0.75f, 0.35f) : new Color(0.4f, 0.4f, 0.5f),
-                OnToggleBotRace);
-
-            if (_statusText != null)
-                _statusText.text = botRace ? "Bot Race will be active!" : "Bot Race disabled";
-        }
-
-        public void Show() { if (_panel != null) _panel.SetActive(true); }
-        public void Hide() { if (_panel != null) _panel.SetActive(false); }
-        private void OnBack() { Hide(); }
-
-        private void CreateSmallButton(Transform parent, string label, Vector2 pos, Color color, UnityEngine.Events.UnityAction onClick)
+        private void CreateSmallButton(Transform parent, string label, Vector2 pos,
+            Color color, UnityEngine.Events.UnityAction onClick)
         {
             var obj = new GameObject($"Btn_{label}");
             obj.transform.SetParent(parent, false);
@@ -173,6 +374,7 @@ namespace MeraWorld.Core
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos;
             rt.sizeDelta = new Vector2(220f, 80f);
+
             var textObj = new GameObject("Label");
             textObj.transform.SetParent(obj.transform, false);
             var txt = textObj.AddComponent<Text>();
