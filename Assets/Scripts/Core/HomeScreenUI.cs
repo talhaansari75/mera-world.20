@@ -21,6 +21,10 @@ namespace MeraWorld.Core
         private const string SKIP_HOME_KEY = "SkipHome";
         private const string STARS_KEY_PREFIX = "Stars_Level_";
 
+        // Static flag: app session mein sirf ek baar reset hoga.
+        // Scene reload pe reset nahi hota, lekin app restart pe reset ho jata hai.
+        private static bool _sessionHomeShown = false;
+
         private static readonly Color BG_TOP = new Color(0.08f, 0.14f, 0.30f);
         private static readonly Color BG_BOTTOM = new Color(0.03f, 0.05f, 0.14f);
         private static readonly Color GOLD = new Color(1f, 0.85f, 0.30f);
@@ -30,6 +34,21 @@ namespace MeraWorld.Core
         void Start()
         {
             if (Progress == null) Progress = PlayerProgressManager.Instance;
+
+            // App fresh launch pe SkipHome hamesha clear karo.
+            // Isse game band karke dobara kholne pe Home screen dikhegi.
+            if (!_sessionHomeShown)
+            {
+                _sessionHomeShown = true;
+                PlayerPrefs.DeleteKey(SKIP_HOME_KEY);
+                PlayerPrefs.Save();
+                Debug.Log("[HomeScreen] Fresh launch — home will be shown.");
+            }
+            else
+            {
+                Debug.Log("[HomeScreen] Scene reloaded — SkipHome respected.");
+            }
+
             Invoke(nameof(Setup), 0.2f);
         }
 
@@ -68,6 +87,7 @@ namespace MeraWorld.Core
 
             canvasObj.AddComponent<GraphicRaycaster>();
 
+            // Background
             var bgObj = new GameObject("BackgroundGradient");
             bgObj.transform.SetParent(_homeCanvas.transform, false);
             var bgImg = bgObj.AddComponent<Image>();
@@ -81,6 +101,7 @@ namespace MeraWorld.Core
             bgRt.offsetMin = Vector2.zero;
             bgRt.offsetMax = Vector2.zero;
 
+            // Title halo
             var haloObj = new GameObject("TitleHalo");
             haloObj.transform.SetParent(_homeCanvas.transform, false);
             var haloImg = haloObj.AddComponent<Image>();
@@ -93,10 +114,12 @@ namespace MeraWorld.Core
             haloRt.anchoredPosition = new Vector2(0f, 820f);
             haloRt.sizeDelta = new Vector2(1200f, 1200f);
 
+            // Settings gear
             CreateIconButton(_homeCanvas.transform, new Vector2(-30f, -30f), new Vector2(110f, 110f),
                 new Vector2(1f, 1f), new Vector2(1f, 1f),
                 new Color(0.30f, 0.35f, 0.50f), "SET", 36, OnSettingsClicked);
 
+            // Title
             _titleGroup = new GameObject("TitleGroup");
             _titleGroup.transform.SetParent(_homeCanvas.transform, false);
             var tgr = _titleGroup.AddComponent<RectTransform>();
@@ -122,16 +145,20 @@ namespace MeraWorld.Core
             lineRt.anchoredPosition = new Vector2(0f, -100f);
             lineRt.sizeDelta = new Vector2(500f, 6f);
 
+            // Stats card
             int coins = Progress != null ? Progress.Coins : 0;
             int stars = Progress != null ? Progress.TotalStars : 0;
             CreateStatsCard(_homeCanvas.transform, new Vector2(0f, 620f), coins, stars);
 
+            // PLAY button
             Create3DButton(_homeCanvas.transform, "▶  PLAY", new Vector2(0f, 400f),
                 new Vector2(700f, 170f), GREEN, 60, OnPlayClicked);
 
+            // LEVELS button
             Create3DButton(_homeCanvas.transform, "LEVELS", new Vector2(0f, 240f),
                 new Vector2(700f, 130f), BLUE, 46, OnLevelsClicked);
 
+            // 3 Categories row
             float catY = 60f;
             float spacing = 240f;
             Create3DButton(_homeCanvas.transform, "SOCIAL", new Vector2(-spacing, catY),
@@ -141,6 +168,7 @@ namespace MeraWorld.Core
             Create3DButton(_homeCanvas.transform, "PROGRESS", new Vector2(spacing, catY),
                 new Vector2(220f, 180f), new Color(0.30f, 0.65f, 0.80f), 22, () => OpenCategory("progress"));
 
+            // Footer
             CreateText(_homeCanvas.transform, "v1.0  •  Talha Ansari",
                 new Vector2(0f, -850f), 26, new Color(0.55f, 0.60f, 0.75f), FontStyle.Normal, false);
         }
@@ -150,7 +178,7 @@ namespace MeraWorld.Core
             if (SoundManager.Instance != null)
                 SoundManager.Instance.PlayButtonClick();
 
-            // Social = online-only
+            // Multiplayer / Social = online-only
             if (categoryId == "social")
             {
                 if (!InternetChecker.QuickCheck())

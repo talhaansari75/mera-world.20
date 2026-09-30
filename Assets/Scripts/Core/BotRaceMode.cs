@@ -13,22 +13,30 @@ namespace MeraWorld.Core
         public SelectionManager SelectionManager;
         public PlayerProgressManager Progress;
 
+        [Header("Race Settings")]
+        [Tooltip("Agar koi bot name set na ho to random use hoga")]
+        public bool UseRandomBotName = true;
+
+        [Tooltip("Level ke hisaab se bot difficulty auto-set karega")]
+        public bool AutoDifficultyByLevel = true;
+
+        // ---- Runtime ----
         private BotOpponent _bot;
         private Canvas _canvas;
         private GameObject _racePanel;
         private Text _playerScoreText;
         private Text _botScoreText;
-        private Text _botNameText;
         private Image _playerProgressFill;
         private Image _botProgressFill;
         private int _playerFoundCount = 0;
         private int _totalWords = 8;
 
-        private static readonly string[] BotNames = {
-            "Alex", "Sam", "Riley", "Jordan", "Casey", "Morgan",
-            "Taylor", "Aiden", "Emma", "Liam", "Maya", "Noah",
-            "Zara", "Owen", "Aisha", "Rayan", "Hina", "Bilal"
-        };
+        private const string PREF_BOT_NAME = "BotRace_OpponentName";
+        private const string PREF_BOT_ENABLED = "BotRace_Enabled";
+
+        // ---------------------------------------------------------------
+        // Lifecycle
+        // ---------------------------------------------------------------
 
         void Start()
         {
@@ -41,49 +49,78 @@ namespace MeraWorld.Core
 
         private void Setup()
         {
-            if (GameManager == null || SelectionManager == null) return;
+            if (GameManager == null || SelectionManager == null)
+            {
+                Debug.LogWarning("[BotRace] Missing GameManager or SelectionManager.");
+                return;
+            }
 
-            // Check if bot race should be active this level
             int level = GameManager.CurrentLevel;
-            bool raceEnabled = PlayerPrefs.GetInt("BotRace_Enabled", 0) == 1;
+
+            // ---- Should this level have a bot race? ----
+            bool raceEnabled = PlayerPrefs.GetInt(PREF_BOT_ENABLED, 0) == 1;
 
             if (!raceEnabled)
             {
-                // Random 30% chance per level
+                // Fallback: 30% random chance
                 raceEnabled = Random.Range(0, 100) < 30;
             }
 
-            if (!raceEnabled) return;
+            if (!raceEnabled)
+            {
+                Debug.Log("[BotRace] Disabled for this level.");
+                return;
+            }
+
+            if (GameManager.Words == null || GameManager.Words.Count == 0)
+            {
+                Debug.LogWarning("[BotRace] No words in GameManager. Skipping race.");
+                return;
+            }
 
             IsActive = true;
             _totalWords = GameManager.Words.Count;
 
-            // Bot name: prefer the one set by MatchmakingManager, else random
-            string botName = PlayerPrefs.GetString("BotRace_OpponentName", "");
-            if (string.IsNullOrEmpty(botName))
-                botName = BotNames[Random.Range(0, BotNames.Length)];
+            // ---- Bot name ----
+            string botName = PlayerPrefs.GetString(PREF_BOT_NAME, "");
+            if (string.IsNullOrEmpty(botName) && UseRandomBotName)
+                botName = BotOpponent.GetRandomName();
 
-            // Clear the stored name so the next match uses a fresh one
-            PlayerPrefs.DeleteKey("BotRace_OpponentName");
+            // Consume the name so the next race uses a fresh one
+            PlayerPrefs.DeleteKey(PREF_BOT_NAME);
             PlayerPrefs.Save();
 
-            // Create bot with level-scaled difficulty
-            float difficultyMult = Mathf.Lerp(1.3f, 0.6f, Mathf.Clamp01(level / 50f));
-            _bot = new BotOpponent(botName, GameManager.Words, difficultyMult);
+            // ---- Bot difficulty ----
+            BotDifficulty difficulty;
+            if (AutoDifficultyByLevel)
+                difficulty = BotOpponent.GetDifficultyForLevel(level);
+            else
+                difficulty = BotDifficulty.Skilled;
+
+            // ---- Create bot ----
+            _bot = new BotOpponent(botName, GameManager.Words, difficulty);
             _bot.OnWordFound += OnBotFoundWord;
 
+            // ---- Build UI ----
             BuildCanvas();
             BuildRacePanel();
 
+            // ---- Hook player events ----
             SelectionManager.OnWordFound += OnPlayerFoundWord;
 
-            Debug.Log($"[BotRace] Started against {botName} (difficulty {difficultyMult:F2})");
+            Debug.Log($"[BotRace] Started vs '{botName}' ({difficulty}) on Level {level}. " +
+                      $"Words: {_totalWords}");
         }
+
+        // ---------------------------------------------------------------
+        // UI Construction
+        // ---------------------------------------------------------------
 
         private void BuildCanvas()
         {
             var canvasObj = new GameObject("BotRaceCanvas");
-            canvasObj.transform.SetParent(transform);
+            canvasObj.transform.SetParent(transform, false);
+
             _canvas = canvasObj.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _canvas.sortingOrder = 58;
@@ -91,7 +128,7 @@ namespace MeraWorld.Core
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.matchWidthOrHeight = 0f;   // width-priority for consistent fit
 
             canvasObj.AddComponent<GraphicRaycaster>();
         }
@@ -102,7 +139,8 @@ namespace MeraWorld.Core
             _racePanel.transform.SetParent(_canvas.transform, false);
 
             var bg = _racePanel.AddComponent<Image>();
-            bg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.10f, 0.15f, 0.28f), 256, 40);
+            bg.sprite = UISpriteFactory.Create3DButtonSprite(
+                new Color(0.10f, 0.15f, 0.28f), 256, 40);
             bg.type = Image.Type.Sliced;
             bg.color = Color.white;
             bg.raycastTarget = false;
@@ -114,13 +152,13 @@ namespace MeraWorld.Core
             rt.anchoredPosition = new Vector2(0f, -270f);
             rt.sizeDelta = new Vector2(900f, 130f);
 
-            // Player side (left)
-            _playerScoreText = CreateScore(_racePanel.transform, "YOU",
+            // ---- Player side (left) ----
+            _playerScoreText = CreateScoreText(_racePanel.transform, "YOU",
                 new Vector2(-320f, 0f), new Color(0.30f, 0.75f, 0.40f));
             _playerProgressFill = CreateProgressBar(_racePanel.transform,
                 new Vector2(-160f, -35f), new Color(0.30f, 0.75f, 0.40f));
 
-            // VS divider
+            // ---- VS divider ----
             var vsObj = new GameObject("VS");
             vsObj.transform.SetParent(_racePanel.transform, false);
             var vsTxt = vsObj.AddComponent<Text>();
@@ -138,15 +176,15 @@ namespace MeraWorld.Core
             vsRt.anchoredPosition = Vector2.zero;
             vsRt.sizeDelta = new Vector2(80f, 60f);
 
-            // Bot side (right)
-            _botNameText = CreateScore(_racePanel.transform, _bot.Name,
+            // ---- Bot side (right) ----
+            string botLabel = _bot != null ? _bot.Name : "Bot";
+            _botScoreText = CreateScoreText(_racePanel.transform, botLabel,
                 new Vector2(320f, 0f), new Color(0.90f, 0.45f, 0.30f));
-            _botScoreText = _botNameText;
             _botProgressFill = CreateProgressBar(_racePanel.transform,
                 new Vector2(160f, -35f), new Color(0.90f, 0.45f, 0.30f));
         }
 
-        private Text CreateScore(Transform parent, string label, Vector2 pos, Color color)
+        private Text CreateScoreText(Transform parent, string label, Vector2 pos, Color color)
         {
             var obj = new GameObject("Score");
             obj.transform.SetParent(parent, false);
@@ -158,6 +196,7 @@ namespace MeraWorld.Core
             txt.color = color;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.raycastTarget = false;
+
             var rt = obj.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
@@ -174,6 +213,7 @@ namespace MeraWorld.Core
             var bgImg = bgObj.AddComponent<Image>();
             bgImg.color = new Color(0.15f, 0.18f, 0.28f);
             bgImg.raycastTarget = false;
+
             var bgRt = bgObj.GetComponent<RectTransform>();
             bgRt.anchorMin = new Vector2(0.5f, 0.5f);
             bgRt.anchorMax = new Vector2(0.5f, 0.5f);
@@ -186,6 +226,7 @@ namespace MeraWorld.Core
             var fillImg = fillObj.AddComponent<Image>();
             fillImg.color = color;
             fillImg.raycastTarget = false;
+
             var fillRt = fillObj.GetComponent<RectTransform>();
             fillRt.anchorMin = new Vector2(0f, 0f);
             fillRt.anchorMax = new Vector2(0f, 1f);
@@ -196,9 +237,14 @@ namespace MeraWorld.Core
             return fillImg;
         }
 
+        // ---------------------------------------------------------------
+        // Race events
+        // ---------------------------------------------------------------
+
         private void OnPlayerFoundWord(string word)
         {
             if (!IsActive) return;
+
             _playerFoundCount++;
 
             if (_playerScoreText != null)
@@ -210,7 +256,9 @@ namespace MeraWorld.Core
 
         private void OnBotFoundWord(string word)
         {
-            if (_botScoreText != null && _bot != null)
+            if (!IsActive || _bot == null) return;
+
+            if (_botScoreText != null)
                 _botScoreText.text = $"{_bot.Name}: {_bot.FoundWords}/{_totalWords}";
 
             UpdateBar(_botProgressFill, _bot.FoundWords);
@@ -220,7 +268,7 @@ namespace MeraWorld.Core
         private void UpdateBar(Image fill, int count)
         {
             if (fill == null) return;
-            float pct = (float)count / _totalWords;
+            float pct = Mathf.Clamp01((float)count / Mathf.Max(1, _totalWords));
             fill.rectTransform.sizeDelta = new Vector2(236f * pct, -4f);
         }
 
@@ -228,41 +276,49 @@ namespace MeraWorld.Core
         {
             if (_bot == null) return;
 
-            if (_playerFoundCount >= _totalWords && _bot.FoundWords >= _totalWords)
-                EndRace("draw");
-            else if (_playerFoundCount >= _totalWords)
-                EndRace("win");
-            else if (_bot.FoundWords >= _totalWords)
-                EndRace("lose");
+            bool playerDone = _playerFoundCount >= _totalWords;
+            bool botDone = _bot.FoundWords >= _totalWords;
+
+            if (playerDone && botDone) EndRace("draw");
+            else if (playerDone) EndRace("win");
+            else if (botDone) EndRace("lose");
         }
+
+        // ---------------------------------------------------------------
+        // Result
+        // ---------------------------------------------------------------
 
         private void EndRace(string result)
         {
             IsActive = false;
 
-            if (result == "win")
+            switch (result)
             {
-                Debug.Log("[BotRace] Player WON!");
-                if (Progress != null) Progress.AddCoins(50);
-                ShowResult("YOU WIN!", "+50 bonus coins",
-                    new Color(0.25f, 0.75f, 0.35f));
-            }
-            else if (result == "lose")
-            {
-                Debug.Log("[BotRace] Bot won");
-                ShowResult($"{_bot.Name} WINS!", "Better luck next time!",
-                    new Color(0.85f, 0.35f, 0.35f));
-            }
-            else
-            {
-                Debug.Log("[BotRace] Draw");
-                ShowResult("DRAW!", "Tie!",
-                    new Color(0.85f, 0.75f, 0.30f));
+                case "win":
+                    Debug.Log("[BotRace] Player WON!");
+                    if (Progress != null) Progress.AddCoins(50);
+                    ShowResult("YOU WIN!", "+50 bonus coins",
+                        new Color(0.25f, 0.75f, 0.35f));
+                    break;
+
+                case "lose":
+                    Debug.Log("[BotRace] Bot won.");
+                    ShowResult($"{_bot.Name} WINS!", "Better luck next time!",
+                        new Color(0.85f, 0.35f, 0.35f));
+                    break;
+
+                default:
+                    Debug.Log("[BotRace] Draw.");
+                    ShowResult("DRAW!", "Tie!",
+                        new Color(0.85f, 0.75f, 0.30f));
+                    break;
             }
         }
 
         private void ShowResult(string title, string subtitle, Color color)
         {
+            if (_canvas == null) return;
+
             var panel = new GameObject("RaceResult");
             panel.transform.SetParent(_canvas.transform, false);
 
@@ -284,11 +340,12 @@ namespace MeraWorld.Core
             Destroy(panel, 3f);
         }
 
-        private void CreateText(Transform parent, string content, Vector2 pos, int size,
-            Color color, FontStyle style)
+        private void CreateText(Transform parent, string content, Vector2 pos,
+            int size, Color color, FontStyle style)
         {
             var obj = new GameObject("Text");
             obj.transform.SetParent(parent, false);
+
             var txt = obj.AddComponent<Text>();
             txt.text = content;
             txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -297,6 +354,7 @@ namespace MeraWorld.Core
             txt.color = color;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.raycastTarget = false;
+
             var rt = obj.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
@@ -304,6 +362,10 @@ namespace MeraWorld.Core
             rt.anchoredPosition = pos;
             rt.sizeDelta = new Vector2(600f, 100f);
         }
+
+        // ---------------------------------------------------------------
+        // Tick
+        // ---------------------------------------------------------------
 
         void Update()
         {
@@ -315,6 +377,9 @@ namespace MeraWorld.Core
         {
             if (SelectionManager != null)
                 SelectionManager.OnWordFound -= OnPlayerFoundWord;
+
+            if (_bot != null)
+                _bot.OnWordFound -= OnBotFoundWord;
         }
     }
 }
