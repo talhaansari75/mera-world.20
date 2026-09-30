@@ -28,14 +28,14 @@ namespace MeraWorld.Core
             Instance = this;
         }
 
-        void Start() { Invoke(nameof(Setup), 1.3f); }
+        void Start() { Invoke(nameof(Setup), 1.0f); }
 
         private void Setup() { BuildCanvas(); BuildPanel(); }
 
         private void BuildCanvas()
         {
             var canvasObj = new GameObject("CategoryCanvas");
-            canvasObj.transform.SetParent(transform);
+            canvasObj.transform.SetParent(transform, false);
             _canvas = canvasObj.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _canvas.sortingOrder = 850;
@@ -51,7 +51,11 @@ namespace MeraWorld.Core
             {
                 var es = new GameObject("EventSystem");
                 es.AddComponent<UnityEngine.EventSystems.EventSystem>();
-                es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+
+                var newModule = System.Type.GetType(
+                    "UnityEngine.InputSystem.UI.InputSystemUIInputModule, Unity.InputSystem");
+                if (newModule != null) es.AddComponent(newModule);
+                else es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
             }
         }
 
@@ -69,42 +73,61 @@ namespace MeraWorld.Core
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
-            _titleText = CreateText(_panel.transform, "CATEGORY", new Vector2(0f, 830f), 70,
-                new Color(1f, 0.85f, 0.3f), FontStyle.Bold);
+            // Title
+            _titleText = CreateText(_panel.transform, "CATEGORY", new Vector2(0f, 830f), 60,
+                new Color(1f, 0.85f, 0.30f), FontStyle.Bold);
 
+            // Back button
             CreateSmallButton(_panel.transform, "◀ BACK", new Vector2(-380f, 830f),
                 new Color(0.5f, 0.5f, 0.55f), OnBack);
 
+            // Offline note
             _offlineNoteText = CreateText(_panel.transform, "", new Vector2(0f, 740f), 26,
                 new Color(1f, 0.55f, 0.55f), FontStyle.Normal);
             _offlineNoteText.gameObject.SetActive(false);
 
+            // Grid parent
             _gridParent = new GameObject("GridParent");
             _gridParent.transform.SetParent(_panel.transform, false);
             var grt = _gridParent.AddComponent<RectTransform>();
             grt.anchorMin = new Vector2(0.5f, 0.5f);
             grt.anchorMax = new Vector2(0.5f, 0.5f);
             grt.pivot = new Vector2(0.5f, 0.5f);
-            grt.anchoredPosition = new Vector2(0f, 0f);
-            grt.sizeDelta = new Vector2(900f, 1300f);
+            grt.anchoredPosition = new Vector2(0f, -80f);
+            grt.sizeDelta = new Vector2(960f, 1300f);
 
             var grid = _gridParent.AddComponent<GridLayoutGroup>();
-            grid.cellSize = new Vector2(380f, 180f);
+            grid.cellSize = new Vector2(420f, 200f);
             grid.spacing = new Vector2(30f, 30f);
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = 2;
-            grid.padding = new RectOffset(40, 40, 40, 40);
+            grid.padding = new RectOffset(30, 30, 30, 30);
+            grid.childAlignment = TextAnchor.UpperCenter;
 
             _panel.SetActive(false);
         }
 
         public void Show(string categoryId)
         {
+            if (_gridParent == null)
+            {
+                Debug.LogError("[Category] Grid parent is NULL. BuildPanel not called yet?");
+                return;
+            }
+
             _activeCategory = categoryId;
+            Debug.Log($"[Category] Show: {categoryId}");
 
-            foreach (Transform child in _gridParent.transform)
-                Destroy(child.gameObject);
+            // Clear old items - use DestroyImmediate for reliable removal
+            int cleared = 0;
+            for (int i = _gridParent.transform.childCount - 1; i >= 0; i--)
+            {
+                DestroyImmediate(_gridParent.transform.GetChild(i).gameObject);
+                cleared++;
+            }
+            Debug.Log($"[Category] Cleared {cleared} old items");
 
+            // Update title
             string title = "MENU";
             switch (categoryId)
             {
@@ -126,11 +149,15 @@ namespace MeraWorld.Core
                 _offlineNoteText.gameObject.SetActive(false);
             }
 
+            // Populate items
             var items = GetItemsForCategory(categoryId);
+            Debug.Log($"[Category] Creating {items.Count} items");
+
             foreach (var item in items)
                 CreateMenuItem(item, online);
 
             _panel.SetActive(true);
+            Debug.Log($"[Category] Panel shown with {_gridParent.transform.childCount} children");
         }
 
         private System.Collections.Generic.List<MenuItem> GetItemsForCategory(string category)
@@ -140,96 +167,40 @@ namespace MeraWorld.Core
             switch (category)
             {
                 case "social":
-                    list.Add(new MenuItem {
-                        Label = "ONLINE MATCH",
-                        Color = new Color(0.75f, 0.30f, 0.30f),
-                        OnClick = () => OpenPanel<MultiplayerMenuUI>("ONLINE MATCH"),
-                        RequiresOnline = true
-                    });
-                    list.Add(new MenuItem {
-                        Label = "FRIENDS",
-                        Color = new Color(0.35f, 0.75f, 0.55f),
-                        OnClick = () => OpenPanel<FriendListUI>("FRIENDS"),
-                        RequiresOnline = true
-                    });
-                    list.Add(new MenuItem {
-                        Label = "TOURNEY",
-                        Color = new Color(0.85f, 0.35f, 0.35f),
-                        OnClick = () => OpenPanel<TournamentModeUI>("TOURNAMENT"),
-                        RequiresOnline = true
-                    });
-                    list.Add(new MenuItem {
-                        Label = "INVITE",
-                        Color = new Color(0.85f, 0.30f, 0.50f),
-                        OnClick = () => OpenPanel<ReferralSystemUI>("INVITE"),
-                        RequiresOnline = true
-                    });
+                    list.Add(new MenuItem { Label = "ONLINE MATCH", Color = new Color(0.75f, 0.30f, 0.30f),
+                        OnClick = () => OpenPanel<MultiplayerMenuUI>("ONLINE MATCH"), RequiresOnline = true });
+                    list.Add(new MenuItem { Label = "FRIENDS", Color = new Color(0.35f, 0.75f, 0.55f),
+                        OnClick = () => OpenPanel<FriendListUI>("FRIENDS"), RequiresOnline = true });
+                    list.Add(new MenuItem { Label = "TOURNEY", Color = new Color(0.85f, 0.35f, 0.35f),
+                        OnClick = () => OpenPanel<TournamentModeUI>("TOURNAMENT"), RequiresOnline = true });
+                    list.Add(new MenuItem { Label = "INVITE", Color = new Color(0.85f, 0.30f, 0.50f),
+                        OnClick = () => OpenPanel<ReferralSystemUI>("INVITE"), RequiresOnline = true });
                     break;
 
                 case "shop":
-                    list.Add(new MenuItem {
-                        Label = "SHOP",
-                        Color = new Color(0.90f, 0.55f, 0.20f),
-                        OnClick = () => OpenPanel<ShopUI>("SHOP"),
-                        RequiresOnline = false
-                    });
-                    list.Add(new MenuItem {
-                        Label = "SPIN",
-                        Color = new Color(1f, 0.70f, 0.20f),
-                        OnClick = () => OpenPanel<SpinWheelUI>("SPIN"),
-                        RequiresOnline = false
-                    });
-                    list.Add(new MenuItem {
-                        Label = "SEASON",
-                        Color = new Color(0.85f, 0.55f, 0.25f),
-                        OnClick = () => OpenPanel<SeasonPassUI>("SEASON PASS"),
-                        RequiresOnline = false
-                    });
-                    list.Add(new MenuItem {
-                        Label = "FREE COINS",
-                        Color = new Color(0.30f, 0.75f, 0.55f),
-                        OnClick = () => OpenPanel<AdRewardTiersUI>("FREE COINS"),
-                        RequiresOnline = false
-                    });
+                    list.Add(new MenuItem { Label = "SHOP", Color = new Color(0.90f, 0.55f, 0.20f),
+                        OnClick = () => OpenPanel<ShopUI>("SHOP"), RequiresOnline = false });
+                    list.Add(new MenuItem { Label = "SPIN WHEEL", Color = new Color(1f, 0.70f, 0.20f),
+                        OnClick = () => OpenPanel<SpinWheelUI>("SPIN"), RequiresOnline = false });
+                    list.Add(new MenuItem { Label = "SEASON PASS", Color = new Color(0.85f, 0.55f, 0.25f),
+                        OnClick = () => OpenPanel<SeasonPassUI>("SEASON"), RequiresOnline = false });
+                    list.Add(new MenuItem { Label = "FREE COINS", Color = new Color(0.30f, 0.75f, 0.55f),
+                        OnClick = () => OpenPanel<AdRewardTiersUI>("FREE COINS"), RequiresOnline = false });
                     break;
 
                 case "progress":
-                    list.Add(new MenuItem {
-                        Label = "AWARDS",
-                        Color = new Color(0.85f, 0.40f, 0.55f),
-                        OnClick = () => OpenPanel<AchievementProgressBarUI>("AWARDS"),
-                        RequiresOnline = false
-                    });
-                    list.Add(new MenuItem {
-                        Label = "STATS",
-                        Color = new Color(0.30f, 0.65f, 0.80f),
-                        OnClick = () => OpenPanel<StatisticsUI>("STATS"),
-                        RequiresOnline = false
-                    });
-                    list.Add(new MenuItem {
-                        Label = "MISSIONS",
-                        Color = new Color(0.30f, 0.55f, 0.85f),
-                        OnClick = () => OpenPanel<MissionsSystem>("MISSIONS"),
-                        RequiresOnline = false
-                    });
-                    list.Add(new MenuItem {
-                        Label = "WORLDS",
-                        Color = new Color(0.50f, 0.70f, 0.95f),
-                        OnClick = () => OpenPanel<WorldMapUI>("WORLDS"),
-                        RequiresOnline = false
-                    });
-                    list.Add(new MenuItem {
-                        Label = "NEWS",
-                        Color = new Color(0.75f, 0.65f, 0.30f),
-                        OnClick = () => OpenPanel<NewsFeedUI>("NEWS"),
-                        RequiresOnline = false
-                    });
-                    list.Add(new MenuItem {
-                        Label = "NOTIFS",
-                        Color = new Color(0.65f, 0.45f, 0.75f),
-                        OnClick = () => OpenPanel<NotificationCenterUI>("NOTIFICATIONS"),
-                        RequiresOnline = false
-                    });
+                    list.Add(new MenuItem { Label = "AWARDS", Color = new Color(0.85f, 0.40f, 0.55f),
+                        OnClick = () => OpenPanel<AchievementsUI>("AWARDS"), RequiresOnline = false });
+                    list.Add(new MenuItem { Label = "STATS", Color = new Color(0.30f, 0.65f, 0.80f),
+                        OnClick = () => OpenPanel<StatisticsUI>("STATS"), RequiresOnline = false });
+                    list.Add(new MenuItem { Label = "MISSIONS", Color = new Color(0.30f, 0.55f, 0.85f),
+                        OnClick = () => OpenPanel<MissionsSystem>("MISSIONS"), RequiresOnline = false });
+                    list.Add(new MenuItem { Label = "WORLDS", Color = new Color(0.50f, 0.70f, 0.95f),
+                        OnClick = () => OpenPanel<WorldMapUI>("WORLDS"), RequiresOnline = false });
+                    list.Add(new MenuItem { Label = "NEWS", Color = new Color(0.75f, 0.65f, 0.30f),
+                        OnClick = () => OpenPanel<NewsFeedUI>("NEWS"), RequiresOnline = false });
+                    list.Add(new MenuItem { Label = "NOTIFS", Color = new Color(0.65f, 0.45f, 0.75f),
+                        OnClick = () => OpenPanel<NotificationCenterUI>("NOTIFS"), RequiresOnline = false });
                     break;
             }
 
@@ -252,10 +223,8 @@ namespace MeraWorld.Core
                 System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance,
                 null, System.Type.EmptyTypes, null);
 
-            if (showMethod != null)
-                showMethod.Invoke(target, null);
-            else
-                target.gameObject.SetActive(true);
+            if (showMethod != null) showMethod.Invoke(target, null);
+            else target.gameObject.SetActive(true);
 
             return target;
         }
@@ -267,24 +236,30 @@ namespace MeraWorld.Core
             var rootObj = new GameObject($"Item_{item.Label}");
             rootObj.transform.SetParent(_gridParent.transform, false);
 
+            // RectTransform is set by GridLayoutGroup automatically, but ensure it exists
+            if (rootObj.GetComponent<RectTransform>() == null)
+                rootObj.AddComponent<RectTransform>();
+
             Color displayColor = disabled
                 ? new Color(0.30f, 0.32f, 0.38f)
                 : item.Color;
 
+            // Bottom shadow (3D effect)
             var shadowObj = new GameObject("BottomShadow");
             shadowObj.transform.SetParent(rootObj.transform, false);
-            var bShadowImg = shadowObj.AddComponent<Image>();
-            bShadowImg.sprite = UISpriteFactory.Create3DButtonSprite(
+            var shImg = shadowObj.AddComponent<Image>();
+            shImg.sprite = UISpriteFactory.Create3DButtonSprite(
                 Color.Lerp(displayColor, Color.black, 0.55f), 256, 40);
-            bShadowImg.type = Image.Type.Sliced;
-            bShadowImg.raycastTarget = false;
+            shImg.type = Image.Type.Sliced;
+            shImg.color = Color.white;
+            shImg.raycastTarget = false;
             var shRt = shadowObj.GetComponent<RectTransform>();
             shRt.anchorMin = Vector2.zero;
             shRt.anchorMax = Vector2.one;
-            shRt.offsetMin = Vector2.zero;
-            shRt.offsetMax = Vector2.zero;
-            shRt.anchoredPosition = new Vector2(0f, -8f);
+            shRt.offsetMin = new Vector2(0f, 0f);
+            shRt.offsetMax = new Vector2(0f, -8f);
 
+            // Main button
             var btnObj = new GameObject("Button");
             btnObj.transform.SetParent(rootObj.transform, false);
             var btnImg = btnObj.AddComponent<Image>();
@@ -300,13 +275,7 @@ namespace MeraWorld.Core
                 btn.onClick.AddListener(() =>
                 {
                     if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-
-                    if (item.RequiresOnline && !InternetChecker.QuickCheck())
-                    {
-                        Debug.LogWarning($"[Category] {item.Label} requires internet.");
-                        return;
-                    }
-
+                    if (item.RequiresOnline && !InternetChecker.QuickCheck()) return;
                     item.OnClick?.Invoke();
                 });
             }
@@ -317,12 +286,13 @@ namespace MeraWorld.Core
             btnRt.offsetMin = Vector2.zero;
             btnRt.offsetMax = new Vector2(0f, 8f);
 
+            // Label
             var textObj = new GameObject("Label");
             textObj.transform.SetParent(btnObj.transform, false);
             var txt = textObj.AddComponent<Text>();
-            txt.text = disabled ? $"{item.Label}\n(ONLINE ONLY)" : item.Label;
+            txt.text = disabled ? $"{item.Label}\n(ONLINE)" : item.Label;
             txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = disabled ? 30 : 40;
+            txt.fontSize = disabled ? 28 : 40;
             txt.fontStyle = FontStyle.Bold;
             txt.color = disabled ? new Color(0.75f, 0.75f, 0.80f) : Color.white;
             txt.alignment = TextAnchor.MiddleCenter;
@@ -379,9 +349,9 @@ namespace MeraWorld.Core
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos;
             rt.sizeDelta = new Vector2(220f, 80f);
-            var textObj = new GameObject("Label");
-            textObj.transform.SetParent(obj.transform, false);
-            var txt = textObj.AddComponent<Text>();
+            var t = new GameObject("Label");
+            t.transform.SetParent(obj.transform, false);
+            var txt = t.AddComponent<Text>();
             txt.text = label;
             txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             txt.fontSize = 32;
@@ -389,7 +359,7 @@ namespace MeraWorld.Core
             txt.color = Color.white;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.raycastTarget = false;
-            var trt = textObj.GetComponent<RectTransform>();
+            var trt = t.GetComponent<RectTransform>();
             trt.anchorMin = Vector2.zero;
             trt.anchorMax = Vector2.one;
             trt.offsetMin = Vector2.zero;
