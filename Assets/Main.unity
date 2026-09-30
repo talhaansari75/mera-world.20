@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &8185810
+--- !u!1 &101535148
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,58 +127,78 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8185813}
-  - component: {fileID: 8185812}
-  - component: {fileID: 8185811}
+  - component: {fileID: 101535150}
+  - component: {fileID: 101535149}
   m_Layer: 0
-  m_Name: EventSystem
+  m_Name: DailyRewardUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &8185811
+--- !u!114 &101535149
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8185810}
+  m_GameObject: {fileID: 101535148}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
+  m_Script: {fileID: 11500000, guid: 87539204142e9664287ad852d791157b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.StandaloneInputModule
-  m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
---- !u!114 &8185812
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8185810}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventSystem
-  m_FirstSelected: {fileID: 0}
-  m_sendNavigationEvents: 1
-  m_DragThreshold: 10
---- !u!4 &8185813
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.DailyRewardUI
+--- !u!4 &101535150
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8185810}
+  m_GameObject: {fileID: 101535148}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &309220194
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 309220196}
+  - component: {fileID: 309220195}
+  m_Layer: 0
+  m_Name: MissionsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &309220195
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 309220194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ef41fb364fae994bbacfaa489908c52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.MissionsManager
+--- !u!4 &309220196
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 309220194}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -204,7 +224,6 @@ GameObject:
   - component: {fileID: 343331820}
   - component: {fileID: 343331819}
   - component: {fileID: 343331821}
-  - component: {fileID: 343331822}
   - component: {fileID: 343331826}
   - component: {fileID: 343331825}
   - component: {fileID: 343331824}
@@ -347,6 +366,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.GridVisualizer
   GameManager: {fileID: 343331813}
   SelectionManager: {fileID: 420426493}
+  MaxWidthFraction: 0.92
+  MaxHeightFraction: 0.58
+  GapRatio: 0.12
+  GridOffsetY: 0.55
 --- !u!114 &343331815
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -433,23 +456,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f66d3a6f258f9e419aa1ea73637a0b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.HintButtonUI
-  SelectionManager: {fileID: 420426493}
-  Progress: {fileID: 343331820}
-  WinScreen: {fileID: 0}
-  HintCost: 50
---- !u!114 &343331822
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 343331811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 50e814d7e04215f46b7bb5c81ea23218, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.HomeScreenUI
-  Progress: {fileID: 343331820}
 --- !u!114 &343331823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -486,8 +492,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87539204142e9664287ad852d791157b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.DailyRewardUI
-  Progress: {fileID: 343331820}
-  Sound: {fileID: 343331818}
 --- !u!114 &343331826
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -500,8 +504,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3adc3f5f390fd3c47856b01c4b7ef830, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.SettingsScreenUI
-  Progress: {fileID: 343331820}
-  Sound: {fileID: 343331818}
 --- !u!114 &343331827
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -593,7 +595,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ComboSystem
   ComboWindowSeconds: 5
-  BaseBonusCoins: 2
 --- !u!114 &343331834
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -696,8 +697,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07f2d20b557f01a488c2579ad9d49843, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ShopUI
-  Progress: {fileID: 343331820}
-  Sound: {fileID: 343331818}
 --- !u!114 &343331842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -989,6 +988,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8db7bdaecbca79e4892f0884ad73350b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.AdsManager
+  AndroidGameId: 800384686
+  IOSGameId: 800384686
+  BannerAdUnitId: BP_Banner_Android
+  InterstitialAdUnitId: BP_Interstitial_Android
+  RewardedAdUnitId: BP_Rewarded_Android
+  TestMode: 1
+  BannerAutoShow: 1
+  InterstitialMinGapSeconds: 90
   InterstitialEveryNLevels: 3
   RewardedCoinsAmount: 100
   RewardedCooldownSeconds: 60
@@ -1069,8 +1076,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bd2a5b33b1b4c5479fe10f5176194b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.StatisticsUI
-  Progress: {fileID: 343331820}
-  Stats: {fileID: 343331873}
 --- !u!114 &343331873
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1187,8 +1192,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df561ab1906d8b84e89845d291ccd014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.LeaderboardUI
-  Progress: {fileID: 343331820}
-  XP: {fileID: 343331882}
 --- !u!114 &343331882
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1455,8 +1458,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29172fcb0704ae94cbb87223ccefec94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.AdRewardTiersUI
-  Progress: {fileID: 343331820}
-  Ads: {fileID: 343331866}
 --- !u!114 &343331905
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1554,7 +1555,184 @@ MonoBehaviour:
   SelectedColor: {r: 0.95, g: 0.75, b: 0.2, a: 1}
   FoundColor: {r: 0.25, g: 0.75, b: 0.3, a: 1}
   CoinsPerWord: 5
-  DebugLogging: 1
+--- !u!1 &499994376
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 499994378}
+  - component: {fileID: 499994377}
+  m_Layer: 0
+  m_Name: ClickTest
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &499994377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 499994376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bbdd6002f1bc394baaf76a0ea70d44a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ClickTest
+--- !u!4 &499994378
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 499994376}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &799110815
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 799110818}
+  - component: {fileID: 799110817}
+  - component: {fileID: 799110819}
+  m_Layer: 0
+  m_Name: EventSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &799110817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 799110815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventSystem
+  m_FirstSelected: {fileID: 0}
+  m_sendNavigationEvents: 1
+  m_DragThreshold: 10
+--- !u!4 &799110818
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 799110815}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &799110819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 799110815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.UI.InputSystemUIInputModule
+  m_SendPointerHoverToParent: 1
+  m_MoveRepeatDelay: 0.5
+  m_MoveRepeatRate: 0.1
+  m_XRTrackingOrigin: {fileID: 0}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_PointAction: {fileID: -1654692200621890270, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_MoveAction: {fileID: -8784545083839296357, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_SubmitAction: {fileID: 392368643174621059, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_CancelAction: {fileID: 7727032971491509709, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_LeftClickAction: {fileID: 3001919216989983466, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_MiddleClickAction: {fileID: -2185481485913320682, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_RightClickAction: {fileID: -4090225696740746782, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_DeselectOnBackgroundClick: 1
+  m_PointerBehavior: 0
+  m_CursorLockBehavior: 0
+  m_ScrollDeltaPerTick: 6
+--- !u!1 &982779529
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 982779531}
+  - component: {fileID: 982779530}
+  m_Layer: 0
+  m_Name: AdsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &982779530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 982779529}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8db7bdaecbca79e4892f0884ad73350b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.AdsManager
+  AndroidGameId: 800384686
+  IOSGameId: 800384686
+  BannerAdUnitId: BP_Banner_Android
+  InterstitialAdUnitId: BP_Interstitial_Android
+  RewardedAdUnitId: BP_Rewarded_Android
+  TestMode: 1
+  BannerAutoShow: 1
+  InterstitialMinGapSeconds: 90
+  InterstitialEveryNLevels: 3
+  RewardedCoinsAmount: 100
+  RewardedCooldownSeconds: 60
+--- !u!4 &982779531
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 982779529}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1484417316
 GameObject:
   m_ObjectHideFlags: 0
@@ -1584,7 +1762,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e8151350d7b69f409f10324df52a743, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.GameBootstrap
-  CreateHomeScreenUI: 1
   CreateGridVisualizer: 1
   CreateWordListUI: 1
   CreateTopBarUI: 1
@@ -1592,6 +1769,25 @@ MonoBehaviour:
   CreateWinScreenUI: 1
   CreateLevelTimerUI: 1
   CreateBotRaceMode: 1
+  CreateHomeScreenUI: 1
+  CreateCategoryMenuUI: 1
+  CreateSettingsScreenUI: 1
+  CreateShopUI: 1
+  CreateSpinWheelUI: 1
+  CreateSeasonPassUI: 1
+  CreateAdRewardTiersUI: 1
+  CreateAchievementsUI: 1
+  CreateStatisticsUI: 1
+  CreateLeaderboardUI: 1
+  CreateMissionsUI: 1
+  CreateMultiplayerMenuUI: 1
+  CreateFriendListUI: 1
+  CreateTournamentModeUI: 1
+  CreateReferralSystemUI: 1
+  CreateDailyRewardUI: 1
+  CreateWorldMapUI: 1
+  CreateNewsFeedUI: 1
+  CreateNotificationCenterUI: 1
   LogSetup: 1
 --- !u!4 &1484417318
 Transform:
@@ -1620,6 +1816,7 @@ GameObject:
   - component: {fileID: 1487051998}
   - component: {fileID: 1487051997}
   - component: {fileID: 1487052000}
+  - component: {fileID: 1487052001}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1745,6 +1942,67 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &1487052001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1487051996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 0
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 0}
+--- !u!1 &1584069521
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1584069523}
+  - component: {fileID: 1584069522}
+  m_Layer: 0
+  m_Name: ManualButtonHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1584069522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1584069521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 088aa942a7a29f045bb45aeb8a9b35a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ManualButtonHandler
+--- !u!4 &1584069523
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1584069521}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1622648238
 GameObject:
   m_ObjectHideFlags: 0
@@ -1801,6 +2059,94 @@ Transform:
   m_Children:
   - {fileID: 343331812}
   - {fileID: 420426492}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1630610245
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1630610247}
+  - component: {fileID: 1630610246}
+  m_Layer: 0
+  m_Name: ButtonDebugTool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1630610246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1630610245}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e70320485e9a83949ba7d901abfdc534, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ButtonDebugTool
+--- !u!4 &1630610247
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1630610245}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1632007291
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1632007293}
+  - component: {fileID: 1632007292}
+  m_Layer: 0
+  m_Name: MissionsUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1632007292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1632007291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2327103157168354f9db927337d5050e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.MissionsUI
+--- !u!4 &1632007293
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1632007291}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1640825246
@@ -1935,6 +2281,81 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1883157452
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1883157454}
+  - component: {fileID: 1883157453}
+  m_Layer: 0
+  m_Name: LeaderboardUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1883157453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1883157452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df561ab1906d8b84e89845d291ccd014, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.LeaderboardUI
+--- !u!4 &1883157454
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1883157452}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1909293348
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1909293349}
+  m_Layer: 0
+  m_Name: 'AdsBootstrap '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1909293349
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1909293348}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2138983427
 GameObject:
   m_ObjectHideFlags: 0
@@ -1990,4 +2411,13 @@ SceneRoots:
   - {fileID: 2138983429}
   - {fileID: 1820838607}
   - {fileID: 1484417318}
-  - {fileID: 8185813}
+  - {fileID: 982779531}
+  - {fileID: 1909293349}
+  - {fileID: 101535150}
+  - {fileID: 309220196}
+  - {fileID: 1632007293}
+  - {fileID: 1883157454}
+  - {fileID: 1630610247}
+  - {fileID: 799110818}
+  - {fileID: 499994378}
+  - {fileID: 1584069523}

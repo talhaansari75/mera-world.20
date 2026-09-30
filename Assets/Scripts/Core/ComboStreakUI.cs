@@ -4,67 +4,96 @@ using UnityEngine.UI;
 
 namespace MeraWorld.Core
 {
+    /// <summary>
+    /// Small streak counter — shows current combo as a pill on the side.
+    /// </summary>
     public class ComboStreakUI : MonoBehaviour
     {
         private Canvas _canvas;
-        private GameObject _streakPanel;
+        private GameObject _streakRoot;
         private Text _streakText;
+        private Image _bgImage;
 
-        void Start()
-        {
-            Invoke(nameof(Setup), 0.6f);
-        }
+        void Start() { Invoke(nameof(Setup), 1.2f); }
 
         private void Setup()
         {
             BuildCanvas();
-            BuildStreakPanel();
+            BuildUI();
 
             if (ComboSystem.Instance != null)
-                ComboSystem.Instance.OnComboChanged += OnComboChanged;
+                ComboSystem.Instance.OnComboChanged += HandleComboChanged;
+
+            TrySubscribe();
+        }
+
+        private bool _subscribed = false;
+
+        private void TrySubscribe()
+        {
+            if (_subscribed) return;
+            if (ComboSystem.Instance == null)
+            {
+                Invoke(nameof(TrySubscribe), 0.5f);
+                return;
+            }
+            ComboSystem.Instance.OnComboChanged += HandleComboChanged;
+            _subscribed = true;
+        }
+
+        void OnDestroy()
+        {
+            if (ComboSystem.Instance != null)
+                ComboSystem.Instance.OnComboChanged -= HandleComboChanged;
         }
 
         private void BuildCanvas()
         {
             var canvasObj = new GameObject("ComboStreakCanvas");
-            canvasObj.transform.SetParent(transform);
+            canvasObj.transform.SetParent(transform, false);
             _canvas = canvasObj.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _canvas.sortingOrder = 286;
+            _canvas.sortingOrder = 96;
 
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
-
+            scaler.matchWidthOrHeight = 0f;
             canvasObj.AddComponent<GraphicRaycaster>();
         }
 
-        private void BuildStreakPanel()
+        private void BuildUI()
         {
-            _streakPanel = new GameObject("StreakPanel");
-            _streakPanel.transform.SetParent(_canvas.transform, false);
+            _streakRoot = new GameObject("StreakRoot");
+            _streakRoot.transform.SetParent(_canvas.transform, false);
 
-            var bg = _streakPanel.AddComponent<Image>();
-            bg.color = new Color(1f, 0.55f, 0.20f, 0.95f);
+            var rt = _streakRoot.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0.5f);
+            rt.anchorMax = new Vector2(0f, 0.5f);
+            rt.pivot = new Vector2(0f, 0.5f);
+            rt.anchoredPosition = new Vector2(20f, 0f);
+            rt.sizeDelta = new Vector2(140f, 140f);
 
-            var rt = _streakPanel.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(1f, 1f);
-            rt.anchorMax = new Vector2(1f, 1f);
-            rt.pivot = new Vector2(1f, 1f);
-            rt.anchoredPosition = new Vector2(-30f, -280f);
-            rt.sizeDelta = new Vector2(300f, 90f);
+            _bgImage = _streakRoot.AddComponent<Image>();
+            _bgImage.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.95f, 0.65f, 0.20f), 128, 40);
+            _bgImage.type = Image.Type.Sliced;
+            _bgImage.color = Color.white;
+            _bgImage.raycastTarget = false;
 
-            var textObj = new GameObject("StreakText");
-            textObj.transform.SetParent(_streakPanel.transform, false);
+            var textObj = new GameObject("Text");
+            textObj.transform.SetParent(_streakRoot.transform, false);
             _streakText = textObj.AddComponent<Text>();
-            _streakText.text = "STREAK x2";
+            _streakText.text = "x1";
             _streakText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _streakText.fontSize = 36;
+            _streakText.fontSize = 48;
             _streakText.fontStyle = FontStyle.Bold;
             _streakText.color = Color.white;
             _streakText.alignment = TextAnchor.MiddleCenter;
             _streakText.raycastTarget = false;
+
+            var shadow = textObj.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.55f);
+            shadow.effectDistance = new Vector2(2f, -2f);
 
             var trt = textObj.GetComponent<RectTransform>();
             trt.anchorMin = Vector2.zero;
@@ -72,53 +101,56 @@ namespace MeraWorld.Core
             trt.offsetMin = Vector2.zero;
             trt.offsetMax = Vector2.zero;
 
-            _streakPanel.SetActive(false);
+            _streakRoot.SetActive(false);
         }
 
-        private void OnComboChanged(int combo, int bonus)
+        private void HandleComboChanged(int combo)
         {
+            if (_streakRoot == null) return;
+
             if (combo < 2)
             {
-                if (_streakPanel.activeSelf)
-                    _streakPanel.SetActive(false);
+                _streakRoot.SetActive(false);
                 return;
             }
 
-            _streakText.text = $"STREAK x{combo}";
+            _streakRoot.SetActive(true);
+            _streakText.text = $"x{combo}";
 
-            // Color by combo level
-            var img = _streakPanel.GetComponent<Image>();
-            if (combo == 2) img.color = new Color(1f, 0.55f, 0.20f, 0.95f);
-            else if (combo == 3) img.color = new Color(1f, 0.35f, 0.35f, 0.95f);
-            else if (combo == 4) img.color = new Color(0.85f, 0.30f, 0.75f, 0.95f);
-            else img.color = new Color(0.60f, 0.30f, 1f, 0.95f);
+            // Change color by combo level
+            Color c;
+            if (combo >= 15) c = new Color(0.95f, 0.30f, 0.55f);       // pink (legendary)
+            else if (combo >= 10) c = new Color(0.85f, 0.30f, 0.85f);  // purple
+            else if (combo >= 5) c = new Color(0.30f, 0.65f, 0.95f);   // blue
+            else c = new Color(0.95f, 0.65f, 0.20f);                    // orange
 
-            _streakPanel.SetActive(true);
-            StopAllCoroutines();
-            StartCoroutine(PulseRoutine());
+            _bgImage.sprite = UISpriteFactory.Create3DButtonSprite(c, 128, 40);
+            _bgImage.type = Image.Type.Sliced;
+
+            StartCoroutine(Punch());
         }
 
-        private IEnumerator PulseRoutine()
+        private IEnumerator Punch()
         {
-            var rt = _streakPanel.GetComponent<RectTransform>();
-            float duration = 0.3f;
-            float elapsed = 0f;
+            var rt = _streakRoot.GetComponent<RectTransform>();
+            Vector3 big = Vector3.one * 1.2f;
+            Vector3 normal = Vector3.one;
 
-            while (elapsed < duration)
+            float t = 0f;
+            while (t < 0.1f)
             {
-                elapsed += Time.unscaledDeltaTime;
-                float t = elapsed / duration;
-                float scale = 1f + Mathf.Sin(t * Mathf.PI) * 0.25f;
-                rt.localScale = new Vector3(scale, scale, 1f);
+                t += Time.unscaledDeltaTime;
+                rt.localScale = Vector3.Lerp(normal, big, t / 0.1f);
                 yield return null;
             }
-            rt.localScale = Vector3.one;
-        }
-
-        void OnDestroy()
-        {
-            if (ComboSystem.Instance != null)
-                ComboSystem.Instance.OnComboChanged -= OnComboChanged;
+            t = 0f;
+            while (t < 0.1f)
+            {
+                t += Time.unscaledDeltaTime;
+                rt.localScale = Vector3.Lerp(big, normal, t / 0.1f);
+                yield return null;
+            }
+            rt.localScale = normal;
         }
     }
 }

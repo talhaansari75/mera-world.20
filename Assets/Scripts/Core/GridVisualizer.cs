@@ -9,11 +9,17 @@ namespace MeraWorld.Core
         public GameManager GameManager;
         public SelectionManager SelectionManager;
 
-        // Ye 2 values badli hain — pehle 0.60f/0.10f the
-        private const float CellSize = 0.78f;
-        private const float CellGap  = 0.10f;
-        private const float GridOffsetX = 0f;
-        private const float GridOffsetY = 0.55f;
+        [Header("Fit Settings")]
+        [Range(0.5f, 1.0f)]
+        public float MaxWidthFraction = 0.92f;
+
+        [Range(0.3f, 0.8f)]
+        public float MaxHeightFraction = 0.58f;
+
+        [Range(0.05f, 0.30f)]
+        public float GapRatio = 0.12f;
+
+        public float GridOffsetY = 0.55f;
 
         private static readonly Color TileTop    = new Color(0.42f, 0.68f, 1.00f);
         private static readonly Color TileMid    = new Color(0.20f, 0.42f, 0.85f);
@@ -32,11 +38,20 @@ namespace MeraWorld.Core
         private Sprite _rimSprite;
         private Sprite _circleSprite;
 
+        void Awake()
+        {
+            // Force find references if not set
+            if (GameManager == null) GameManager = FindFirstObjectByType<GameManager>();
+            if (SelectionManager == null) SelectionManager = FindFirstObjectByType<SelectionManager>();
+
+            Debug.Log($"[GridVisualizer] Awake — GameManager={(GameManager != null ? "OK" : "NULL")}, Selection={(SelectionManager != null ? "OK" : "NULL")}");
+        }
+
         private void Start()
         {
             if (GameManager == null)
             {
-                Debug.LogError("GridVisualizer: GameManager not assigned!");
+                Debug.LogError("[GridVisualizer] GameManager not found in scene!");
                 return;
             }
 
@@ -45,71 +60,111 @@ namespace MeraWorld.Core
             _rimSprite    = CreateRoundedSprite(160, 18);
             _circleSprite = CreateCircleSprite(32);
 
-            Invoke(nameof(BuildVisuals), 0.1f);
+            Invoke(nameof(BuildVisuals), 0.3f);
         }
 
         private void BuildVisuals()
         {
+            // Re-find GameManager if it became null
+            if (GameManager == null)
+                GameManager = FindFirstObjectByType<GameManager>();
+
+            if (GameManager == null)
+            {
+                Debug.LogError("[GridVisualizer] BuildVisuals — GameManager is NULL.");
+                return;
+            }
+
             var grid = GameManager.LastGeneratedGrid;
-            if (grid == null) return;
+            if (grid == null)
+            {
+                Debug.LogError("[GridVisualizer] LastGeneratedGrid is NULL. Waiting more...");
+                // Retry after 0.5s
+                Invoke(nameof(BuildVisuals), 0.5f);
+                return;
+            }
 
             int rows = grid.Rows;
             int cols = grid.Columns;
 
-            float totalWidth  = cols * (CellSize + CellGap) - CellGap;
-            float totalHeight = rows * (CellSize + CellGap) - CellGap;
-            float originX = -totalWidth  / 2f + CellSize / 2f;
-            float originY =  totalHeight / 2f - CellSize / 2f;
+            Camera cam = Camera.main;
+            if (cam == null || !cam.orthographic)
+            {
+                Debug.LogError("[GridVisualizer] Needs orthographic Main Camera!");
+                return;
+            }
 
-            float padX = CellSize * 0.9f;
-            float padY = CellSize * 0.9f;
-            float panelW = totalWidth  + padX;
-            float panelH = totalHeight + padY;
+            float camHeight = cam.orthographicSize * 2f;
+            float camWidth  = camHeight * ((float)Screen.width / Screen.height);
+
+            float availW = camWidth  * MaxWidthFraction;
+            float availH = camHeight * MaxHeightFraction;
+
+            float denomW = cols + (cols - 1) * GapRatio;
+            float denomH = rows + (rows - 1) * GapRatio;
+
+            float cellSize = Mathf.Min(availW / denomW, availH / denomH);
+            float cellGap  = cellSize * GapRatio;
+            float pad      = cellSize * 0.45f;
+
+            float totalWidth  = cols * cellSize + (cols - 1) * cellGap;
+            float totalHeight = rows * cellSize + (rows - 1) * cellGap;
+            float panelW = totalWidth  + pad;
+            float panelH = totalHeight + pad;
+
+            float originX = -totalWidth  / 2f + cellSize / 2f;
+            float originY =  totalHeight / 2f - cellSize / 2f;
+
+            Debug.Log($"[GridVisualizer] BUILDING — {rows}x{cols}, cell={cellSize:F3}, panel={panelW:F2}x{panelH:F2}");
 
             CreateStarfield(panelW * 4f, panelH * 4f, 60);
 
+            // Gold rim
             var rimObj = new GameObject("GoldRim");
             rimObj.transform.SetParent(transform);
-            rimObj.transform.position = new Vector3(GridOffsetX, GridOffsetY, 1.5f);
+            rimObj.transform.position = new Vector3(0f, GridOffsetY, 1.5f);
             var rimSr = rimObj.AddComponent<SpriteRenderer>();
             rimSr.sprite = _rimSprite;
             rimSr.color = GoldRim;
             rimSr.sortingOrder = -12;
             rimObj.transform.localScale = new Vector3(panelW + 0.12f, panelH + 0.12f, 1f);
 
+            // Dark inner rim
             var rimDarkObj = new GameObject("RimDark");
             rimDarkObj.transform.SetParent(transform);
-            rimDarkObj.transform.position = new Vector3(GridOffsetX, GridOffsetY, 1.4f);
+            rimDarkObj.transform.position = new Vector3(0f, GridOffsetY, 1.4f);
             var rimDarkSr = rimDarkObj.AddComponent<SpriteRenderer>();
             rimDarkSr.sprite = _rimSprite;
             rimDarkSr.color = new Color(0.02f, 0.03f, 0.08f);
             rimDarkSr.sortingOrder = -11;
             rimDarkObj.transform.localScale = new Vector3(panelW + 0.06f, panelH + 0.06f, 1f);
 
+            // Panel background
             var panelObj = new GameObject("GridPanel");
             panelObj.transform.SetParent(transform);
-            panelObj.transform.position = new Vector3(GridOffsetX, GridOffsetY, 1f);
+            panelObj.transform.position = new Vector3(0f, GridOffsetY, 1f);
             var panelSr = panelObj.AddComponent<SpriteRenderer>();
             panelSr.sprite = _panelSprite;
             panelSr.color = Color.white;
             panelSr.sortingOrder = -10;
             panelObj.transform.localScale = new Vector3(panelW, panelH, 1f);
 
+            // Letter cells
             for (int r = 0; r < rows; r++)
             {
                 for (int c = 0; c < cols; c++)
                 {
                     var cell = grid.GetCell(r, c);
                     Vector3 pos = new Vector3(
-                        originX + c * (CellSize + CellGap) + GridOffsetX,
-                        originY - r * (CellSize + CellGap) + GridOffsetY,
+                        originX + c * (cellSize + cellGap),
+                        originY - r * (cellSize + cellGap) + GridOffsetY,
                         0f);
 
-                    CreateCellVisual(pos, cell.Letter, r, c);
+                    CreateCellVisual(pos, cell.Letter, r, c, cellSize);
                 }
             }
 
-            Debug.Log($"GridVisualizer: Rendered {rows}x{cols} grid.");
+            Debug.Log($"[GridVisualizer] ✅ Rendered {rows}x{cols} grid.");
         }
 
         private void CreateStarfield(float width, float height, int count)
@@ -139,12 +194,12 @@ namespace MeraWorld.Core
             }
         }
 
-        private void CreateCellVisual(Vector3 position, char letter, int row, int col)
+        private void CreateCellVisual(Vector3 position, char letter, int row, int col, float cellSize)
         {
             var cellObj = new GameObject($"Cell_{row}_{col}");
             cellObj.transform.SetParent(transform);
             cellObj.transform.position = position;
-            cellObj.transform.localScale = new Vector3(CellSize, CellSize, 1f);
+            cellObj.transform.localScale = new Vector3(cellSize, cellSize, 1f);
 
             var shadowObj = new GameObject("Shadow");
             shadowObj.transform.SetParent(cellObj.transform, false);
@@ -177,16 +232,17 @@ namespace MeraWorld.Core
                     new Color(0.35f, 0.95f, 0.55f, 0.98f));
             }
 
+            float charSize = cellSize * 0.075f;
+
             var textShadowObj = new GameObject("LetterShadow");
             textShadowObj.transform.SetParent(cellObj.transform, false);
             textShadowObj.transform.localPosition = new Vector3(0.03f, -0.03f, -0.49f);
-            textShadowObj.transform.localScale = Vector3.one;
 
             var tms = textShadowObj.AddComponent<TextMesh>();
             tms.text = letter.ToString();
             tms.color = LetterShadowColor;
             tms.fontSize = 100;
-            tms.characterSize = 0.058f;
+            tms.characterSize = charSize;
             tms.anchor = TextAnchor.MiddleCenter;
             tms.alignment = TextAlignment.Center;
             tms.fontStyle = FontStyle.Bold;
@@ -202,13 +258,12 @@ namespace MeraWorld.Core
             var textObj = new GameObject("Letter");
             textObj.transform.SetParent(cellObj.transform, false);
             textObj.transform.localPosition = new Vector3(0f, 0f, -0.5f);
-            textObj.transform.localScale = Vector3.one;
 
             var tm = textObj.AddComponent<TextMesh>();
             tm.text = letter.ToString();
             tm.color = LetterColor;
             tm.fontSize = 100;
-            tm.characterSize = 0.058f;
+            tm.characterSize = charSize;
             tm.anchor = TextAnchor.MiddleCenter;
             tm.alignment = TextAlignment.Center;
             tm.fontStyle = FontStyle.Bold;
@@ -222,6 +277,8 @@ namespace MeraWorld.Core
             }
         }
 
+        // -------- SPRITE HELPERS (unchanged) --------
+
         private Sprite CreateTileSprite(int size, int radius)
         {
             var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
@@ -231,12 +288,9 @@ namespace MeraWorld.Core
             for (int y = 0; y < size; y++)
             {
                 float t = (float)y / size;
-
-                Color rowColor;
-                if (t < 0.5f)
-                    rowColor = Color.Lerp(TileBottom, TileMid, t * 2f);
-                else
-                    rowColor = Color.Lerp(TileMid, TileTop, (t - 0.5f) * 2f);
+                Color rowColor = t < 0.5f
+                    ? Color.Lerp(TileBottom, TileMid, t * 2f)
+                    : Color.Lerp(TileMid, TileTop, (t - 0.5f) * 2f);
 
                 for (int x = 0; x < size; x++)
                 {
@@ -245,8 +299,8 @@ namespace MeraWorld.Core
 
                     Color c = rowColor;
                     float topBand = Mathf.InverseLerp(0.78f, 0.92f, t);
-                    float shineStrength = Mathf.Sin(topBand * Mathf.PI) * 0.35f;
-                    c = Color.Lerp(c, Color.white, shineStrength);
+                    float shine = Mathf.Sin(topBand * Mathf.PI) * 0.35f;
+                    c = Color.Lerp(c, Color.white, shine);
 
                     c.a *= alpha;
                     pixels[y * size + x] = c;
@@ -291,14 +345,12 @@ namespace MeraWorld.Core
             var pixels = new Color[size * size];
 
             for (int y = 0; y < size; y++)
-            {
                 for (int x = 0; x < size; x++)
                 {
                     float dist = DistanceToCorner(x, y, size, radius);
                     float alpha = Mathf.Clamp01(radius - dist + 0.5f);
                     pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
                 }
-            }
 
             tex.SetPixels(pixels);
             tex.Apply();
@@ -313,7 +365,6 @@ namespace MeraWorld.Core
             float half = size / 2f;
 
             for (int y = 0; y < size; y++)
-            {
                 for (int x = 0; x < size; x++)
                 {
                     float dx = x - half + 0.5f;
@@ -322,7 +373,6 @@ namespace MeraWorld.Core
                     float alpha = Mathf.Clamp01(half - d);
                     pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
                 }
-            }
 
             tex.SetPixels(pixels);
             tex.Apply();
@@ -333,9 +383,7 @@ namespace MeraWorld.Core
         {
             int cx = x < radius ? radius : (x >= size - radius ? size - radius - 1 : x);
             int cy = y < radius ? radius : (y >= size - radius ? size - radius - 1 : y);
-
             if (cx == x && cy == y) return 0f;
-
             float dx = x - cx;
             float dy = y - cy;
             return Mathf.Sqrt(dx * dx + dy * dy);

@@ -21,6 +21,7 @@ namespace MeraWorld.Core
 
         private static readonly string[][] WordBankByLevel = new string[][]
         {
+            // ========== Levels 1-20 ==========
             new[] { "CAT", "DOG", "SUN", "MOON", "STAR", "FISH", "BIRD", "TREE" },
             new[] { "BOOK", "GAME", "PLAY", "FOOD", "HOME", "LOVE", "HOPE", "TIME" },
             new[] { "APPLE", "BREAD", "CHAIR", "DANCE", "EAGLE", "FLAME", "GRASS", "HONEY" },
@@ -41,6 +42,8 @@ namespace MeraWorld.Core
             new[] { "TREASURE", "JOURNEY", "ADVENTURE", "DISCOVERY", "EXPEDITION", "EXPLORER", "COMPASS", "MAP" },
             new[] { "TWILIGHT", "ECLIPSE", "PHANTOM", "CRYSTAL", "SILVER", "GOLDEN", "MARBLE", "VELVET" },
             new[] { "INFINITY", "ETERNAL", "COSMIC", "QUANTUM", "PHOTON", "GRAVITY", "MAGNETIC", "SPECTRUM" },
+
+            // ========== Levels 21-30 ==========
             new[] { "GARDEN", "SILVER", "MEADOW", "PUZZLE", "CANDLE", "DESERT", "FOREST", "MIRROR" },
             new[] { "ANCIENT", "MYSTERY", "WHISPER", "JOURNEY", "BALANCE", "HORIZON", "MAGICAL", "SPARKLE" },
             new[] { "CRIMSON", "EMERALD", "SAPPHIRE", "OBSIDIAN", "AMETHYST", "TOPAZ", "OPAL", "JADE" },
@@ -51,6 +54,8 @@ namespace MeraWorld.Core
             new[] { "BUTTERFLY", "LADYBUG", "FIREFLY", "DRAGONFLY", "GRASSHOPPER", "CRICKET", "BEETLE", "MANTIS" },
             new[] { "PIANO", "GUITAR", "VIOLIN", "TRUMPET", "SAXOPHONE", "FLUTE", "DRUMS", "HARP" },
             new[] { "SPAGHETTI", "LASAGNA", "RAVIOLI", "FETTUCCINE", "MACARONI", "PENNE", "RIGATONI", "LINGUINE" },
+
+            // ========== Levels 31-40 ==========
             new[] { "AURORA", "CORONA", "SOLSTICE", "EQUINOX", "ZENITH", "NADIR", "APEX", "VERGE" },
             new[] { "ANTIQUE", "VINTAGE", "CLASSIC", "MODERN", "FUTURE", "PRESENT", "HISTORY", "LEGACY" },
             new[] { "SAPPHIRE", "DIAMOND", "EMERALD", "RUBY", "PEARL", "OPAL", "TOPAZ", "AMBER" },
@@ -61,6 +66,8 @@ namespace MeraWorld.Core
             new[] { "COMPASSION", "KINDNESS", "GENEROSITY", "HONESTY", "LOYALTY", "PATIENCE", "COURAGE", "WISDOM" },
             new[] { "TRIUMPH", "VICTORY", "CHAMPION", "WINNER", "LEGEND", "HERO", "MASTER", "TITAN" },
             new[] { "STARDUST", "MOONBEAM", "SUNRISE", "SUNSET", "TWILIGHT", "DAWN", "DUSK", "NIGHTFALL" },
+
+            // ========== Levels 41-50 ==========
             new[] { "OBSERVATORY", "LABORATORY", "LIBRARY", "GALLERY", "THEATER", "STADIUM", "MUSEUM", "ACADEMY" },
             new[] { "MELODIOUS", "HARMONIOUS", "RHYTHMIC", "LYRICAL", "POETIC", "ARTISTIC", "CREATIVE", "MUSICAL" },
             new[] { "RESPLENDENT", "MAGNIFICENT", "SPLENDID", "GLORIOUS", "MAJESTIC", "GRAND", "SUBLIME", "DIVINE" },
@@ -71,12 +78,71 @@ namespace MeraWorld.Core
             new[] { "ADVENTUROUS", "COURAGEOUS", "FEARLESS", "DARING", "BOLD", "VALIANT", "HEROIC", "GALLANT" },
             new[] { "ABUNDANCE", "PROSPERITY", "WEALTH", "FORTUNE", "RICHES", "TREASURE", "PLENTY", "BOUNTY" },
             new[] { "TRANSCENDENT", "EXTRAORDINARY", "REMARKABLE", "EXCEPTIONAL", "PHENOMENAL", "MIRACULOUS", "WONDROUS", "ASTOUNDING" },
+
+            // ========== Levels 51-60 ==========
+            new[] { "BUTTERFLY", "CATERPILLAR", "DRAGONFLY", "GRASSHOPPER", "LADYBUG", "FIREFLY", "BEETLE", "MANTIS" },
+            new[] { "MOUNTAIN", "VOLCANO", "GLACIER", "CANYON", "PLATEAU", "PENINSULA", "ARCHIPELAGO", "CONTINENT" },
+            new[] { "SANDWICH", "PIZZA", "BURGER", "PASTA", "SUSHI", "TACO", "SALAD", "SOUP" },
+            new[] { "GUITAR", "PIANO", "VIOLIN", "DRUMS", "TRUMPET", "FLUTE", "SAXOPHONE", "HARMONICA" },
+            new[] { "ELEPHANT", "GIRAFFE", "RHINOCEROS", "HIPPOPOTAMUS", "CROCODILE", "ALLIGATOR", "KANGAROO", "WOMBAT" },
+            new[] { "TELESCOPE", "MICROSCOPE", "PERISCOPE", "STETHOSCOPE", "KALEIDOSCOPE", "GYROSCOPE", "BAROMETER", "THERMOMETER" },
+            new[] { "SAPPHIRE", "EMERALD", "DIAMOND", "RUBY", "OPAL", "TOPAZ", "AMETHYST", "OBSIDIAN" },
+            new[] { "ADVENTURE", "DISCOVERY", "EXPLORATION", "EXPEDITION", "JOURNEY", "ODYSSEY", "QUEST", "VOYAGE" },
+            new[] { "MIDNIGHT", "TWILIGHT", "DAWN", "DUSK", "NOON", "SUNRISE", "SUNSET", "AURORA" },
+            new[] { "HAPPINESS", "SADNESS", "EXCITEMENT", "CALMNESS", "BRAVERY", "KINDNESS", "WISDOM", "PATIENCE" },
+
+            // ========== Levels 61-70 ==========
+            new[] { "CHOCOLATE", "VANILLA", "STRAWBERRY", "CARAMEL", "MOCHA", "PISTACHIO", "HAZELNUT", "ALMOND" },
+            new[] { "COMPUTER", "KEYBOARD", "MONITOR", "SPEAKER", "CAMERA", "PRINTER", "SCANNER", "ROUTER" },
+            new[] { "MOUNTAIN", "MEADOW", "FOREST", "DESERT", "JUNGLE", "SAVANNA", "TUNDRA", "SWAMP" },
+            new[] { "PHILOSOPHY", "PSYCHOLOGY", "BIOLOGY", "CHEMISTRY", "PHYSICS", "GEOLOGY", "ASTRONOMY", "MATHEMATICS" },
+            new[] { "BASKETBALL", "FOOTBALL", "BASEBALL", "CRICKET", "TENNIS", "HOCKEY", "VOLLEYBALL", "BADMINTON" },
+            new[] { "FESTIVAL", "CARNIVAL", "PARADE", "CONCERT", "WEDDING", "BIRTHDAY", "ANNIVERSARY", "CELEBRATION" },
+            new[] { "STRAWBERRY", "BLUEBERRY", "RASPBERRY", "BLACKBERRY", "CRANBERRY", "GOOSEBERRY", "ELDERBERRY", "MULBERRY" },
+            new[] { "HOSPITAL", "PHARMACY", "CLINIC", "DOCTOR", "NURSE", "SURGEON", "DENTIST", "PHYSICIAN" },
+            new[] { "ORCHESTRA", "SYMPHONY", "CONCERTO", "SONATA", "BALLAD", "HYMN", "ANTHEM", "OPERA" },
+            new[] { "PARLIAMENT", "DEMOCRACY", "REPUBLIC", "MONARCHY", "DICTATORSHIP", "FEDERATION", "CONFEDERATION", "EMPIRE" },
+
+            // ========== Levels 71-80 ==========
+            new[] { "REFRIGERATOR", "MICROWAVE", "DISHWASHER", "VACUUM", "TOASTER", "BLENDER", "KETTLE", "COFFEEMAKER" },
+            new[] { "JOURNALISM", "PHOTOGRAPHY", "SCULPTURE", "ARCHITECTURE", "PAINTING", "POTTERY", "WEAVING", "CARVING" },
+            new[] { "SPACESHIP", "ASTRONAUT", "SATELLITE", "TELESCOPE", "ASTEROID", "METEORITE", "SUPERNOVA", "CONSTELLATION" },
+            new[] { "VOCABULARY", "GRAMMAR", "PRONUNCIATION", "SYNTAX", "SEMANTICS", "ETYMOLOGY", "PHONETICS", "LINGUISTICS" },
+            new[] { "ELEPHANT", "TIGER", "LEOPARD", "CHEETAH", "JAGUAR", "PANTHER", "LION", "LYNX" },
+            new[] { "PYRAMID", "SPHINX", "TEMPLE", "PALACE", "CASTLE", "FORTRESS", "MONUMENT", "OBELISK" },
+            new[] { "COMPASSION", "EMPATHY", "SYMPATHY", "GENEROSITY", "ALTRUISM", "BENEVOLENCE", "MAGNANIMITY", "PHILANTHROPY" },
+            new[] { "SWEATER", "JACKET", "TROUSERS", "SHIRT", "DRESS", "SKIRT", "SCARF", "GLOVES" },
+            new[] { "STETHOSCOPE", "SYRINGE", "BANDAGE", "MEDICINE", "VACCINE", "ANTIBIOTIC", "PRESCRIPTION", "DIAGNOSIS" },
+            new[] { "MARATHON", "TRIATHLON", "PENTATHLON", "DECATHLON", "GYMNASTICS", "SWIMMING", "CYCLING", "ROWING" },
+
+            // ========== Levels 81-90 ==========
+            new[] { "PHILOSOPHER", "SCIENTIST", "ENGINEER", "ARCHITECT", "MUSICIAN", "ARTIST", "WRITER", "INVENTOR" },
+            new[] { "DEMOCRACY", "FREEDOM", "JUSTICE", "EQUALITY", "LIBERTY", "FRATERNITY", "SOLIDARITY", "INDEPENDENCE" },
+            new[] { "CIVILIZATION", "CULTURE", "TRADITION", "HERITAGE", "ANCESTRY", "GENEALOGY", "LINEAGE", "DESCENT" },
+            new[] { "BREAKFAST", "LUNCH", "DINNER", "SNACK", "DESSERT", "APPETIZER", "MAINCOURSE", "BEVERAGE" },
+            new[] { "GALAXY", "NEBULA", "QUASAR", "PULSAR", "BLACKHOLE", "WORMHOLE", "DIMENSION", "UNIVERSE" },
+            new[] { "PAINTING", "SCULPTURE", "CERAMICS", "MOSAIC", "FRESCO", "PORTRAIT", "LANDSCAPE", "STILLLIFE" },
+            new[] { "ATHLETICS", "FOOTBALL", "CRICKET", "HOCKEY", "RUGBY", "POLO", "BOXING", "WRESTLING" },
+            new[] { "ORCHESTRA", "CHOIR", "BAND", "ENSEMBLE", "QUARTET", "TRIO", "DUET", "SOLOIST" },
+            new[] { "MOUNTAINEER", "EXPLORER", "ADVENTURER", "PIONEER", "TRAVELER", "VOYAGER", "NAVIGATOR", "CARTOGRAPHER" },
+            new[] { "HOSPITALITY", "GENEROSITY", "KINDNESS", "WARMTH", "COMFORT", "WELCOME", "FRIENDLINESS", "GRACIOUSNESS" },
+
+            // ========== Levels 91-100 ==========
+            new[] { "TECHNOLOGY", "INNOVATION", "DISCOVERY", "INVENTION", "CREATION", "EVOLUTION", "REVOLUTION", "TRANSFORMATION" },
+            new[] { "EDUCATION", "LEARNING", "KNOWLEDGE", "WISDOM", "UNDERSTANDING", "INSIGHT", "ENLIGHTENMENT", "REALIZATION" },
+            new[] { "CELEBRATION", "FESTIVITY", "JOYFULNESS", "HAPPINESS", "CHEERFULNESS", "GLADNESS", "MERRIMENT", "JUBILATION" },
+            new[] { "COMPETITION", "CHALLENGE", "STRUGGLE", "ENDEAVOR", "PURSUIT", "AMBITION", "ASPIRATION", "DETERMINATION" },
+            new[] { "PERSEVERANCE", "PERSISTENCE", "RESILIENCE", "TENACITY", "FORTITUDE", "GRIT", "ENDURANCE", "STAMINA" },
+            new[] { "ILLUSTRATION", "PHOTOGRAPHY", "FILMMAKING", "ANIMATION", "GRAPHICDESIGN", "TYPOGRAPHY", "CALLIGRAPHY", "LITHOGRAPHY" },
+            new[] { "SHIP", "YACHT", "SAILBOAT", "SUBMARINE", "FERRY", "CANOE", "KAYAK", "GONDOLA" },
+            new[] { "HARMONIOUS", "MELODIOUS", "RHYTHMIC", "HARMONIC", "SYMPHONIC", "ORCHESTRAL", "INSTRUMENTAL", "VOCAL" },
+            new[] { "ACHIEVEMENT", "ACCOMPLISHMENT", "ATTAINMENT", "REALIZATION", "FULFILLMENT", "SUCCESS", "TRIUMPH", "VICTORY" },
+            new[] { "IMAGINATION", "CREATIVITY", "INNOVATION", "ORIGINALITY", "INVENTIVENESS", "RESOURCEFULNESS", "INGENUITY", "ARTISTRY" },
         };
 
         // =================================================================
-        // IMPORTANT: Grid is generated in Awake() so that other scripts
-        // (SelectionManager, GridVisualizer, WordListUI) can read it
-        // safely in their Start() methods.
+        // IMPORTANT: Grid is generated in Awake() so other scripts can
+        // read it safely in their Start() methods.
         // =================================================================
         void Awake()
         {

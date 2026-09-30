@@ -111,14 +111,14 @@ namespace MeraWorld.Core
         {
             if (_gridParent == null)
             {
-                Debug.LogError("[Category] Grid parent is NULL. BuildPanel not called yet?");
+                Debug.LogError("[Category] Grid parent is NULL.");
                 return;
             }
 
             _activeCategory = categoryId;
             Debug.Log($"[Category] Show: {categoryId}");
 
-            // Clear old items - use DestroyImmediate for reliable removal
+            // Clear old items
             int cleared = 0;
             for (int i = _gridParent.transform.childCount - 1; i >= 0; i--)
             {
@@ -193,8 +193,10 @@ namespace MeraWorld.Core
                         OnClick = () => OpenPanel<AchievementsUI>("AWARDS"), RequiresOnline = false });
                     list.Add(new MenuItem { Label = "STATS", Color = new Color(0.30f, 0.65f, 0.80f),
                         OnClick = () => OpenPanel<StatisticsUI>("STATS"), RequiresOnline = false });
+                    list.Add(new MenuItem { Label = "RANKS", Color = new Color(0.75f, 0.55f, 0.25f),
+                        OnClick = () => OpenPanel<LeaderboardUI>("LEADERBOARD"), RequiresOnline = false });
                     list.Add(new MenuItem { Label = "MISSIONS", Color = new Color(0.30f, 0.55f, 0.85f),
-                        OnClick = () => OpenPanel<MissionsSystem>("MISSIONS"), RequiresOnline = false });
+                        OnClick = () => OpenPanel<MissionsUI>("MISSIONS"), RequiresOnline = false });
                     list.Add(new MenuItem { Label = "WORLDS", Color = new Color(0.50f, 0.70f, 0.95f),
                         OnClick = () => OpenPanel<WorldMapUI>("WORLDS"), RequiresOnline = false });
                     list.Add(new MenuItem { Label = "NEWS", Color = new Color(0.75f, 0.65f, 0.30f),
@@ -236,7 +238,6 @@ namespace MeraWorld.Core
             var rootObj = new GameObject($"Item_{item.Label}");
             rootObj.transform.SetParent(_gridParent.transform, false);
 
-            // RectTransform is set by GridLayoutGroup automatically, but ensure it exists
             if (rootObj.GetComponent<RectTransform>() == null)
                 rootObj.AddComponent<RectTransform>();
 
@@ -244,7 +245,7 @@ namespace MeraWorld.Core
                 ? new Color(0.30f, 0.32f, 0.38f)
                 : item.Color;
 
-            // Bottom shadow (3D effect)
+            // Bottom shadow
             var shadowObj = new GameObject("BottomShadow");
             shadowObj.transform.SetParent(rootObj.transform, false);
             var shImg = shadowObj.AddComponent<Image>();

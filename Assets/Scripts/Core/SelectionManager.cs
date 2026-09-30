@@ -41,6 +41,7 @@ namespace MeraWorld.Core
         private bool _isDragging;
         private WordGrid _grid;
         private Camera _cam;
+        private int _hintsUsedThisLevel = 0;
 
         void Awake()
         {
@@ -56,9 +57,7 @@ namespace MeraWorld.Core
 
         void Update()
         {
-            // ═══════════════════════════════════════════════════════════════
-            // GATE #1: Home screen visible? SKIP everything silently.
-            // ═══════════════════════════════════════════════════════════════
+            // Gate: skip input when home screen is visible
             if (HomeScreenUI.IsHomeVisible)
             {
                 if (_isDragging)
@@ -66,17 +65,13 @@ namespace MeraWorld.Core
                     _isDragging = false;
                     ClearSelection();
                 }
-                return;   // ← EARLY EXIT, no input, no physics
+                return;
             }
 
-            // ═══════════════════════════════════════════════════════════════
-            // GATE #2: No grid? SKIP.
-            // ═══════════════════════════════════════════════════════════════
             if (_cam == null) _cam = Camera.main;
             if (_grid == null && GameManager != null) _grid = GameManager.LastGeneratedGrid;
             if (_cam == null || _grid == null) return;
 
-            // ---- Input ----
             bool pressed = Input.GetMouseButton(0);
             bool down = Input.GetMouseButtonDown(0);
             bool up = Input.GetMouseButtonUp(0);
@@ -203,25 +198,44 @@ namespace MeraWorld.Core
             foreach (var t in _selection) t.SetFound(wordColor);
             _selection.Clear();
 
+            // Rewards
             if (PlayerProgressManager.Instance != null)
             {
                 PlayerProgressManager.Instance.AddCoins(CoinsPerWord);
                 PlayerProgressManager.Instance.AddWordFound();
             }
 
-            if (ComboSystem.Instance != null) ComboSystem.Instance.RegisterWordFound();
+            if (StatisticsManager.Instance != null)
+            {
+                StatisticsManager.Instance.AddWordFound();
+                StatisticsManager.Instance.AddCoinsEarned(CoinsPerWord);
+            }
+
+            if (ComboSystem.Instance != null)
+                ComboSystem.Instance.RegisterWordFound();
 
             if (AchievementManager.Instance != null)
             {
                 AchievementManager.Instance.AddProgress("first_word", 1);
                 AchievementManager.Instance.AddProgress("word_hunter", 1);
                 AchievementManager.Instance.AddProgress("word_master", 1);
+                AchievementManager.Instance.AddProgress("word_legend", 1);
+                AchievementManager.Instance.AddProgress("word_10", 1);
+                AchievementManager.Instance.AddProgress("word_50", 1);
+                AchievementManager.Instance.AddProgress("word_5000", 1);
             }
+
+            // Missions hook
+            if (MissionsManager.Instance != null)
+                MissionsManager.Instance.OnWordFound();
 
             OnWordFound?.Invoke(word);
 
+            // Check level complete
             if (GameManager != null && _foundWords.Count >= GameManager.Words.Count)
             {
+                bool perfect = _hintsUsedThisLevel == 0;
+
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayLevelComplete();
                 if (VibrationManager.Instance != null) VibrationManager.Instance.VibrateHeavy();
 
@@ -230,9 +244,30 @@ namespace MeraWorld.Core
                     AchievementManager.Instance.AddProgress("first_level", 1);
                     AchievementManager.Instance.AddProgress("level_5", 1);
                     AchievementManager.Instance.AddProgress("level_10", 1);
+                    AchievementManager.Instance.AddProgress("level_25", 1);
+                    AchievementManager.Instance.AddProgress("level_50", 1);
+
+                    if (perfect)
+                        AchievementManager.Instance.AddProgress("perfect_1", 1);
                 }
 
-                if (ComboSystem.Instance != null) ComboSystem.Instance.ResetCombo();
+                if (StatisticsManager.Instance != null)
+                    StatisticsManager.Instance.AddLevelCompleted(perfect);
+
+                if (ComboSystem.Instance != null)
+                    ComboSystem.Instance.ResetCombo();
+
+                // Missions hook
+                if (MissionsManager.Instance != null)
+                    MissionsManager.Instance.OnLevelCompleted(perfect);
+
+                // Leaderboard hook
+                if (PlayerProgressManager.Instance != null)
+                    LeaderboardManager.SubmitScore(PlayerProgressManager.Instance.Coins);
+
+                // Ads hook
+                if (AdsManager.Instance != null)
+                    AdsManager.Instance.OnLevelCompleted();
 
                 OnLevelComplete?.Invoke();
             }
@@ -253,6 +288,10 @@ namespace MeraWorld.Core
         public void HintWord(string word)
         {
             if (string.IsNullOrEmpty(word) || _grid == null) return;
+
+            _hintsUsedThisLevel++;
+            if (StatisticsManager.Instance != null)
+                StatisticsManager.Instance.AddHintUsed();
 
             word = word.ToUpperInvariant();
             var (dr, dc) = FindWordDirection(word);

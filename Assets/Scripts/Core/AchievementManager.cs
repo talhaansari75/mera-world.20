@@ -13,15 +13,12 @@ namespace MeraWorld.Core
     {
         public static AchievementManager Instance { get; private set; }
 
-        // ---- PlayerPrefs keys ----
         private const string KEY_PROGRESS_PREFIX = "Achievement_Progress_";
         private const string KEY_UNLOCKED_PREFIX = "Achievement_Unlocked_";
 
-        // ---- Events ----
         public event Action<AchievementDefinitions.Achievement> OnAchievementUnlocked;
-        public event Action<AchievementDefinitions.Achievement, int, int> OnProgressChanged; // (ach, current, target)
+        public event Action<AchievementDefinitions.Achievement, int, int> OnProgressChanged;
 
-        // ---- Runtime cache ----
         private readonly Dictionary<string, int> _progress = new Dictionary<string, int>();
         private readonly HashSet<string> _unlocked = new HashSet<string>();
 
@@ -29,7 +26,16 @@ namespace MeraWorld.Core
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+
+            // Only works if this GameObject is a root object.
+            if (transform.parent == null)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
+            else
+            {
+                Debug.Log("[Achievements] Manager is a child object — skipping DontDestroyOnLoad.");
+            }
 
             LoadFromPlayerPrefs();
         }
@@ -38,10 +44,6 @@ namespace MeraWorld.Core
         // Public API
         // ---------------------------------------------------------------
 
-        /// <summary>
-        /// Add progress to an achievement. Auto-unlocks when target reached.
-        /// Safe to call even if achievement doesn't exist (just logs warning).
-        /// </summary>
         public void AddProgress(string achievementId, int amount = 1)
         {
             var ach = AchievementDefinitions.GetById(achievementId);
@@ -51,8 +53,7 @@ namespace MeraWorld.Core
                 return;
             }
 
-            if (_unlocked.Contains(achievementId))
-                return; // already unlocked, no need to track further
+            if (_unlocked.Contains(achievementId)) return;
 
             int current = GetProgress(achievementId) + amount;
             current = Mathf.Clamp(current, 0, ach.TargetCount);
@@ -66,9 +67,6 @@ namespace MeraWorld.Core
                 Unlock(ach);
         }
 
-        /// <summary>
-        /// Force-set progress (useful for absolute counters like total coins).
-        /// </summary>
         public void SetProgress(string achievementId, int value)
         {
             var ach = AchievementDefinitions.GetById(achievementId);
@@ -90,7 +88,6 @@ namespace MeraWorld.Core
             if (_progress.TryGetValue(achievementId, out var v))
                 return v;
 
-            // Try PlayerPrefs
             int stored = PlayerPrefs.GetInt(KEY_PROGRESS_PREFIX + achievementId, 0);
             _progress[achievementId] = stored;
             return stored;
@@ -108,20 +105,9 @@ namespace MeraWorld.Core
             return Mathf.Clamp01((float)GetProgress(achievementId) / ach.TargetCount);
         }
 
-        public int GetUnlockedCount()
-        {
-            return _unlocked.Count;
-        }
-
-        public int GetTotalCount()
-        {
-            return AchievementDefinitions.All.Count;
-        }
-
-        public List<AchievementDefinitions.Achievement> GetAllAchievements()
-        {
-            return AchievementDefinitions.All;
-        }
+        public int GetUnlockedCount() => _unlocked.Count;
+        public int GetTotalCount() => AchievementDefinitions.All.Count;
+        public List<AchievementDefinitions.Achievement> GetAllAchievements() => AchievementDefinitions.All;
 
         // ---------------------------------------------------------------
         // Unlock
@@ -137,20 +123,20 @@ namespace MeraWorld.Core
 
             Debug.Log($"[Achievements] UNLOCKED: {ach.Title} (+{ach.CoinReward} coins, +{ach.GemReward} gems)");
 
-            // Give rewards
             if (PlayerProgressManager.Instance != null)
             {
-                if (ach.CoinReward > 0) PlayerProgressManager.Instance.AddCoins(ach.CoinReward);
-                if (ach.GemReward > 0 && HasMethod(PlayerProgressManager.Instance, "AddGems"))
-                    PlayerProgressManager.Instance.SendMessage("AddGems", ach.GemReward, SendMessageOptions.DontRequireReceiver);
+                if (ach.CoinReward > 0)
+                    PlayerProgressManager.Instance.AddCoins(ach.CoinReward);
+
+                if (ach.GemReward > 0)
+                {
+                    var method = PlayerProgressManager.Instance.GetType().GetMethod("AddGems");
+                    if (method != null)
+                        method.Invoke(PlayerProgressManager.Instance, new object[] { ach.GemReward });
+                }
             }
 
             OnAchievementUnlocked?.Invoke(ach);
-        }
-
-        private bool HasMethod(object obj, string methodName)
-        {
-            return obj.GetType().GetMethod(methodName) != null;
         }
 
         // ---------------------------------------------------------------
@@ -179,10 +165,6 @@ namespace MeraWorld.Core
             PlayerPrefs.SetInt(KEY_PROGRESS_PREFIX + id, value);
             PlayerPrefs.Save();
         }
-
-        // ---------------------------------------------------------------
-        // Debug helpers (call from any script to test)
-        // ---------------------------------------------------------------
 
         [ContextMenu("Reset All Achievements")]
         public void ResetAll()

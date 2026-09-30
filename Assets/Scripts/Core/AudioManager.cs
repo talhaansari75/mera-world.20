@@ -43,7 +43,17 @@ namespace MeraWorld.Core
                 return;
             }
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+
+            // Only works if this GameObject is a root object.
+            // If it's a child of another object, skip DontDestroyOnLoad to avoid warnings.
+            if (transform.parent == null)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
+            else
+            {
+                Debug.Log("[Audio] AudioManager is a child object — skipping DontDestroyOnLoad.");
+            }
 
             LoadSettings();
             SetupSources();

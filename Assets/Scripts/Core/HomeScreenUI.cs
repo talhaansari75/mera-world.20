@@ -12,6 +12,10 @@ namespace MeraWorld.Core
         [Header("References")]
         public PlayerProgressManager Progress;
 
+        [Header("Timing")]
+        [Tooltip("Kitne second baad home canvas hide karein (gameplay ke liye)")]
+        public float HideHomeDelaySeconds = 2f;
+
         private Canvas _homeCanvas;
         private Canvas _levelSelectCanvas;
         private GameObject _starfieldParent;
@@ -20,9 +24,7 @@ namespace MeraWorld.Core
 
         private const string STARS_KEY_PREFIX = "Stars_Level_";
 
-        // ---- Static flag: survives scene reload, resets on app restart ----
         private static bool _skipHomeForThisSession = false;
-
         private bool _showGameplayOnSetup = false;
 
         private static readonly Color BG_TOP = new Color(0.08f, 0.14f, 0.30f);
@@ -32,23 +34,16 @@ namespace MeraWorld.Core
         private static readonly Color BLUE = new Color(0.25f, 0.45f, 0.85f);
 
         // =================================================================
-        // Start — sets IsHomeVisible immediately so SelectionManager
-        // can gate its input processing.
-        // =================================================================
         void Start()
         {
             if (Progress == null) Progress = PlayerProgressManager.Instance;
 
-            // Clean up legacy PlayerPrefs from older versions
             if (PlayerPrefs.HasKey("SkipHome"))
             {
                 PlayerPrefs.DeleteKey("SkipHome");
                 PlayerPrefs.Save();
             }
 
-            // SET IsHomeVisible to TRUE immediately.
-            // This blocks SelectionManager from processing input while
-            // the home screen or tutorial is on screen.
             IsHomeVisible = true;
 
             bool showGameplay = _skipHomeForThisSession;
@@ -62,7 +57,9 @@ namespace MeraWorld.Core
 
         private void Setup()
         {
-            EnsureEventSystem();
+            // EnsureEventSystem() — DISABLED. Scene mein manually EventSystem rakha gaya hai.
+            // Agar do EventSystem honge to UI clicks conflict karenge.
+
             BuildHomeCanvas();
             BuildLevelSelectCanvas();
             BuildStarfield();
@@ -71,7 +68,7 @@ namespace MeraWorld.Core
 
             if (_showGameplayOnSetup)
             {
-                Debug.Log("[HomeScreen] Showing GAMEPLAY.");
+                Debug.Log("[HomeScreen] Showing GAMEPLAY (delayed hide).");
                 ShowGameplay();
             }
             else
@@ -81,6 +78,9 @@ namespace MeraWorld.Core
             }
         }
 
+        // =================================================================
+        // HOME CANVAS
+        // =================================================================
         private void BuildHomeCanvas()
         {
             var canvasObj = new GameObject("HomeCanvas");
@@ -95,7 +95,6 @@ namespace MeraWorld.Core
 
             canvasObj.AddComponent<GraphicRaycaster>();
 
-            // Background
             var bgObj = new GameObject("BackgroundGradient");
             bgObj.transform.SetParent(_homeCanvas.transform, false);
             var bgImg = bgObj.AddComponent<Image>();
@@ -109,7 +108,6 @@ namespace MeraWorld.Core
             bgRt.offsetMin = Vector2.zero;
             bgRt.offsetMax = Vector2.zero;
 
-            // Title halo
             var haloObj = new GameObject("TitleHalo");
             haloObj.transform.SetParent(_homeCanvas.transform, false);
             var haloImg = haloObj.AddComponent<Image>();
@@ -122,12 +120,10 @@ namespace MeraWorld.Core
             haloRt.anchoredPosition = new Vector2(0f, 820f);
             haloRt.sizeDelta = new Vector2(1200f, 1200f);
 
-            // Settings gear
             CreateIconButton(_homeCanvas.transform, new Vector2(-30f, -30f), new Vector2(110f, 110f),
                 new Vector2(1f, 1f), new Vector2(1f, 1f),
                 new Color(0.30f, 0.35f, 0.50f), "SET", 36, OnSettingsClicked);
 
-            // Title
             _titleGroup = new GameObject("TitleGroup");
             _titleGroup.transform.SetParent(_homeCanvas.transform, false);
             var tgr = _titleGroup.AddComponent<RectTransform>();
@@ -153,20 +149,16 @@ namespace MeraWorld.Core
             lineRt.anchoredPosition = new Vector2(0f, -100f);
             lineRt.sizeDelta = new Vector2(500f, 6f);
 
-            // Stats card
             int coins = Progress != null ? Progress.Coins : 0;
             int stars = Progress != null ? Progress.TotalStars : 0;
             CreateStatsCard(_homeCanvas.transform, new Vector2(0f, 620f), coins, stars);
 
-            // PLAY button
             Create3DButton(_homeCanvas.transform, "▶  PLAY", new Vector2(0f, 400f),
                 new Vector2(700f, 170f), GREEN, 60, OnPlayClicked);
 
-            // LEVELS button
             Create3DButton(_homeCanvas.transform, "LEVELS", new Vector2(0f, 240f),
                 new Vector2(700f, 130f), BLUE, 46, OnLevelsClicked);
 
-            // Categories
             float catY = 60f;
             float spacing = 240f;
             Create3DButton(_homeCanvas.transform, "SOCIAL", new Vector2(-spacing, catY),
@@ -176,7 +168,6 @@ namespace MeraWorld.Core
             Create3DButton(_homeCanvas.transform, "PROGRESS", new Vector2(spacing, catY),
                 new Vector2(220f, 180f), new Color(0.30f, 0.65f, 0.80f), 22, () => OpenCategory("progress"));
 
-            // Footer
             CreateText(_homeCanvas.transform, "v1.0  •  Talha Ansari",
                 new Vector2(0f, -850f), 26, new Color(0.55f, 0.60f, 0.75f), FontStyle.Normal, false);
         }
@@ -709,7 +700,6 @@ namespace MeraWorld.Core
                 PlayerPrefs.Save();
             }
 
-            // Use static flag — survives scene reload only
             _skipHomeForThisSession = true;
 
             Debug.Log($"➡️ Loading Level {level}...");
@@ -719,27 +709,24 @@ namespace MeraWorld.Core
         private void ShowGameplay()
         {
             IsHomeVisible = false;
+            StartCoroutine(HideHomeAfterDelay());
+        }
+
+        private IEnumerator HideHomeAfterDelay()
+        {
+            Debug.Log($"[HomeScreen] Delaying home hide by {HideHomeDelaySeconds}s so gameplay can build...");
+
+            yield return new WaitForSeconds(HideHomeDelaySeconds);
+
             if (_homeCanvas != null) _homeCanvas.gameObject.SetActive(false);
             if (_levelSelectCanvas != null) _levelSelectCanvas.gameObject.SetActive(false);
+
+            Debug.Log("[HomeScreen] Home canvas hidden — gameplay visible now.");
         }
 
-        private void EnsureEventSystem()
-        {
-            if (UnityEngine.EventSystems.EventSystem.current == null)
-            {
-                var es = new GameObject("EventSystem");
-                es.AddComponent<UnityEngine.EventSystems.EventSystem>();
-
-                var newModuleType = System.Type.GetType(
-                    "UnityEngine.InputSystem.UI.InputSystemUIInputModule, Unity.InputSystem");
-
-                if (newModuleType != null)
-                    es.AddComponent(newModuleType);
-                else
-                    es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
-            }
-        }
-
+        // =================================================================
+        // TEXT HELPERS
+        // =================================================================
         private Text CreateText(Transform parent, string content, Vector2 pos, int size, Color color,
             FontStyle style, bool addShadow)
         {

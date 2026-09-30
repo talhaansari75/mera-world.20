@@ -3,13 +3,12 @@ using UnityEngine;
 namespace MeraWorld.Core
 {
     /// <summary>
-    /// Auto-setup helper v2 — creates missing components AND wires references.
+    /// Auto-setup helper — creates ALL missing UI components and wires them.
     /// Attach to any empty GameObject in the gameplay scene.
     /// </summary>
     public class GameBootstrap : MonoBehaviour
     {
-        [Header("Auto-Create Missing Components")]
-        public bool CreateHomeScreenUI = true;
+        [Header("Core Gameplay")]
         public bool CreateGridVisualizer = true;
         public bool CreateWordListUI = true;
         public bool CreateTopBarUI = true;
@@ -17,6 +16,35 @@ namespace MeraWorld.Core
         public bool CreateWinScreenUI = true;
         public bool CreateLevelTimerUI = true;
         public bool CreateBotRaceMode = true;
+        public bool CreateHomeScreenUI = true;
+
+        [Header("Menus (critical for buttons!)")]
+        public bool CreateCategoryMenuUI = true;
+        public bool CreateSettingsScreenUI = true;
+
+        [Header("Shop & Economy UIs")]
+        public bool CreateShopUI = true;
+        public bool CreateSpinWheelUI = true;
+        public bool CreateSeasonPassUI = true;
+        public bool CreateAdRewardTiersUI = true;
+
+        [Header("Progress UIs")]
+        public bool CreateAchievementsUI = true;
+        public bool CreateStatisticsUI = true;
+        public bool CreateLeaderboardUI = true;
+        public bool CreateMissionsUI = true;
+
+        [Header("Social UIs")]
+        public bool CreateMultiplayerMenuUI = true;
+        public bool CreateFriendListUI = true;
+        public bool CreateTournamentModeUI = true;
+        public bool CreateReferralSystemUI = true;
+
+        [Header("Extra UIs")]
+        public bool CreateDailyRewardUI = true;
+        public bool CreateWorldMapUI = true;
+        public bool CreateNewsFeedUI = true;
+        public bool CreateNotificationCenterUI = true;
 
         [Header("Debug")]
         public bool LogSetup = true;
@@ -25,7 +53,6 @@ namespace MeraWorld.Core
         {
             if (LogSetup) Debug.Log("[Bootstrap] === Starting scene setup ===");
 
-            // Find shared dependencies
             var gameManager = FindFirstObjectByType<GameManager>();
             var selectionManager = FindFirstObjectByType<SelectionManager>();
             var progress = PlayerProgressManager.Instance;
@@ -36,69 +63,23 @@ namespace MeraWorld.Core
                 return;
             }
 
-            if (selectionManager == null)
-                Debug.LogWarning("[Bootstrap] SelectionManager missing. Will try to create.");
-
-            // ---- Create components in order ----
-
+            // ---- Core gameplay (wire references) ----
             if (CreateGridVisualizer)
             {
                 var gv = EnsureComponent<GridVisualizer>("GridVisualizer");
-                if (gv != null)
-                {
-                    gv.GameManager = gameManager;
-                    gv.SelectionManager = selectionManager;
-                    if (LogSetup) Debug.Log("[Bootstrap] GridVisualizer wired");
-                }
+                if (gv != null) { gv.GameManager = gameManager; gv.SelectionManager = selectionManager; }
             }
 
             if (CreateWordListUI)
             {
                 var wl = EnsureComponent<WordListUI>("WordListUI");
-                if (wl != null)
-                {
-                    wl.GameManager = gameManager;
-                    wl.SelectionManager = selectionManager;
-                    if (LogSetup) Debug.Log("[Bootstrap] WordListUI wired");
-                }
+                if (wl != null) { wl.GameManager = gameManager; wl.SelectionManager = selectionManager; }
             }
 
-            if (CreateTopBarUI)
-            {
-                var tb = EnsureComponent<TopBarUI>("TopBarUI");
-                if (tb != null)
-                {
-                    // TopBarUI usually finds Progress itself
-                    if (LogSetup) Debug.Log("[Bootstrap] TopBarUI wired");
-                }
-            }
-
-            if (CreateHintButtonUI)
-            {
-                var hb = EnsureComponent<HintButtonUI>("HintButtonUI");
-                if (hb != null)
-                {
-                    if (LogSetup) Debug.Log("[Bootstrap] HintButtonUI wired");
-                }
-            }
-
-            if (CreateWinScreenUI)
-            {
-                var ws = EnsureComponent<WinScreenUI>("WinScreenUI");
-                if (ws != null)
-                {
-                    if (LogSetup) Debug.Log("[Bootstrap] WinScreenUI wired");
-                }
-            }
-
-            if (CreateLevelTimerUI)
-            {
-                var lt = EnsureComponent<LevelTimerUI>("LevelTimerUI");
-                if (lt != null)
-                {
-                    if (LogSetup) Debug.Log("[Bootstrap] LevelTimerUI wired");
-                }
-            }
+            if (CreateTopBarUI) EnsureComponent<TopBarUI>("TopBarUI");
+            if (CreateHintButtonUI) EnsureComponent<HintButtonUI>("HintButtonUI");
+            if (CreateWinScreenUI) EnsureComponent<WinScreenUI>("WinScreenUI");
+            if (CreateLevelTimerUI) EnsureComponent<LevelTimerUI>("LevelTimerUI");
 
             if (CreateBotRaceMode)
             {
@@ -108,19 +89,42 @@ namespace MeraWorld.Core
                     br.GameManager = gameManager;
                     br.SelectionManager = selectionManager;
                     br.Progress = progress;
-                    if (LogSetup) Debug.Log("[Bootstrap] BotRaceMode wired");
                 }
             }
 
-            // HomeScreenUI goes LAST so it can overlay everything
+            // ---- Menus (the FIX for buttons) ----
+            if (CreateCategoryMenuUI) EnsureComponent<CategoryMenuUI>("CategoryMenuUI");
+            if (CreateSettingsScreenUI) EnsureComponent<SettingsScreenUI>("SettingsScreenUI");
+
+            // ---- Shop UIs ----
+            if (CreateShopUI) EnsureComponent<ShopUI>("ShopUI");
+            if (CreateSpinWheelUI) EnsureComponent<SpinWheelUI>("SpinWheelUI");
+            if (CreateSeasonPassUI) EnsureComponent<SeasonPassUI>("SeasonPassUI");
+            if (CreateAdRewardTiersUI) EnsureComponent<AdRewardTiersUI>("AdRewardTiersUI");
+
+            // ---- Progress UIs ----
+            if (CreateAchievementsUI) EnsureComponent<AchievementsUI>("AchievementsUI");
+            if (CreateStatisticsUI) EnsureComponent<StatisticsUI>("StatisticsUI");
+            if (CreateLeaderboardUI) EnsureComponent<LeaderboardUI>("LeaderboardUI");
+            if (CreateMissionsUI) EnsureComponent<MissionsUI>("MissionsUI");
+
+            // ---- Social UIs ----
+            if (CreateMultiplayerMenuUI) EnsureComponent<MultiplayerMenuUI>("MultiplayerMenuUI");
+            if (CreateFriendListUI) EnsureComponent<FriendListUI>("FriendListUI");
+            if (CreateTournamentModeUI) EnsureComponent<TournamentModeUI>("TournamentModeUI");
+            if (CreateReferralSystemUI) EnsureComponent<ReferralSystemUI>("ReferralSystemUI");
+
+            // ---- Extra UIs ----
+            if (CreateDailyRewardUI) EnsureComponent<DailyRewardUI>("DailyRewardUI");
+            if (CreateWorldMapUI) EnsureComponent<WorldMapUI>("WorldMapUI");
+            if (CreateNewsFeedUI) EnsureComponent<NewsFeedUI>("NewsFeedUI");
+            if (CreateNotificationCenterUI) EnsureComponent<NotificationCenterUI>("NotificationCenterUI");
+
+            // ---- HomeScreenUI goes LAST (overlays everything) ----
             if (CreateHomeScreenUI)
             {
                 var hs = EnsureComponent<HomeScreenUI>("HomeScreenUI");
-                if (hs != null)
-                {
-                    hs.Progress = progress;
-                    if (LogSetup) Debug.Log("[Bootstrap] HomeScreenUI wired");
-                }
+                if (hs != null) hs.Progress = progress;
             }
 
             if (LogSetup) Debug.Log("[Bootstrap] === Scene setup complete ===");
@@ -131,7 +135,7 @@ namespace MeraWorld.Core
             var existing = FindFirstObjectByType<T>();
             if (existing != null)
             {
-                if (LogSetup) Debug.Log($"[Bootstrap] {typeof(T).Name} already exists on '{existing.gameObject.name}'");
+                if (LogSetup) Debug.Log($"[Bootstrap] {typeof(T).Name} already exists");
                 return existing;
             }
 

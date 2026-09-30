@@ -1,58 +1,49 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 namespace MeraWorld.Core
 {
     public class LeaderboardUI : MonoBehaviour
     {
-        [Header("References")]
-        public PlayerProgressManager Progress;
-        public XPManager XP;
+        public static LeaderboardUI Instance { get; private set; }
 
         private Canvas _canvas;
         private GameObject _panel;
+        private Transform _scrollContent;
+        private Text _playerRankText;
 
-        private const string KEY_LEADERBOARD = "LocalLeaderboard";
-        private const int MAX_ENTRIES = 10;
-
-        void Start()
+        void Awake()
         {
-            if (Progress == null) Progress = PlayerProgressManager.Instance;
-            if (XP == null) XP = XPManager.Instance;
-            Invoke(nameof(Setup), 1f);
+            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            Instance = this;
         }
 
-        private void Setup()
-        {
-            BuildCanvas();
-            BuildPanel();
-        }
+        void Start() { Invoke(nameof(Setup), 1.4f); }
+
+        private void Setup() { BuildCanvas(); BuildPanel(); }
 
         private void BuildCanvas()
         {
             var canvasObj = new GameObject("LeaderboardCanvas");
-            canvasObj.transform.SetParent(transform);
+            canvasObj.transform.SetParent(transform, false);
             _canvas = canvasObj.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _canvas.sortingOrder = 745;
+            _canvas.sortingOrder = 925;
 
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
-
+            scaler.matchWidthOrHeight = 0f;
             canvasObj.AddComponent<GraphicRaycaster>();
         }
 
         private void BuildPanel()
         {
-            _panel = new GameObject("LeaderboardPanel");
+            _panel = new GameObject("Panel");
             _panel.transform.SetParent(_canvas.transform, false);
-
             var bg = _panel.AddComponent<Image>();
-            bg.color = new Color(0.06f, 0.10f, 0.24f, 1f);
+            bg.color = new Color(0.04f, 0.08f, 0.20f, 1f);
 
             var rt = _panel.GetComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
@@ -60,160 +51,134 @@ namespace MeraWorld.Core
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
-            CreateText(_panel.transform, "LEADERBOARD", new Vector2(0f, 830f), 70,
-                new Color(1f, 0.85f, 0.3f), FontStyle.Bold);
+            CreateText(_panel.transform, "LEADERBOARD", new Vector2(0f, 830f), 60,
+                new Color(1f, 0.85f, 0.30f), FontStyle.Bold);
+
+            _playerRankText = CreateText(_panel.transform, "", new Vector2(0f, 745f), 28,
+                new Color(0.80f, 0.85f, 1f), FontStyle.Normal);
 
             CreateSmallButton(_panel.transform, "◀ BACK", new Vector2(-380f, 830f),
-                new Color(0.5f, 0.5f, 0.55f), OnBack);
+                new Color(0.5f, 0.5f, 0.55f), Hide);
 
-            // Top 3 podium
-            CreatePodium();
-
-            // Rest of scores list
-            var entries = GetEntries();
-
-            for (int i = 3; i < Mathf.Min(MAX_ENTRIES, entries.Count); i++)
-            {
-                float y = 200f - (i - 3) * 100f;
-                CreateRow(i + 1, entries[i], y);
-            }
-
-            if (entries.Count <= 3)
-            {
-                CreateText(_panel.transform, "Play more levels to fill the leaderboard!",
-                    new Vector2(0f, 200f), 28, new Color(0.70f, 0.75f, 0.90f), FontStyle.Italic);
-            }
-
+            BuildScrollView();
             _panel.SetActive(false);
         }
 
-        private void CreatePodium()
+        private void BuildScrollView()
         {
-            var entries = GetEntries();
+            var scrollObj = new GameObject("ScrollView");
+            scrollObj.transform.SetParent(_panel.transform, false);
+            var scrollRt = scrollObj.AddComponent<RectTransform>();
+            scrollRt.anchorMin = new Vector2(0.5f, 0.5f);
+            scrollRt.anchorMax = new Vector2(0.5f, 0.5f);
+            scrollRt.pivot = new Vector2(0.5f, 0.5f);
+            scrollRt.anchoredPosition = new Vector2(0f, -60f);
+            scrollRt.sizeDelta = new Vector2(960f, 1350f);
 
-            // 2nd place
-            if (entries.Count > 1)
-                CreatePodiumSlot(2, entries[1], new Vector2(-250f, 400f),
-                    new Color(0.75f, 0.75f, 0.85f), 160f);
+            var scrollRect = scrollObj.AddComponent<ScrollRect>();
+            scrollRect.horizontal = false;
+            scrollRect.movementType = ScrollRect.MovementType.Clamped;
 
-            // 1st place
-            if (entries.Count > 0)
-                CreatePodiumSlot(1, entries[0], new Vector2(0f, 480f),
-                    new Color(1f, 0.85f, 0.30f), 200f);
+            var vp = new GameObject("Viewport");
+            vp.transform.SetParent(scrollObj.transform, false);
+            var vrt = vp.AddComponent<RectTransform>();
+            vrt.anchorMin = Vector2.zero;
+            vrt.anchorMax = Vector2.one;
+            vrt.offsetMin = Vector2.zero;
+            vrt.offsetMax = Vector2.zero;
+            var vimg = vp.AddComponent<Image>();
+            vimg.color = new Color(0f, 0f, 0f, 0.01f);
+            vp.AddComponent<Mask>().showMaskGraphic = false;
 
-            // 3rd place
-            if (entries.Count > 2)
-                CreatePodiumSlot(3, entries[2], new Vector2(250f, 350f),
-                    new Color(0.85f, 0.55f, 0.30f), 140f);
+            var content = new GameObject("Content");
+            content.transform.SetParent(vp.transform, false);
+            var crt = content.AddComponent<RectTransform>();
+            crt.anchorMin = new Vector2(0f, 1f);
+            crt.anchorMax = new Vector2(1f, 1f);
+            crt.pivot = new Vector2(0.5f, 1f);
+            crt.anchoredPosition = Vector2.zero;
+            crt.sizeDelta = new Vector2(0f, 0f);
+
+            var vlg = content.AddComponent<VerticalLayoutGroup>();
+            vlg.childAlignment = TextAnchor.UpperCenter;
+            vlg.spacing = 10f;
+            vlg.padding = new RectOffset(20, 20, 20, 20);
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+
+            var csf = content.AddComponent<ContentSizeFitter>();
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            _scrollContent = content.transform;
+            scrollRect.viewport = vrt;
+            scrollRect.content = crt;
         }
 
-        private void CreatePodiumSlot(int rank, string entry, Vector2 pos, Color color, float size)
+        public void Show()
         {
-            string[] parts = entry.Split('|');
-            string name = parts.Length > 0 ? parts[0] : "Player";
-            string score = parts.Length > 1 ? parts[1] : "0";
+            if (_panel == null) return;
+            Rebuild();
+            _panel.SetActive(true);
+        }
 
-            var slot = new GameObject($"Podium_{rank}");
-            slot.transform.SetParent(_panel.transform, false);
+        public void Hide() { if (_panel != null) _panel.SetActive(false); }
 
-            var bg = slot.AddComponent<Image>();
-            bg.sprite = UISpriteFactory.Create3DButtonSprite(color, 256, 40);
-            bg.type = Image.Type.Sliced;
-            bg.color = Color.white;
+        private void Rebuild()
+        {
+            if (_scrollContent == null) return;
 
-            var rt = slot.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(size, size);
+            for (int i = _scrollContent.childCount - 1; i >= 0; i--)
+                DestroyImmediate(_scrollContent.GetChild(i).gameObject);
 
-            // Rank number
-            var rankObj = new GameObject("Rank");
-            rankObj.transform.SetParent(slot.transform, false);
-            var rankTxt = rankObj.AddComponent<Text>();
-            rankTxt.text = rank.ToString();
-            rankTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            rankTxt.fontSize = 70;
-            rankTxt.fontStyle = FontStyle.Bold;
-            rankTxt.color = new Color(0.15f, 0.10f, 0.05f);
-            rankTxt.alignment = TextAnchor.MiddleCenter;
-            rankTxt.raycastTarget = false;
-            var rankRt = rankObj.GetComponent<RectTransform>();
-            rankRt.anchorMin = new Vector2(0f, 0.5f);
-            rankRt.anchorMax = new Vector2(1f, 1f);
-            rankRt.offsetMin = Vector2.zero;
-            rankRt.offsetMax = Vector2.zero;
+            var board = LeaderboardManager.GetLeaderboard(20);
+
+            for (int i = 0; i < board.Count; i++)
+                CreateRow(board[i], i + 1);
+
+            if (_playerRankText != null)
+                _playerRankText.text = $"Your Rank: #{LeaderboardManager.GetPlayerRank()}  (Best: {LeaderboardManager.PlayerHighScore})";
+        }
+
+        private void CreateRow(LeaderboardManager.Entry entry, int rank)
+        {
+            var row = new GameObject($"Rank_{rank}");
+            row.transform.SetParent(_scrollContent, false);
+
+            var rt = row.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(0f, 100f);
+            var le = row.AddComponent<LayoutElement>();
+            le.minHeight = 100f;
+            le.preferredHeight = 100f;
+
+            Color bgColor = entry.IsPlayer
+                ? new Color(0.85f, 0.60f, 0.20f)
+                : (rank <= 3 ? new Color(0.20f, 0.35f, 0.55f) : new Color(0.14f, 0.18f, 0.28f));
+
+            var bgImg = row.AddComponent<Image>();
+            bgImg.sprite = UISpriteFactory.Create3DButtonSprite(bgColor, 256, 30);
+            bgImg.type = Image.Type.Sliced;
+            bgImg.color = Color.white;
+
+            // Rank
+            CreateTextInRow(row.transform, "#" + rank, new Vector2(-400f, 0f), 32,
+                Color.white, FontStyle.Bold, TextAnchor.MiddleLeft, 100f);
 
             // Name
-            var nameObj = new GameObject("Name");
-            nameObj.transform.SetParent(slot.transform, false);
-            var nameTxt = nameObj.AddComponent<Text>();
-            nameTxt.text = name;
-            nameTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            nameTxt.fontSize = 22;
-            nameTxt.fontStyle = FontStyle.Bold;
-            nameTxt.color = Color.white;
-            nameTxt.alignment = TextAnchor.MiddleCenter;
-            nameTxt.raycastTarget = false;
-            var nameRt = nameObj.GetComponent<RectTransform>();
-            nameRt.anchorMin = new Vector2(0f, 0.3f);
-            nameRt.anchorMax = new Vector2(1f, 0.5f);
-            nameRt.offsetMin = Vector2.zero;
-            nameRt.offsetMax = Vector2.zero;
+            string nameText = entry.IsPlayer ? "YOU" : entry.Name;
+            CreateTextInRow(row.transform, nameText, new Vector2(-180f, 0f), 30,
+                entry.IsPlayer ? new Color(1f, 0.95f, 0.75f) : Color.white,
+                entry.IsPlayer ? FontStyle.Bold : FontStyle.Normal,
+                TextAnchor.MiddleLeft, 400f);
 
             // Score
-            var scoreObj = new GameObject("Score");
-            scoreObj.transform.SetParent(slot.transform, false);
-            var scoreTxt = scoreObj.AddComponent<Text>();
-            scoreTxt.text = score;
-            scoreTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            scoreTxt.fontSize = 28;
-            scoreTxt.fontStyle = FontStyle.Bold;
-            scoreTxt.color = new Color(0.15f, 0.10f, 0.05f);
-            scoreTxt.alignment = TextAnchor.MiddleCenter;
-            scoreTxt.raycastTarget = false;
-            var scoreRt = scoreObj.GetComponent<RectTransform>();
-            scoreRt.anchorMin = new Vector2(0f, 0f);
-            scoreRt.anchorMax = new Vector2(1f, 0.3f);
-            scoreRt.offsetMin = Vector2.zero;
-            scoreRt.offsetMax = Vector2.zero;
+            CreateTextInRow(row.transform, entry.Score.ToString(), new Vector2(380f, 0f), 32,
+                new Color(1f, 0.90f, 0.55f), FontStyle.Bold, TextAnchor.MiddleRight, 200f);
         }
 
-        private void CreateRow(int rank, string entry, float y)
-        {
-            string[] parts = entry.Split('|');
-            string name = parts.Length > 0 ? parts[0] : "Player";
-            string score = parts.Length > 1 ? parts[1] : "0";
-
-            var rowObj = new GameObject($"Row_{rank}");
-            rowObj.transform.SetParent(_panel.transform, false);
-
-            var bg = rowObj.AddComponent<Image>();
-            bg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.15f, 0.20f, 0.35f), 256, 40);
-            bg.type = Image.Type.Sliced;
-            bg.color = Color.white;
-            bg.raycastTarget = false;
-
-            var rt = rowObj.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(0f, y);
-            rt.sizeDelta = new Vector2(880f, 80f);
-
-            CreateRowText(rowObj.transform, rank.ToString(), new Vector2(-380f, 0f), 36,
-                new Color(0.70f, 0.80f, 1f), TextAnchor.MiddleLeft);
-
-            CreateRowText(rowObj.transform, name, new Vector2(-100f, 0f), 32,
-                Color.white, TextAnchor.MiddleLeft);
-
-            CreateRowText(rowObj.transform, score, new Vector2(380f, 0f), 36,
-                new Color(1f, 0.85f, 0.30f), TextAnchor.MiddleRight);
-        }
-
-        private void CreateRowText(Transform parent, string content, Vector2 pos, int size,
-            Color color, TextAnchor anchor)
+        private void CreateTextInRow(Transform parent, string content, Vector2 pos, int size,
+            Color color, FontStyle style, TextAnchor align, float width)
         {
             var obj = new GameObject("Text");
             obj.transform.SetParent(parent, false);
@@ -221,67 +186,18 @@ namespace MeraWorld.Core
             txt.text = content;
             txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             txt.fontSize = size;
-            txt.fontStyle = FontStyle.Bold;
+            txt.fontStyle = style;
             txt.color = color;
-            txt.alignment = anchor;
+            txt.alignment = align;
             txt.raycastTarget = false;
+
             var rt = obj.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(anchor == TextAnchor.MiddleLeft ? 0f : 1f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(300f, 60f);
+            rt.sizeDelta = new Vector2(width, 60f);
         }
-
-        public List<string> GetEntries()
-        {
-            var result = new List<string>();
-            string raw = PlayerPrefs.GetString(KEY_LEADERBOARD, "");
-
-            if (string.IsNullOrEmpty(raw))
-            {
-                // Add default scores
-                result.Add("Player|" + (Progress != null ? Progress.TotalStars * 100 + Progress.HighestLevelUnlocked * 50 : 100));
-                return result;
-            }
-
-            var entries = raw.Split(';');
-            foreach (var e in entries)
-                if (!string.IsNullOrEmpty(e)) result.Add(e);
-
-            return result;
-        }
-
-        public void AddScore(string playerName, int score)
-        {
-            var entries = GetEntries();
-            entries.Add($"{playerName}|{score}");
-
-            entries.Sort((a, b) =>
-            {
-                int sa = ParseScore(a);
-                int sb = ParseScore(b);
-                return sb.CompareTo(sa);
-            });
-
-            if (entries.Count > MAX_ENTRIES)
-                entries.RemoveRange(MAX_ENTRIES, entries.Count - MAX_ENTRIES);
-
-            PlayerPrefs.SetString(KEY_LEADERBOARD, string.Join(";", entries));
-            PlayerPrefs.Save();
-        }
-
-        private int ParseScore(string entry)
-        {
-            var parts = entry.Split('|');
-            if (parts.Length < 2) return 0;
-            int s;
-            return int.TryParse(parts[1], out s) ? s : 0;
-        }
-
-        public void Show() { if (_panel != null) _panel.SetActive(true); }
-        public void Hide() { if (_panel != null) _panel.SetActive(false); }
-        private void OnBack() { Hide(); }
 
         private Text CreateText(Transform parent, string content, Vector2 pos, int size, Color color, FontStyle style)
         {
@@ -300,17 +216,16 @@ namespace MeraWorld.Core
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(900f, 120f);
+            rt.sizeDelta = new Vector2(900f, 100f);
             return txt;
         }
 
-        private void CreateSmallButton(Transform parent, string label, Vector2 pos, Color color,
-            UnityEngine.Events.UnityAction onClick)
+        private void CreateSmallButton(Transform parent, string label, Vector2 pos, Color color, UnityEngine.Events.UnityAction onClick)
         {
             var obj = new GameObject($"Btn_{label}");
             obj.transform.SetParent(parent, false);
             var img = obj.AddComponent<Image>();
-            img.sprite = UISpriteFactory.Create3DButtonSprite(color, 256, 40);
+            img.sprite = UISpriteFactory.Create3DButtonSprite(color, 128, 30);
             img.type = Image.Type.Sliced;
             img.color = Color.white;
             var btn = obj.AddComponent<Button>();
@@ -321,9 +236,9 @@ namespace MeraWorld.Core
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos;
             rt.sizeDelta = new Vector2(220f, 80f);
-            var textObj = new GameObject("Label");
-            textObj.transform.SetParent(obj.transform, false);
-            var txt = textObj.AddComponent<Text>();
+            var t = new GameObject("Label");
+            t.transform.SetParent(obj.transform, false);
+            var txt = t.AddComponent<Text>();
             txt.text = label;
             txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             txt.fontSize = 32;
@@ -331,7 +246,7 @@ namespace MeraWorld.Core
             txt.color = Color.white;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.raycastTarget = false;
-            var trt = textObj.GetComponent<RectTransform>();
+            var trt = t.GetComponent<RectTransform>();
             trt.anchorMin = Vector2.zero;
             trt.anchorMax = Vector2.one;
             trt.offsetMin = Vector2.zero;
