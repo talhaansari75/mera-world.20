@@ -4,6 +4,11 @@ using UnityEngine.UI;
 
 namespace MeraWorld.Core
 {
+    /// <summary>
+    /// Runs a "race" between the player and a bot opponent.
+    /// Shows a live scoreboard at the top of the gameplay screen.
+    /// The bot's difficulty scales with the current level.
+    /// </summary>
     public class BotRaceMode : MonoBehaviour
     {
         public static bool IsActive { get; private set; } = false;
@@ -80,13 +85,13 @@ namespace MeraWorld.Core
 
             IsActive = true;
             _totalWords = GameManager.Words.Count;
+            _playerFoundCount = 0;
 
             // ---- Bot name ----
             string botName = PlayerPrefs.GetString(PREF_BOT_NAME, "");
             if (string.IsNullOrEmpty(botName) && UseRandomBotName)
                 botName = BotOpponent.GetRandomName();
 
-            // Consume the name so the next race uses a fresh one
             PlayerPrefs.DeleteKey(PREF_BOT_NAME);
             PlayerPrefs.Save();
 
@@ -128,7 +133,7 @@ namespace MeraWorld.Core
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0f;   // width-priority for consistent fit
+            scaler.matchWidthOrHeight = 0f;
 
             canvasObj.AddComponent<GraphicRaycaster>();
         }
@@ -188,6 +193,7 @@ namespace MeraWorld.Core
         {
             var obj = new GameObject("Score");
             obj.transform.SetParent(parent, false);
+
             var txt = obj.AddComponent<Text>();
             txt.text = $"{label}: 0/{_totalWords}";
             txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -203,6 +209,7 @@ namespace MeraWorld.Core
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos + new Vector2(0f, 20f);
             rt.sizeDelta = new Vector2(280f, 60f);
+
             return txt;
         }
 
@@ -210,6 +217,7 @@ namespace MeraWorld.Core
         {
             var bgObj = new GameObject("BarBg");
             bgObj.transform.SetParent(parent, false);
+
             var bgImg = bgObj.AddComponent<Image>();
             bgImg.color = new Color(0.15f, 0.18f, 0.28f);
             bgImg.raycastTarget = false;
@@ -223,6 +231,7 @@ namespace MeraWorld.Core
 
             var fillObj = new GameObject("Fill");
             fillObj.transform.SetParent(bgObj.transform, false);
+
             var fillImg = fillObj.AddComponent<Image>();
             fillImg.color = color;
             fillImg.raycastTarget = false;
@@ -246,6 +255,10 @@ namespace MeraWorld.Core
             if (!IsActive) return;
 
             _playerFoundCount++;
+
+            // Bot ko player ka current score batao (catch-up logic ke liye)
+            if (_bot != null)
+                _bot.SetPlayerFoundCount(_playerFoundCount);
 
             if (_playerScoreText != null)
                 _playerScoreText.text = $"YOU: {_playerFoundCount}/{_totalWords}";

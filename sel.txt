@@ -56,27 +56,10 @@ namespace MeraWorld.Core
 
         void Update()
         {
-            // ═══════════════════════════════════════════════════════════════
-            // GATE #1: Home screen visible? SKIP everything silently.
-            // ═══════════════════════════════════════════════════════════════
-            if (HomeScreenUI.IsHomeVisible)
-            {
-                if (_isDragging)
-                {
-                    _isDragging = false;
-                    ClearSelection();
-                }
-                return;   // ← EARLY EXIT, no input, no physics
-            }
-
-            // ═══════════════════════════════════════════════════════════════
-            // GATE #2: No grid? SKIP.
-            // ═══════════════════════════════════════════════════════════════
             if (_cam == null) _cam = Camera.main;
-            if (_grid == null && GameManager != null) _grid = GameManager.LastGeneratedGrid;
-            if (_cam == null || _grid == null) return;
+            if (_grid == null && GameManager != null)
+                _grid = GameManager.LastGeneratedGrid;
 
-            // ---- Input ----
             bool pressed = Input.GetMouseButton(0);
             bool down = Input.GetMouseButtonDown(0);
             bool up = Input.GetMouseButtonUp(0);
@@ -89,7 +72,6 @@ namespace MeraWorld.Core
                     ClearSelection();
                     _isDragging = true;
                     Add(tile);
-
                     if (SoundManager.Instance != null) SoundManager.Instance.PlayLetterSelect();
                     if (VibrationManager.Instance != null) VibrationManager.Instance.VibrateLight();
                 }
@@ -110,10 +92,8 @@ namespace MeraWorld.Core
         private LetterTile GetTileUnderMouse()
         {
             if (_cam == null) return null;
-
             Vector3 world = _cam.ScreenToWorldPoint(Input.mousePosition);
             Vector2 point = new Vector2(world.x, world.y);
-
             var hits = Physics2D.OverlapPointAll(point);
             foreach (var h in hits)
             {
@@ -166,8 +146,6 @@ namespace MeraWorld.Core
 
         private void Validate()
         {
-            if (_grid == null) { ClearSelection(); return; }
-
             var cells = new List<GridCell>();
             foreach (var t in _selection)
             {
@@ -179,8 +157,10 @@ namespace MeraWorld.Core
 
             if (word == null || !WordValidator.IsPlacedWord(_grid, cells))
             {
+                Debug.Log($"Not a word: {word ?? "(invalid)"}");
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayWordInvalid();
                 if (VibrationManager.Instance != null) VibrationManager.Instance.VibrateMedium();
+                if (ScreenShakeUI.Instance != null) ScreenShakeUI.Instance.Shake(0.2f, 0.08f);
                 ClearSelection();
                 return;
             }
@@ -192,6 +172,7 @@ namespace MeraWorld.Core
                 return;
             }
 
+            Debug.Log($"Word found: {word}");
             if (SoundManager.Instance != null) SoundManager.Instance.PlayWordFound();
             if (VibrationManager.Instance != null) VibrationManager.Instance.VibrateMedium();
 
@@ -209,7 +190,8 @@ namespace MeraWorld.Core
                 PlayerProgressManager.Instance.AddWordFound();
             }
 
-            if (ComboSystem.Instance != null) ComboSystem.Instance.RegisterWordFound();
+            if (ComboSystem.Instance != null)
+                ComboSystem.Instance.RegisterWordFound();
 
             if (AchievementManager.Instance != null)
             {
@@ -222,6 +204,7 @@ namespace MeraWorld.Core
 
             if (GameManager != null && _foundWords.Count >= GameManager.Words.Count)
             {
+                Debug.Log("LEVEL COMPLETE!");
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayLevelComplete();
                 if (VibrationManager.Instance != null) VibrationManager.Instance.VibrateHeavy();
 
@@ -232,7 +215,8 @@ namespace MeraWorld.Core
                     AchievementManager.Instance.AddProgress("level_10", 1);
                 }
 
-                if (ComboSystem.Instance != null) ComboSystem.Instance.ResetCombo();
+                if (ComboSystem.Instance != null)
+                    ComboSystem.Instance.ResetCombo();
 
                 OnLevelComplete?.Invoke();
             }
@@ -244,7 +228,10 @@ namespace MeraWorld.Core
 
             var unfound = new List<string>();
             foreach (var w in GameManager.Words)
-                if (!_foundWords.Contains(NormalizeWord(w))) unfound.Add(w);
+            {
+                if (!_foundWords.Contains(NormalizeWord(w)))
+                    unfound.Add(w);
+            }
 
             if (unfound.Count == 0) return null;
             return unfound[UnityEngine.Random.Range(0, unfound.Count)];
@@ -324,7 +311,9 @@ namespace MeraWorld.Core
         {
             var allTiles = FindObjectsByType<LetterTile>(FindObjectsSortMode.None);
             foreach (var t in allTiles)
+            {
                 if (t.Row == row && t.Column == col) return t;
+            }
             return null;
         }
 

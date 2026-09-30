@@ -5,223 +5,184 @@ using UnityEngine.UI;
 
 namespace MeraWorld.Core
 {
+    /// <summary>
+    /// Shows a small toast when an achievement is unlocked.
+    /// Auto-creates itself and listens to AchievementManager events.
+    /// </summary>
     public class AchievementToastUI : MonoBehaviour
     {
-        [Header("References")]
-        public AchievementManager Manager;
+        public static AchievementToastUI Instance { get; private set; }
 
         private Canvas _canvas;
-        private RectTransform _toastRect;
-        private Text _titleText;
-        private Text _descText;
-        private GameObject _toast;
-        private readonly Queue<Achievement> _queue = new Queue<Achievement>();
+        private readonly Queue<AchievementDefinitions.Achievement> _queue =
+            new Queue<AchievementDefinitions.Achievement>();
         private bool _isShowing = false;
+
+        void Awake()
+        {
+            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            Instance = this;
+        }
 
         void Start()
         {
-            Invoke(nameof(Setup), 0.5f);
-        }
-
-        private void Setup()
-        {
-            if (Manager == null) Manager = AchievementManager.Instance;
-            if (Manager == null) return;
-
             BuildCanvas();
-            BuildToast();
 
-            Manager.OnAchievementUnlocked += OnAchievementUnlocked;
+            // Subscribe to achievement unlocks
+            if (AchievementManager.Instance != null)
+                AchievementManager.Instance.OnAchievementUnlocked += EnqueueToast;
+
+            // If AchievementManager spawns later, poll for it
+            InvokeRepeating(nameof(EnsureSubscribed), 0.5f, 1f);
         }
 
-        private void BuildCanvas()
+        private bool _subscribed = false;
+
+        private void EnsureSubscribed()
         {
-            var canvasObj = new GameObject("AchievementToastCanvas");
-            canvasObj.transform.SetParent(transform);
-            _canvas = canvasObj.AddComponent<Canvas>();
-            _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _canvas.sortingOrder = 450;
+            if (_subscribed) return;
+            if (AchievementManager.Instance == null) return;
 
-            var scaler = canvasObj.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
-
-            canvasObj.AddComponent<GraphicRaycaster>();
-        }
-
-        private void BuildToast()
-        {
-            _toast = new GameObject("Toast");
-            _toast.transform.SetParent(_canvas.transform, false);
-
-            var bg = _toast.AddComponent<Image>();
-            bg.color = new Color(0.15f, 0.45f, 0.25f, 0.98f);
-
-            _toastRect = _toast.GetComponent<RectTransform>();
-            _toastRect.anchorMin = new Vector2(0.5f, 1f);
-            _toastRect.anchorMax = new Vector2(0.5f, 1f);
-            _toastRect.pivot = new Vector2(0.5f, 1f);
-            _toastRect.anchoredPosition = new Vector2(0f, 150f); // off-screen
-            _toastRect.sizeDelta = new Vector2(900f, 180f);
-
-            // Gold left border
-            var border = new GameObject("Border");
-            border.transform.SetParent(_toast.transform, false);
-            var borderImg = border.AddComponent<Image>();
-            borderImg.color = new Color(1f, 0.85f, 0.30f);
-            var borderRt = border.GetComponent<RectTransform>();
-            borderRt.anchorMin = new Vector2(0f, 0f);
-            borderRt.anchorMax = new Vector2(0f, 1f);
-            borderRt.pivot = new Vector2(0f, 0.5f);
-            borderRt.anchoredPosition = Vector2.zero;
-            borderRt.sizeDelta = new Vector2(12f, 0f);
-
-            // Icon
-            var iconObj = new GameObject("Icon");
-            iconObj.transform.SetParent(_toast.transform, false);
-            var iconImg = iconObj.AddComponent<Image>();
-            iconImg.color = new Color(1f, 0.85f, 0.30f);
-            var iconRt = iconObj.GetComponent<RectTransform>();
-            iconRt.anchorMin = new Vector2(0f, 0.5f);
-            iconRt.anchorMax = new Vector2(0f, 0.5f);
-            iconRt.pivot = new Vector2(0f, 0.5f);
-            iconRt.anchoredPosition = new Vector2(30f, 0f);
-            iconRt.sizeDelta = new Vector2(100f, 100f);
-
-            var iconTxtObj = new GameObject("Trophy");
-            iconTxtObj.transform.SetParent(iconObj.transform, false);
-            var iconTxt = iconTxtObj.AddComponent<Text>();
-            iconTxt.text = "★";
-            iconTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            iconTxt.fontSize = 70;
-            iconTxt.fontStyle = FontStyle.Bold;
-            iconTxt.color = new Color(0.10f, 0.20f, 0.10f);
-            iconTxt.alignment = TextAnchor.MiddleCenter;
-            var iconTxtRt = iconTxtObj.GetComponent<RectTransform>();
-            iconTxtRt.anchorMin = Vector2.zero;
-            iconTxtRt.anchorMax = Vector2.one;
-            iconTxtRt.offsetMin = Vector2.zero;
-            iconTxtRt.offsetMax = Vector2.zero;
-
-            // Small "UNLOCKED" text
-            var labelObj = new GameObject("Label");
-            labelObj.transform.SetParent(_toast.transform, false);
-            var labelTxt = labelObj.AddComponent<Text>();
-            labelTxt.text = "ACHIEVEMENT UNLOCKED!";
-            labelTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            labelTxt.fontSize = 26;
-            labelTxt.fontStyle = FontStyle.Bold;
-            labelTxt.color = new Color(1f, 0.85f, 0.30f);
-            labelTxt.alignment = TextAnchor.MiddleLeft;
-            var labelRt = labelObj.GetComponent<RectTransform>();
-            labelRt.anchorMin = new Vector2(0f, 1f);
-            labelRt.anchorMax = new Vector2(1f, 1f);
-            labelRt.pivot = new Vector2(0f, 1f);
-            labelRt.anchoredPosition = new Vector2(150f, -25f);
-            labelRt.sizeDelta = new Vector2(-180f, 35f);
-
-            // Title text
-            var titleObj = new GameObject("Title");
-            titleObj.transform.SetParent(_toast.transform, false);
-            _titleText = titleObj.AddComponent<Text>();
-            _titleText.text = "First Word";
-            _titleText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _titleText.fontSize = 46;
-            _titleText.fontStyle = FontStyle.Bold;
-            _titleText.color = Color.white;
-            _titleText.alignment = TextAnchor.MiddleLeft;
-            var titleRt = titleObj.GetComponent<RectTransform>();
-            titleRt.anchorMin = new Vector2(0f, 0.5f);
-            titleRt.anchorMax = new Vector2(1f, 0.5f);
-            titleRt.pivot = new Vector2(0f, 0.5f);
-            titleRt.anchoredPosition = new Vector2(150f, 5f);
-            titleRt.sizeDelta = new Vector2(-180f, 55f);
-
-            // Reward text
-            var descObj = new GameObject("Desc");
-            descObj.transform.SetParent(_toast.transform, false);
-            _descText = descObj.AddComponent<Text>();
-            _descText.text = "+10 coins";
-            _descText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _descText.fontSize = 30;
-            _descText.fontStyle = FontStyle.Bold;
-            _descText.color = new Color(0.65f, 1f, 0.65f);
-            _descText.alignment = TextAnchor.MiddleLeft;
-            var descRt = descObj.GetComponent<RectTransform>();
-            descRt.anchorMin = new Vector2(0f, 0f);
-            descRt.anchorMax = new Vector2(1f, 0f);
-            descRt.pivot = new Vector2(0f, 0f);
-            descRt.anchoredPosition = new Vector2(150f, 25f);
-            descRt.sizeDelta = new Vector2(-180f, 35f);
-
-            _toast.SetActive(false);
-        }
-
-        private void OnAchievementUnlocked(Achievement a)
-        {
-            _queue.Enqueue(a);
-            if (!_isShowing)
-                StartCoroutine(ProcessQueue());
-        }
-
-        private IEnumerator ProcessQueue()
-        {
-            _isShowing = true;
-
-            while (_queue.Count > 0)
-            {
-                var a = _queue.Dequeue();
-                yield return ShowToast(a);
-                yield return new WaitForSecondsRealtime(0.4f);
-            }
-
-            _isShowing = false;
-        }
-
-        private IEnumerator ShowToast(Achievement a)
-        {
-            _titleText.text = a.Title;
-            _descText.text = $"+{a.RewardCoins} coins";
-
-            _toast.SetActive(true);
-
-            // Slide in
-            float duration = 0.4f;
-            float elapsed = 0f;
-            Vector2 startPos = new Vector2(0f, 150f);
-            Vector2 endPos = new Vector2(0f, -20f);
-
-            while (elapsed < duration)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                float t = elapsed / duration;
-                float smoothT = Mathf.SmoothStep(0f, 1f, t);
-                _toastRect.anchoredPosition = Vector2.Lerp(startPos, endPos, smoothT);
-                yield return null;
-            }
-
-            // Hold
-            yield return new WaitForSecondsRealtime(2.5f);
-
-            // Slide out
-            elapsed = 0f;
-            while (elapsed < duration)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                float t = elapsed / duration;
-                float smoothT = Mathf.SmoothStep(0f, 1f, t);
-                _toastRect.anchoredPosition = Vector2.Lerp(endPos, startPos, smoothT);
-                yield return null;
-            }
-
-            _toast.SetActive(false);
+            AchievementManager.Instance.OnAchievementUnlocked += EnqueueToast;
+            _subscribed = true;
+            CancelInvoke(nameof(EnsureSubscribed));
+            Debug.Log("[Toast] Subscribed to AchievementManager.");
         }
 
         void OnDestroy()
         {
-            if (Manager != null)
-                Manager.OnAchievementUnlocked -= OnAchievementUnlocked;
+            if (AchievementManager.Instance != null)
+                AchievementManager.Instance.OnAchievementUnlocked -= EnqueueToast;
+        }
+
+        // ---------------------------------------------------------------
+        // Canvas
+        // ---------------------------------------------------------------
+
+        private void BuildCanvas()
+        {
+            var canvasObj = new GameObject("AchievementToastCanvas");
+            canvasObj.transform.SetParent(transform, false);
+
+            _canvas = canvasObj.AddComponent<Canvas>();
+            _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            _canvas.sortingOrder = 5000;
+
+            var scaler = canvasObj.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1080, 1920);
+            scaler.matchWidthOrHeight = 0f;
+
+            canvasObj.AddComponent<GraphicRaycaster>();
+        }
+
+        // ---------------------------------------------------------------
+        // Toast logic
+        // ---------------------------------------------------------------
+
+        private void EnqueueToast(AchievementDefinitions.Achievement ach)
+        {
+            _queue.Enqueue(ach);
+            if (!_isShowing) StartCoroutine(ShowToasts());
+        }
+
+        private IEnumerator ShowToasts()
+        {
+            _isShowing = true;
+            while (_queue.Count > 0)
+            {
+                var ach = _queue.Dequeue();
+                yield return StartCoroutine(ShowOne(ach));
+                yield return new WaitForSeconds(0.3f);
+            }
+            _isShowing = false;
+        }
+
+        private IEnumerator ShowOne(AchievementDefinitions.Achievement ach)
+        {
+            // Build toast
+            var toast = new GameObject("Toast");
+            toast.transform.SetParent(_canvas.transform, false);
+
+            var bg = toast.AddComponent<Image>();
+            bg.sprite = UISpriteFactory.Create3DButtonSprite(
+                new Color(0.15f, 0.45f, 0.75f), 256, 40);
+            bg.type = Image.Type.Sliced;
+            bg.color = Color.white;
+
+            var rt = toast.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 1f);
+            rt.anchorMax = new Vector2(0.5f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = new Vector2(0f, 100f); // start above screen
+            rt.sizeDelta = new Vector2(900f, 220f);
+
+            // Title
+            CreateLabel(toast.transform, "🏆 ACHIEVEMENT UNLOCKED!",
+                new Vector2(0f, 55f), 28, new Color(1f, 0.85f, 0.30f));
+            CreateLabel(toast.transform, ach.Title,
+                new Vector2(0f, 0f), 44, Color.white);
+            CreateLabel(toast.transform, ach.Description,
+                new Vector2(0f, -50f), 22, new Color(0.85f, 0.90f, 1f));
+
+            // Slide down animation
+            float t = 0f;
+            float dur = 0.35f;
+            Vector2 startPos = new Vector2(0f, 100f);
+            Vector2 endPos = new Vector2(0f, -40f);
+
+            while (t < dur)
+            {
+                t += Time.unscaledDeltaTime;
+                float p = t / dur;
+                rt.anchoredPosition = Vector2.Lerp(startPos, endPos, EaseOutCubic(p));
+                yield return null;
+            }
+            rt.anchoredPosition = endPos;
+
+            // Wait
+            yield return new WaitForSeconds(2.5f);
+
+            // Slide up animation
+            t = 0f;
+            while (t < dur)
+            {
+                t += Time.unscaledDeltaTime;
+                float p = t / dur;
+                rt.anchoredPosition = Vector2.Lerp(endPos, startPos, EaseInCubic(p));
+                yield return null;
+            }
+
+            Destroy(toast);
+        }
+
+        private float EaseOutCubic(float x) => 1f - Mathf.Pow(1f - x, 3f);
+        private float EaseInCubic(float x) => x * x * x;
+
+        private void CreateLabel(Transform parent, string text, Vector2 pos, int size, Color color)
+        {
+            var obj = new GameObject("Label");
+            obj.transform.SetParent(parent, false);
+
+            var txt = obj.AddComponent<Text>();
+            txt.text = text;
+            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.fontSize = size;
+            txt.fontStyle = FontStyle.Bold;
+            txt.color = color;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.raycastTarget = false;
+
+            var shadow = obj.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.6f);
+            shadow.effectDistance = new Vector2(2f, -2f);
+
+            var rt = obj.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = new Vector2(800f, 60f);
         }
     }
 }

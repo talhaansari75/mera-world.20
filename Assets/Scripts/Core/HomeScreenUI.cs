@@ -18,12 +18,12 @@ namespace MeraWorld.Core
         private GameObject _titleGroup;
         private Image[] _parallaxStars;
 
-        private const string SKIP_HOME_KEY = "SkipHome";
         private const string STARS_KEY_PREFIX = "Stars_Level_";
 
-        // Static flag: app session mein sirf ek baar reset hoga.
-        // Scene reload pe reset nahi hota, lekin app restart pe reset ho jata hai.
-        private static bool _sessionHomeShown = false;
+        // ---- Static flag: survives scene reload, resets on app restart ----
+        private static bool _skipHomeForThisSession = false;
+
+        private bool _showGameplayOnSetup = false;
 
         private static readonly Color BG_TOP = new Color(0.08f, 0.14f, 0.30f);
         private static readonly Color BG_BOTTOM = new Color(0.03f, 0.05f, 0.14f);
@@ -31,23 +31,31 @@ namespace MeraWorld.Core
         private static readonly Color GREEN = new Color(0.25f, 0.65f, 0.35f);
         private static readonly Color BLUE = new Color(0.25f, 0.45f, 0.85f);
 
+        // =================================================================
+        // Start — sets IsHomeVisible immediately so SelectionManager
+        // can gate its input processing.
+        // =================================================================
         void Start()
         {
             if (Progress == null) Progress = PlayerProgressManager.Instance;
 
-            // App fresh launch pe SkipHome hamesha clear karo.
-            // Isse game band karke dobara kholne pe Home screen dikhegi.
-            if (!_sessionHomeShown)
+            // Clean up legacy PlayerPrefs from older versions
+            if (PlayerPrefs.HasKey("SkipHome"))
             {
-                _sessionHomeShown = true;
-                PlayerPrefs.DeleteKey(SKIP_HOME_KEY);
+                PlayerPrefs.DeleteKey("SkipHome");
                 PlayerPrefs.Save();
-                Debug.Log("[HomeScreen] Fresh launch — home will be shown.");
             }
-            else
-            {
-                Debug.Log("[HomeScreen] Scene reloaded — SkipHome respected.");
-            }
+
+            // SET IsHomeVisible to TRUE immediately.
+            // This blocks SelectionManager from processing input while
+            // the home screen or tutorial is on screen.
+            IsHomeVisible = true;
+
+            bool showGameplay = _skipHomeForThisSession;
+            _skipHomeForThisSession = false;
+            _showGameplayOnSetup = showGameplay;
+
+            Debug.Log($"[HomeScreen] Start — showGameplay={showGameplay}");
 
             Invoke(nameof(Setup), 0.2f);
         }
@@ -61,14 +69,14 @@ namespace MeraWorld.Core
             StartCoroutine(AnimateStars());
             StartCoroutine(FloatTitle());
 
-            if (PlayerPrefs.GetInt(SKIP_HOME_KEY, 0) == 1)
+            if (_showGameplayOnSetup)
             {
-                PlayerPrefs.SetInt(SKIP_HOME_KEY, 0);
-                PlayerPrefs.Save();
+                Debug.Log("[HomeScreen] Showing GAMEPLAY.");
                 ShowGameplay();
             }
             else
             {
+                Debug.Log("[HomeScreen] Showing HOME screen.");
                 ShowHome();
             }
         }
@@ -158,7 +166,7 @@ namespace MeraWorld.Core
             Create3DButton(_homeCanvas.transform, "LEVELS", new Vector2(0f, 240f),
                 new Vector2(700f, 130f), BLUE, 46, OnLevelsClicked);
 
-            // 3 Categories row
+            // Categories
             float catY = 60f;
             float spacing = 240f;
             Create3DButton(_homeCanvas.transform, "SOCIAL", new Vector2(-spacing, catY),
@@ -178,7 +186,6 @@ namespace MeraWorld.Core
             if (SoundManager.Instance != null)
                 SoundManager.Instance.PlayButtonClick();
 
-            // Multiplayer / Social = online-only
             if (categoryId == "social")
             {
                 if (!InternetChecker.QuickCheck())
@@ -702,8 +709,8 @@ namespace MeraWorld.Core
                 PlayerPrefs.Save();
             }
 
-            PlayerPrefs.SetInt(SKIP_HOME_KEY, 1);
-            PlayerPrefs.Save();
+            // Use static flag — survives scene reload only
+            _skipHomeForThisSession = true;
 
             Debug.Log($"➡️ Loading Level {level}...");
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -722,7 +729,14 @@ namespace MeraWorld.Core
             {
                 var es = new GameObject("EventSystem");
                 es.AddComponent<UnityEngine.EventSystems.EventSystem>();
-                es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+
+                var newModuleType = System.Type.GetType(
+                    "UnityEngine.InputSystem.UI.InputSystemUIInputModule, Unity.InputSystem");
+
+                if (newModuleType != null)
+                    es.AddComponent(newModuleType);
+                else
+                    es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
             }
         }
 

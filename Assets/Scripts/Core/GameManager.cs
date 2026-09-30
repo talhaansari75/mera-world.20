@@ -21,7 +21,6 @@ namespace MeraWorld.Core
 
         private static readonly string[][] WordBankByLevel = new string[][]
         {
-            // ========== Levels 1-20 (existing) ==========
             new[] { "CAT", "DOG", "SUN", "MOON", "STAR", "FISH", "BIRD", "TREE" },
             new[] { "BOOK", "GAME", "PLAY", "FOOD", "HOME", "LOVE", "HOPE", "TIME" },
             new[] { "APPLE", "BREAD", "CHAIR", "DANCE", "EAGLE", "FLAME", "GRASS", "HONEY" },
@@ -42,8 +41,6 @@ namespace MeraWorld.Core
             new[] { "TREASURE", "JOURNEY", "ADVENTURE", "DISCOVERY", "EXPEDITION", "EXPLORER", "COMPASS", "MAP" },
             new[] { "TWILIGHT", "ECLIPSE", "PHANTOM", "CRYSTAL", "SILVER", "GOLDEN", "MARBLE", "VELVET" },
             new[] { "INFINITY", "ETERNAL", "COSMIC", "QUANTUM", "PHOTON", "GRAVITY", "MAGNETIC", "SPECTRUM" },
-
-            // ========== Levels 21-30 (NEW) ==========
             new[] { "GARDEN", "SILVER", "MEADOW", "PUZZLE", "CANDLE", "DESERT", "FOREST", "MIRROR" },
             new[] { "ANCIENT", "MYSTERY", "WHISPER", "JOURNEY", "BALANCE", "HORIZON", "MAGICAL", "SPARKLE" },
             new[] { "CRIMSON", "EMERALD", "SAPPHIRE", "OBSIDIAN", "AMETHYST", "TOPAZ", "OPAL", "JADE" },
@@ -54,8 +51,6 @@ namespace MeraWorld.Core
             new[] { "BUTTERFLY", "LADYBUG", "FIREFLY", "DRAGONFLY", "GRASSHOPPER", "CRICKET", "BEETLE", "MANTIS" },
             new[] { "PIANO", "GUITAR", "VIOLIN", "TRUMPET", "SAXOPHONE", "FLUTE", "DRUMS", "HARP" },
             new[] { "SPAGHETTI", "LASAGNA", "RAVIOLI", "FETTUCCINE", "MACARONI", "PENNE", "RIGATONI", "LINGUINE" },
-
-            // ========== Levels 31-40 (NEW) ==========
             new[] { "AURORA", "CORONA", "SOLSTICE", "EQUINOX", "ZENITH", "NADIR", "APEX", "VERGE" },
             new[] { "ANTIQUE", "VINTAGE", "CLASSIC", "MODERN", "FUTURE", "PRESENT", "HISTORY", "LEGACY" },
             new[] { "SAPPHIRE", "DIAMOND", "EMERALD", "RUBY", "PEARL", "OPAL", "TOPAZ", "AMBER" },
@@ -66,8 +61,6 @@ namespace MeraWorld.Core
             new[] { "COMPASSION", "KINDNESS", "GENEROSITY", "HONESTY", "LOYALTY", "PATIENCE", "COURAGE", "WISDOM" },
             new[] { "TRIUMPH", "VICTORY", "CHAMPION", "WINNER", "LEGEND", "HERO", "MASTER", "TITAN" },
             new[] { "STARDUST", "MOONBEAM", "SUNRISE", "SUNSET", "TWILIGHT", "DAWN", "DUSK", "NIGHTFALL" },
-
-            // ========== Levels 41-50 (NEW) ==========
             new[] { "OBSERVATORY", "LABORATORY", "LIBRARY", "GALLERY", "THEATER", "STADIUM", "MUSEUM", "ACADEMY" },
             new[] { "MELODIOUS", "HARMONIOUS", "RHYTHMIC", "LYRICAL", "POETIC", "ARTISTIC", "CREATIVE", "MUSICAL" },
             new[] { "RESPLENDENT", "MAGNIFICENT", "SPLENDID", "GLORIOUS", "MAJESTIC", "GRAND", "SUBLIME", "DIVINE" },
@@ -80,32 +73,60 @@ namespace MeraWorld.Core
             new[] { "TRANSCENDENT", "EXTRAORDINARY", "REMARKABLE", "EXCEPTIONAL", "PHENOMENAL", "MIRACULOUS", "WONDROUS", "ASTOUNDING" },
         };
 
-        void Start()
+        // =================================================================
+        // IMPORTANT: Grid is generated in Awake() so that other scripts
+        // (SelectionManager, GridVisualizer, WordListUI) can read it
+        // safely in their Start() methods.
+        // =================================================================
+        void Awake()
         {
             CurrentLevel = PlayerProgressManager.Instance != null
                 ? PlayerProgressManager.Instance.CurrentLevel
                 : PlayerPrefs.GetInt("CurrentLevel", 1);
 
-            Words = GetWordsForLevel(CurrentLevel);
-
+            var requestedWords = GetWordsForLevel(CurrentLevel);
             int seed = CurrentLevel * 7919 + 13;
 
             Debug.Log($"=== Mera World: Level {CurrentLevel} ===");
-            Debug.Log($"Words: {string.Join(", ", Words)}");
+            Debug.Log($"Words: {string.Join(", ", requestedWords)}");
             Debug.Log($"Seed: {seed}");
 
-            var result = WordSearchGenerator.Generate(GridRows, GridColumns, Words, seed);
+            var result = GenerateWithRetry(requestedWords, seed);
 
             LastGeneratedGrid = result.Grid;
+            Words = new List<string>(result.PlacedWords);
 
-            Debug.Log($"Placed: {result.PlacedWords.Count} / {Words.Count}");
-
+            Debug.Log($"Placed: {result.PlacedWords.Count} / {requestedWords.Count}");
             foreach (var w in result.PlacedWords)
                 Debug.Log($"  OK {w}");
-
             if (result.FailedWords.Count > 0)
                 foreach (var w in result.FailedWords)
-                    Debug.LogWarning($"  FAIL {w}");
+                    Debug.LogWarning($"  FAIL {w} (dropped)");
+        }
+
+        private WordSearchGenerator.Result GenerateWithRetry(List<string> requestedWords, int seed)
+        {
+            WordSearchGenerator.Result best = null;
+            int[] sizes = { GridRows, GridRows + 1, GridRows + 2, GridRows + 3 };
+
+            foreach (var size in sizes)
+            {
+                var result = WordSearchGenerator.Generate(size, size, requestedWords, seed);
+
+                if (best == null || result.PlacedWords.Count > best.PlacedWords.Count)
+                    best = result;
+
+                if (result.FailedWords.Count == 0)
+                {
+                    GridRows = size;
+                    GridColumns = size;
+                    Debug.Log($"[GameManager] All words placed in {size}x{size} grid.");
+                    return result;
+                }
+            }
+
+            Debug.LogWarning($"[GameManager] Some words could not be placed. Dropped: {string.Join(", ", best.FailedWords)}");
+            return best;
         }
 
         private List<string> GetWordsForLevel(int level)
@@ -115,7 +136,6 @@ namespace MeraWorld.Core
 
             var list = new List<string>(source);
 
-            // For levels > 50, shuffle the words
             if (level > WordBankByLevel.Length)
             {
                 var rng = new System.Random(level * 9973);

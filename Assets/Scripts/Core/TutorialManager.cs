@@ -6,7 +6,7 @@ namespace MeraWorld.Core
 {
     /// <summary>
     /// First-time tutorial. Shows step-by-step overlay on first launch.
-    /// Saves flag so it never shows again (unless reset in settings).
+    /// Auto-creates EventSystem if missing (works with both input systems).
     /// </summary>
     public class TutorialManager : MonoBehaviour
     {
@@ -20,7 +20,6 @@ namespace MeraWorld.Core
         private Image _darkPanel;
         private Text _titleText;
         private Text _bodyText;
-        private Button _nextButton;
         private Text _nextButtonText;
         private Text _stepCounter;
 
@@ -87,6 +86,9 @@ namespace MeraWorld.Core
 
         void Start()
         {
+            // Make sure EventSystem exists BEFORE tutorial UI is built
+            EnsureEventSystem();
+
             if (IsTutorialDone())
             {
                 Debug.Log("[Tutorial] Already completed. Skipping.");
@@ -106,6 +108,35 @@ namespace MeraWorld.Core
             PlayerPrefs.DeleteKey(KEY_TUTORIAL_DONE);
             PlayerPrefs.DeleteKey(KEY_TUTORIAL_STEP);
             PlayerPrefs.Save();
+        }
+
+        // ---------------------------------------------------------------
+        // EventSystem — auto-detect input system
+        // ---------------------------------------------------------------
+
+        private void EnsureEventSystem()
+        {
+            if (UnityEngine.EventSystems.EventSystem.current != null)
+                return;
+
+            var esObj = new GameObject("EventSystem");
+            esObj.AddComponent<UnityEngine.EventSystems.EventSystem>();
+
+            // Try new Input System first (InputSystemUIInputModule)
+            var newModuleType = System.Type.GetType(
+                "UnityEngine.InputSystem.UI.InputSystemUIInputModule, Unity.InputSystem");
+
+            if (newModuleType != null)
+            {
+                esObj.AddComponent(newModuleType);
+                Debug.Log("[Tutorial] EventSystem created with InputSystemUIInputModule.");
+            }
+            else
+            {
+                // Fall back to legacy StandaloneInputModule
+                esObj.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+                Debug.Log("[Tutorial] EventSystem created with StandaloneInputModule (legacy).");
+            }
         }
 
         // ---------------------------------------------------------------
@@ -152,7 +183,6 @@ namespace MeraWorld.Core
 
         private IEnumerator FadeStep()
         {
-            // Simple flash animation
             _overlay.transform.localScale = Vector3.one * 0.95f;
             float t = 0f;
             while (t < 0.15f)
