@@ -5,176 +5,139 @@ namespace MeraWorld.Core
 {
     public class HintButtonUI : MonoBehaviour
     {
-        [Header("References")]
-        public SelectionManager SelectionManager;
-        public PlayerProgressManager Progress;
-        public WinScreenUI WinScreen;
-
-        [Header("Settings")]
-        public int HintCost = 50;
-
         private Canvas _canvas;
-        private GameObject _buttonRoot;
-        private Button _button;
-        private Text _label;
+        private Text _hintCountText;
+        private Button _hintBtn;
+        private const int HINT_COST = 50;
 
-        void Start()
-        {
-            Invoke(nameof(BuildUI), 0.3f);
-        }
+        void Start() { Invoke(nameof(Setup), 1.0f); }
 
-        private void BuildUI()
-        {
-            if (Progress == null) Progress = PlayerProgressManager.Instance;
-            if (SelectionManager == null) SelectionManager = FindFirstObjectByType<SelectionManager>();
-            if (WinScreen == null) WinScreen = FindFirstObjectByType<WinScreenUI>();
-
-            BuildCanvas();
-            BuildHintButton();
-            UpdateButtonState();
-
-            if (Progress != null)
-                Progress.OnCoinsChanged += OnCoinsChanged;
-        }
+        private void Setup() { BuildCanvas(); BuildButton(); RefreshUI(); }
 
         private void BuildCanvas()
         {
             var canvasObj = new GameObject("HintCanvas");
-            canvasObj.transform.SetParent(transform);
+            canvasObj.transform.SetParent(transform, false);
             _canvas = canvasObj.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _canvas.sortingOrder = 60;
+            _canvas.sortingOrder = 90;
 
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
-
+            scaler.matchWidthOrHeight = 0f;
             canvasObj.AddComponent<GraphicRaycaster>();
-
-            if (UnityEngine.EventSystems.EventSystem.current == null)
-            {
-                var es = new GameObject("EventSystem");
-                es.AddComponent<UnityEngine.EventSystems.EventSystem>();
-                es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
-            }
         }
 
-        private void BuildHintButton()
+        private void BuildButton()
         {
-            _buttonRoot = new GameObject("HintBtnRoot");
-            _buttonRoot.transform.SetParent(_canvas.transform, false);
+            var btnObj = new GameObject("HintButton");
+            btnObj.transform.SetParent(_canvas.transform, false);
 
-            var rootRt = _buttonRoot.AddComponent<RectTransform>();
-            rootRt.anchorMin = new Vector2(0.5f, 0f);
-            rootRt.anchorMax = new Vector2(0.5f, 0f);
-            rootRt.pivot = new Vector2(0.5f, 0f);
-            rootRt.anchoredPosition = new Vector2(0f, 40f);
-            rootRt.sizeDelta = new Vector2(500f, 120f);
+            var img = btnObj.AddComponent<Image>();
+            img.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.95f, 0.75f, 0.20f), 256, 40);
+            img.type = Image.Type.Sliced;
+            img.color = Color.white;
 
-            // Bottom shadow
-            var shadowObj = new GameObject("BottomShadow");
-            shadowObj.transform.SetParent(_buttonRoot.transform, false);
-            var bShadowImg = shadowObj.AddComponent<Image>();
-            bShadowImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.60f, 0.42f, 0.08f), 256, 50);
-            bShadowImg.type = Image.Type.Sliced;
-            bShadowImg.raycastTarget = false;
-            var shRt = shadowObj.GetComponent<RectTransform>();
-            shRt.anchorMin = Vector2.zero;
-            shRt.anchorMax = Vector2.one;
-            shRt.offsetMin = Vector2.zero;
-            shRt.offsetMax = Vector2.zero;
-            shRt.anchoredPosition = new Vector2(0f, -8f);
+            var btn = btnObj.AddComponent<Button>();
+            _hintBtn = btn;
+            btn.onClick.AddListener(OnHintClicked);
 
-            // Main button
-            var btnObj = new GameObject("Button");
-            btnObj.transform.SetParent(_buttonRoot.transform, false);
-            var btnImg = btnObj.AddComponent<Image>();
-            btnImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(1f, 0.82f, 0.25f), 256, 50);
-            btnImg.type = Image.Type.Sliced;
-            btnImg.color = Color.white;
+            var rt = btnObj.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0f);
+            rt.anchorMax = new Vector2(0.5f, 0f);
+            rt.pivot = new Vector2(0.5f, 0f);
+            rt.anchoredPosition = new Vector2(0f, 40f);
+            rt.sizeDelta = new Vector2(700f, 120f);
 
-            _button = btnObj.AddComponent<Button>();
-            _button.onClick.AddListener(OnHintClicked);
+            var txtObj = new GameObject("Label");
+            txtObj.transform.SetParent(btnObj.transform, false);
+            _hintCountText = txtObj.AddComponent<Text>();
+            _hintCountText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            _hintCountText.fontSize = 40;
+            _hintCountText.fontStyle = FontStyle.Bold;
+            _hintCountText.color = Color.white;
+            _hintCountText.alignment = TextAnchor.MiddleCenter;
+            _hintCountText.raycastTarget = false;
 
-            var btnRt = btnObj.GetComponent<RectTransform>();
-            btnRt.anchorMin = Vector2.zero;
-            btnRt.anchorMax = Vector2.one;
-            btnRt.offsetMin = Vector2.zero;
-            btnRt.offsetMax = new Vector2(0f, 8f);
+            var shadow = txtObj.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.55f);
+            shadow.effectDistance = new Vector2(2f, -2f);
 
-            // Label
-            var labelObj = new GameObject("Label");
-            labelObj.transform.SetParent(btnObj.transform, false);
-            _label = labelObj.AddComponent<Text>();
-            _label.text = $"HINT ({HintCost})";
-            _label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _label.fontSize = 48;
-            _label.fontStyle = FontStyle.Bold;
-            _label.color = new Color(0.15f, 0.10f, 0.05f);
-            _label.alignment = TextAnchor.MiddleCenter;
-            _label.raycastTarget = false;
-
-            var shadow = labelObj.AddComponent<Shadow>();
-            shadow.effectColor = new Color(1f, 1f, 1f, 0.35f);
-            shadow.effectDistance = new Vector2(1f, 1f);
-
-            var lrt = labelObj.GetComponent<RectTransform>();
-            lrt.anchorMin = Vector2.zero;
-            lrt.anchorMax = Vector2.one;
-            lrt.offsetMin = Vector2.zero;
-            lrt.offsetMax = Vector2.zero;
+            var trt = txtObj.GetComponent<RectTransform>();
+            trt.anchorMin = Vector2.zero;
+            trt.anchorMax = Vector2.one;
+            trt.offsetMin = Vector2.zero;
+            trt.offsetMax = Vector2.zero;
         }
-
-        private void UpdateButtonState()
-        {
-            if (_button == null || Progress == null) return;
-
-            bool canAfford = Progress.Coins >= HintCost;
-            _button.interactable = canAfford;
-
-            var img = _button.GetComponent<Image>();
-            if (img != null)
-            {
-                img.sprite = UISpriteFactory.Create3DButtonSprite(
-                    canAfford ? new Color(1f, 0.82f, 0.25f) : new Color(0.40f, 0.35f, 0.25f),
-                    256, 50);
-                img.type = Image.Type.Sliced;
-            }
-        }
-
-        private void OnCoinsChanged(int amount) { UpdateButtonState(); }
 
         private void OnHintClicked()
         {
-            if (Progress == null || SelectionManager == null) return;
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
 
-            if (!Progress.SpendCoins(HintCost))
+            // Try inventory hint first
+            if (ShopManager.Hints > 0)
             {
-                Debug.Log("[Hint] Not enough coins!");
+                if (!ShopManager.UseHint())
+                {
+                    Debug.LogWarning("[Hint] Failed to use inventory hint.");
+                    return;
+                }
+                GiveHint();
+                RefreshUI();
                 return;
             }
 
-            var word = SelectionManager.GetRandomUnfoundWord();
-            if (string.IsNullOrEmpty(word))
+            // Otherwise buy with coins
+            int coins = PlayerProgressManager.Instance != null ? PlayerProgressManager.Instance.Coins : 0;
+            if (coins < HINT_COST)
             {
-                Progress.AddCoins(HintCost);
+                Debug.Log($"[Hint] Not enough coins ({coins}/{HINT_COST})");
                 return;
             }
 
-            Debug.Log($"[Hint] Showing hint for: {word}");
-            SelectionManager.HintWord(word);
+            if (PlayerProgressManager.Instance != null)
+                PlayerProgressManager.Instance.AddCoins(-HINT_COST);
 
-            if (WinScreen != null) WinScreen.HintsUsed++;
-            if (SoundManager.Instance != null) SoundManager.Instance.PlayWordFound();
-
-            UpdateButtonState();
+            GiveHint();
+            RefreshUI();
         }
 
-        void OnDestroy()
+        private void GiveHint()
         {
-            if (Progress != null)
-                Progress.OnCoinsChanged -= OnCoinsChanged;
+            var sel = SelectionManager.Instance;
+            if (sel == null) return;
+
+            string word = sel.GetRandomUnfoundWord();
+            if (string.IsNullOrEmpty(word))
+            {
+                Debug.Log("[Hint] No unfound words left.");
+                return;
+            }
+
+            sel.HintWord(word);
+            Debug.Log($"[Hint] Revealed: {word}");
+
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayWordFound();
+        }
+
+        private void RefreshUI()
+        {
+            if (_hintCountText == null) return;
+            int invHints = ShopManager.Hints;
+            _hintCountText.text = invHints > 0
+                ? $"HINT ({invHints} left)"
+                : $"HINT ({HINT_COST} coins)";
+        }
+
+        void OnEnable()
+        {
+            ShopManager.OnInventoryChanged += RefreshUI;
+        }
+
+        void OnDisable()
+        {
+            ShopManager.OnInventoryChanged -= RefreshUI;
         }
     }
 }

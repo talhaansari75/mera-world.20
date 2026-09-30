@@ -25,7 +25,7 @@ namespace MeraWorld.Core
 
         void Start()
         {
-            Invoke(nameof(Setup), 1.5f);
+            Invoke(nameof(Setup), 1.4f);
         }
 
         private void Setup()
@@ -73,15 +73,15 @@ namespace MeraWorld.Core
             CreateText(_panel.transform, "ACHIEVEMENTS",
                 new Vector2(0f, 830f), 60, new Color(1f, 0.85f, 0.30f), FontStyle.Bold);
 
-            // Summary line
+            // Summary
             _summaryText = CreateText(_panel.transform, "",
-                new Vector2(0f, 740f), 28, new Color(0.80f, 0.85f, 1f), FontStyle.Normal);
+                new Vector2(0f, 745f), 28, new Color(0.80f, 0.85f, 1f), FontStyle.Normal);
 
             // Back button
             CreateSmallButton(_panel.transform, "◀ BACK", new Vector2(-380f, 830f),
                 new Color(0.5f, 0.5f, 0.55f), Hide);
 
-            // Scroll view for achievement list
+            // Scroll view
             BuildScrollView();
 
             _panel.SetActive(false);
@@ -89,7 +89,6 @@ namespace MeraWorld.Core
 
         private void BuildScrollView()
         {
-            // Scroll root
             var scrollObj = new GameObject("ScrollView");
             scrollObj.transform.SetParent(_panel.transform, false);
 
@@ -98,7 +97,7 @@ namespace MeraWorld.Core
             scrollRt.anchorMax = new Vector2(0.5f, 0.5f);
             scrollRt.pivot = new Vector2(0.5f, 0.5f);
             scrollRt.anchoredPosition = new Vector2(0f, -60f);
-            scrollRt.sizeDelta = new Vector2(960f, 1400f);
+            scrollRt.sizeDelta = new Vector2(960f, 1350f);
 
             var scrollRect = scrollObj.AddComponent<ScrollRect>();
             scrollRect.horizontal = false;
@@ -106,7 +105,7 @@ namespace MeraWorld.Core
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
             scrollRect.scrollSensitivity = 30f;
 
-            // Viewport (masks content)
+            // Viewport
             var viewportObj = new GameObject("Viewport");
             viewportObj.transform.SetParent(scrollObj.transform, false);
             var viewportRt = viewportObj.AddComponent<RectTransform>();
@@ -115,10 +114,10 @@ namespace MeraWorld.Core
             viewportRt.offsetMin = Vector2.zero;
             viewportRt.offsetMax = Vector2.zero;
             var viewportImg = viewportObj.AddComponent<Image>();
-            viewportImg.color = new Color(0f, 0f, 0f, 0.01f); // must be present for mask
+            viewportImg.color = new Color(0f, 0f, 0f, 0.01f);
             viewportObj.AddComponent<Mask>().showMaskGraphic = false;
 
-            // Content (scrollable)
+            // Content
             var contentObj = new GameObject("Content");
             contentObj.transform.SetParent(viewportObj.transform, false);
             var contentRt = contentObj.AddComponent<RectTransform>();
@@ -152,7 +151,6 @@ namespace MeraWorld.Core
         public void Show()
         {
             if (_panel == null) return;
-
             RebuildList();
             UpdateSummary();
             _panel.SetActive(true);
@@ -171,9 +169,9 @@ namespace MeraWorld.Core
         {
             if (_scrollContent == null) return;
 
-            // Clear existing
-            foreach (Transform c in _scrollContent)
-                Destroy(c.gameObject);
+            // Clear existing items reliably
+            for (int i = _scrollContent.childCount - 1; i >= 0; i--)
+                DestroyImmediate(_scrollContent.GetChild(i).gameObject);
 
             if (AchievementManager.Instance == null)
             {
@@ -246,7 +244,6 @@ namespace MeraWorld.Core
             int progress = AchievementManager.Instance.GetProgress(ach.Id);
             float pct = AchievementManager.Instance.GetProgressPercent(ach.Id);
 
-            // Root
             var row = new GameObject($"Ach_{ach.Id}");
             row.transform.SetParent(_scrollContent, false);
 
@@ -257,7 +254,7 @@ namespace MeraWorld.Core
             rowLe.minHeight = 140f;
             rowLe.preferredHeight = 140f;
 
-            // BG
+            // Background
             var bgImg = row.AddComponent<Image>();
             bgImg.sprite = UISpriteFactory.Create3DButtonSprite(
                 unlocked ? new Color(0.20f, 0.45f, 0.25f) : new Color(0.14f, 0.18f, 0.28f),
@@ -265,7 +262,7 @@ namespace MeraWorld.Core
             bgImg.type = Image.Type.Sliced;
             bgImg.color = Color.white;
 
-            // Left icon circle
+            // Icon circle
             var iconObj = new GameObject("Icon");
             iconObj.transform.SetParent(row.transform, false);
             var iconImg = iconObj.AddComponent<Image>();
@@ -281,7 +278,7 @@ namespace MeraWorld.Core
             iconRt.anchoredPosition = new Vector2(20f, 0f);
             iconRt.sizeDelta = new Vector2(90f, 90f);
 
-            // Icon label (trophy / lock)
+            // Icon label
             var iconLabel = new GameObject("IconLabel");
             iconLabel.transform.SetParent(iconObj.transform, false);
             var ilTxt = iconLabel.AddComponent<Text>();
@@ -334,7 +331,7 @@ namespace MeraWorld.Core
             descRt.anchoredPosition = new Vector2(130f, 5f);
             descRt.sizeDelta = new Vector2(-150f, 30f);
 
-            // Progress text (bottom-right)
+            // Progress text
             var progObj = new GameObject("Progress");
             progObj.transform.SetParent(row.transform, false);
             var progTxt = progObj.AddComponent<Text>();
@@ -352,11 +349,11 @@ namespace MeraWorld.Core
             progRt.anchoredPosition = new Vector2(-20f, 0f);
             progRt.sizeDelta = new Vector2(-40f, 30f);
 
-            // Progress bar (bottom)
+            // Progress bar (only if not unlocked)
             if (!unlocked)
                 CreateProgressBar(row.transform, pct);
 
-            // Rewards text
+            // Rewards
             if (ach.CoinReward > 0 || ach.GemReward > 0)
             {
                 var rewardObj = new GameObject("Reward");
