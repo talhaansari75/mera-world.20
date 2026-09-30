@@ -64,11 +64,10 @@ namespace MeraWorld.Core
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.matchWidthOrHeight = 0f;
 
             canvasObj.AddComponent<GraphicRaycaster>();
 
-            // Background
             var bgObj = new GameObject("BackgroundGradient");
             bgObj.transform.SetParent(_homeCanvas.transform, false);
             var bgImg = bgObj.AddComponent<Image>();
@@ -82,7 +81,6 @@ namespace MeraWorld.Core
             bgRt.offsetMin = Vector2.zero;
             bgRt.offsetMax = Vector2.zero;
 
-            // Title halo
             var haloObj = new GameObject("TitleHalo");
             haloObj.transform.SetParent(_homeCanvas.transform, false);
             var haloImg = haloObj.AddComponent<Image>();
@@ -95,12 +93,10 @@ namespace MeraWorld.Core
             haloRt.anchoredPosition = new Vector2(0f, 820f);
             haloRt.sizeDelta = new Vector2(1200f, 1200f);
 
-            // Settings gear
             CreateIconButton(_homeCanvas.transform, new Vector2(-30f, -30f), new Vector2(110f, 110f),
                 new Vector2(1f, 1f), new Vector2(1f, 1f),
                 new Color(0.30f, 0.35f, 0.50f), "SET", 36, OnSettingsClicked);
 
-            // Title
             _titleGroup = new GameObject("TitleGroup");
             _titleGroup.transform.SetParent(_homeCanvas.transform, false);
             var tgr = _titleGroup.AddComponent<RectTransform>();
@@ -126,20 +122,16 @@ namespace MeraWorld.Core
             lineRt.anchoredPosition = new Vector2(0f, -100f);
             lineRt.sizeDelta = new Vector2(500f, 6f);
 
-            // Stats card
             int coins = Progress != null ? Progress.Coins : 0;
             int stars = Progress != null ? Progress.TotalStars : 0;
             CreateStatsCard(_homeCanvas.transform, new Vector2(0f, 620f), coins, stars);
 
-            // PLAY button (big, main)
             Create3DButton(_homeCanvas.transform, "▶  PLAY", new Vector2(0f, 400f),
                 new Vector2(700f, 170f), GREEN, 60, OnPlayClicked);
 
-            // LEVELS button
             Create3DButton(_homeCanvas.transform, "LEVELS", new Vector2(0f, 240f),
                 new Vector2(700f, 130f), BLUE, 46, OnLevelsClicked);
 
-            // 3 Categories row
             float catY = 60f;
             float spacing = 240f;
             Create3DButton(_homeCanvas.transform, "SOCIAL", new Vector2(-spacing, catY),
@@ -149,7 +141,6 @@ namespace MeraWorld.Core
             Create3DButton(_homeCanvas.transform, "PROGRESS", new Vector2(spacing, catY),
                 new Vector2(220f, 180f), new Color(0.30f, 0.65f, 0.80f), 22, () => OpenCategory("progress"));
 
-            // Footer
             CreateText(_homeCanvas.transform, "v1.0  •  Talha Ansari",
                 new Vector2(0f, -850f), 26, new Color(0.55f, 0.60f, 0.75f), FontStyle.Normal, false);
         }
@@ -159,7 +150,7 @@ namespace MeraWorld.Core
             if (SoundManager.Instance != null)
                 SoundManager.Instance.PlayButtonClick();
 
-            // Multiplayer / Social = online-only
+            // Social = online-only
             if (categoryId == "social")
             {
                 if (!InternetChecker.QuickCheck())
@@ -185,7 +176,7 @@ namespace MeraWorld.Core
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.matchWidthOrHeight = 0f;
             canvasObj.AddComponent<GraphicRaycaster>();
 
             var panel = new GameObject("Panel");
@@ -550,7 +541,7 @@ namespace MeraWorld.Core
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.matchWidthOrHeight = 0f;
 
             canvasObj.AddComponent<GraphicRaycaster>();
 

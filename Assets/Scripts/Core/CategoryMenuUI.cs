@@ -43,7 +43,7 @@ namespace MeraWorld.Core
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.matchWidthOrHeight = 0f;
 
             canvasObj.AddComponent<GraphicRaycaster>();
 
@@ -69,20 +69,16 @@ namespace MeraWorld.Core
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
-            // Title
             _titleText = CreateText(_panel.transform, "CATEGORY", new Vector2(0f, 830f), 70,
                 new Color(1f, 0.85f, 0.3f), FontStyle.Bold);
 
-            // Back button
             CreateSmallButton(_panel.transform, "◀ BACK", new Vector2(-380f, 830f),
                 new Color(0.5f, 0.5f, 0.55f), OnBack);
 
-            // Offline note (hidden by default)
             _offlineNoteText = CreateText(_panel.transform, "", new Vector2(0f, 740f), 26,
                 new Color(1f, 0.55f, 0.55f), FontStyle.Normal);
             _offlineNoteText.gameObject.SetActive(false);
 
-            // Grid parent
             _gridParent = new GameObject("GridParent");
             _gridParent.transform.SetParent(_panel.transform, false);
             var grt = _gridParent.AddComponent<RectTransform>();
@@ -106,11 +102,9 @@ namespace MeraWorld.Core
         {
             _activeCategory = categoryId;
 
-            // Clear old items
             foreach (Transform child in _gridParent.transform)
                 Destroy(child.gameObject);
 
-            // Update title
             string title = "MENU";
             switch (categoryId)
             {
@@ -120,7 +114,6 @@ namespace MeraWorld.Core
             }
             _titleText.text = title;
 
-            // Online status
             bool online = InternetChecker.QuickCheck();
 
             if (categoryId == "social" && !online)
@@ -133,7 +126,6 @@ namespace MeraWorld.Core
                 _offlineNoteText.gameObject.SetActive(false);
             }
 
-            // Populate items
             var items = GetItemsForCategory(categoryId);
             foreach (var item in items)
                 CreateMenuItem(item, online);
@@ -256,7 +248,6 @@ namespace MeraWorld.Core
                 return null;
             }
 
-            // Try to call Show() if it exists
             var showMethod = typeof(T).GetMethod("Show",
                 System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance,
                 null, System.Type.EmptyTypes, null);
@@ -280,7 +271,6 @@ namespace MeraWorld.Core
                 ? new Color(0.30f, 0.32f, 0.38f)
                 : item.Color;
 
-            // Bottom shadow
             var shadowObj = new GameObject("BottomShadow");
             shadowObj.transform.SetParent(rootObj.transform, false);
             var bShadowImg = shadowObj.AddComponent<Image>();
@@ -295,7 +285,6 @@ namespace MeraWorld.Core
             shRt.offsetMax = Vector2.zero;
             shRt.anchoredPosition = new Vector2(0f, -8f);
 
-            // Main button
             var btnObj = new GameObject("Button");
             btnObj.transform.SetParent(rootObj.transform, false);
             var btnImg = btnObj.AddComponent<Image>();
@@ -312,7 +301,6 @@ namespace MeraWorld.Core
                 {
                     if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
 
-                    // Double check: online required
                     if (item.RequiresOnline && !InternetChecker.QuickCheck())
                     {
                         Debug.LogWarning($"[Category] {item.Label} requires internet.");
@@ -329,7 +317,6 @@ namespace MeraWorld.Core
             btnRt.offsetMin = Vector2.zero;
             btnRt.offsetMax = new Vector2(0f, 8f);
 
-            // Label
             var textObj = new GameObject("Label");
             textObj.transform.SetParent(btnObj.transform, false);
             var txt = textObj.AddComponent<Text>();

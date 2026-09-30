@@ -9,7 +9,6 @@ namespace MeraWorld.Core
         private Canvas _canvas;
         private GameObject _panel;
         private Text _statusText;
-        private Text _titleText;
         private Text _timerText;
         private Button _findMatchButton;
         private GameObject _searchingPanel;
@@ -68,27 +67,28 @@ namespace MeraWorld.Core
             rt.offsetMax = Vector2.zero;
 
             // Title
-            _titleText = CreateText(_panel.transform, "ONLINE MULTIPLAYER", new Vector2(0f, 830f),
+            CreateText(_panel.transform, "ONLINE MULTIPLAYER", new Vector2(0f, 830f),
                 60, new Color(1f, 0.85f, 0.30f), FontStyle.Bold);
 
             // Back button
             CreateSmallButton(_panel.transform, "< BACK", new Vector2(-380f, 830f),
                 new Color(0.5f, 0.5f, 0.55f), OnBack);
 
-            // Status text (offline / online)
+            // Status text
             _statusText = CreateText(_panel.transform, "", new Vector2(0f, 700f),
                 30, new Color(0.85f, 0.85f, 0.95f), FontStyle.Normal);
 
-            // Info text
-            CreateText(_panel.transform, "Race against players worldwide.\nNo real player? A bot will join after 5 seconds.",
+            // Info
+            CreateText(_panel.transform,
+                "Race against players worldwide.\nNo real player? A bot will join after 5 seconds.",
                 new Vector2(0f, 400f), 26, new Color(0.75f, 0.80f, 0.95f), FontStyle.Normal);
 
-            // Find Match button (main CTA)
+            // Find Match button
             _findMatchButton = CreateBigButton(_panel.transform, "FIND MATCH",
                 new Vector2(0f, 100f), new Vector2(700f, 180f),
                 new Color(0.25f, 0.65f, 0.35f), 55, OnFindMatchClicked);
 
-            // Searching panel (hidden by default)
+            // Searching panel (hidden)
             BuildSearchingPanel();
 
             _panel.SetActive(false);
@@ -116,13 +116,11 @@ namespace MeraWorld.Core
             _timerText = CreateText(_searchingPanel.transform, "5s", new Vector2(0f, 0f),
                 40, Color.white, FontStyle.Bold);
 
-            CreateText(_searchingPanel.transform, "Looking for a real player...", new Vector2(0f, -70f),
-                22, new Color(0.80f, 0.85f, 1f), FontStyle.Normal);
+            CreateText(_searchingPanel.transform, "Looking for a real player...",
+                new Vector2(0f, -70f), 22, new Color(0.80f, 0.85f, 1f), FontStyle.Normal);
 
             _searchingPanel.SetActive(false);
         }
-
-        // --- Online check ---
 
         private void RefreshOnlineState()
         {
@@ -163,7 +161,7 @@ namespace MeraWorld.Core
                 }
             }
 
-            // Also do a real HTTP check in background
+            // Real HTTP verify in background
             StartCoroutine(VerifyInBackground());
         }
 
@@ -173,7 +171,9 @@ namespace MeraWorld.Core
             bool online = InternetChecker.IsOnline;
 
             if (_statusText != null)
-                _statusText.text = online ? "You are ONLINE." : "You are OFFLINE.\nMultiplayer requires internet.";
+                _statusText.text = online
+                    ? "You are ONLINE."
+                    : "You are OFFLINE.\nMultiplayer requires internet.";
 
             if (_findMatchButton != null)
                 _findMatchButton.interactable = online;
@@ -185,8 +185,6 @@ namespace MeraWorld.Core
         {
             _isOnline = online;
         }
-
-        // --- Actions ---
 
         private void OnFindMatchClicked()
         {
@@ -202,6 +200,7 @@ namespace MeraWorld.Core
 
         private IEnumerator FindMatchRoutine()
         {
+            // Ensure matchmaking manager exists
             if (MatchmakingManager.Instance == null)
             {
                 var go = new GameObject("MatchmakingManager");
@@ -211,18 +210,35 @@ namespace MeraWorld.Core
             _findMatchButton.gameObject.SetActive(false);
             _searchingPanel.SetActive(true);
 
-            bool matchFound = false;
+            bool done = false;
             MatchmakingManager.MatchResult result = null;
             string errorMsg = null;
 
-            MatchmakingManager.Instance.OnMatchFound += (r) => { result = r; matchFound = true; };
-            MatchmakingManager.Instance.OnMatchmakingFailed += (e) => { errorMsg = e; matchFound = true; };
-            MatchmakingManager.Instance.OnSearchTick += UpdateTimer;
+            System.Action<MatchmakingManager.MatchResult> onFound = (r) =>
+            {
+                result = r;
+                done = true;
+            };
+            System.Action<string> onFail = (e) =>
+            {
+                errorMsg = e;
+                done = true;
+            };
+            System.Action<float> onTick = UpdateTimer;
+
+            MatchmakingManager.Instance.OnMatchFound += onFound;
+            MatchmakingManager.Instance.OnMatchmakingFailed += onFail;
+            MatchmakingManager.Instance.OnSearchTick += onTick;
 
             MatchmakingManager.Instance.StartMatchmaking();
 
-            while (!matchFound)
+            while (!done)
                 yield return null;
+
+            // Unsubscribe
+            MatchmakingManager.Instance.OnMatchFound -= onFound;
+            MatchmakingManager.Instance.OnMatchmakingFailed -= onFail;
+            MatchmakingManager.Instance.OnSearchTick -= onTick;
 
             _searchingPanel.SetActive(false);
             _findMatchButton.gameObject.SetActive(true);
@@ -237,12 +253,10 @@ namespace MeraWorld.Core
             {
                 Debug.Log($"[Multiplayer] Match found: {result.OpponentName} (bot: {result.IsBot})");
 
-                // Save bot name so BotRaceMode can use it
                 PlayerPrefs.SetString("BotRace_OpponentName", result.OpponentName);
                 PlayerPrefs.SetInt("BotRace_Enabled", 1);
                 PlayerPrefs.Save();
 
-                // Small delay so player sees the found message
                 if (_statusText != null)
                     _statusText.text = $"Matched with {result.OpponentName}! Starting...";
 
@@ -261,7 +275,6 @@ namespace MeraWorld.Core
 
         private void StartBotRace()
         {
-            // Load current level to restart with bot race active
             var progress = PlayerProgressManager.Instance;
             int level = progress != null ? progress.HighestLevelUnlocked : 1;
 
