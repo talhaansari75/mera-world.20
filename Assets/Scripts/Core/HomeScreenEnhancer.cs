@@ -17,7 +17,7 @@ namespace MeraWorld.Core
             c.transform.SetParent(transform, false);
             _canvas = c.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _canvas.sortingOrder = 502;
+            _canvas.sortingOrder = 510;
             var s = c.AddComponent<CanvasScaler>();
             s.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             s.referenceResolution = new Vector2(1080, 1920);
@@ -148,6 +148,8 @@ namespace MeraWorld.Core
         }
     }
 }
+
+
 
 
 

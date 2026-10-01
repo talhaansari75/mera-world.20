@@ -1,155 +1,169 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 namespace MeraWorld.Core
 {
     public class BossLevelUI : MonoBehaviour
     {
-        [Header("References")]
-        public GameManager GameManager;
-        public SoundManager Sound;
-
+        public static BossLevelUI Instance { get; private set; }
         private Canvas _canvas;
-        private GameObject _banner;
+        private GameObject _panel;
+        private Text _bossNameText;
+        private Text _rewardText;
+        private Image _bossAvatar;
 
-        void Start()
+        void Awake()
         {
-            if (GameManager == null) GameManager = FindFirstObjectByType<GameManager>();
-            if (Sound == null) Sound = SoundManager.Instance;
-
-            Invoke(nameof(CheckBossLevel), 1.2f);
+            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            Instance = this;
         }
 
-        private void CheckBossLevel()
+        void Start() { Invoke(nameof(Setup), 1.5f); }
+
+        private void Setup()
         {
-            if (GameManager == null) return;
-
-            int level = GameManager.CurrentLevel;
-            if (level % 10 != 0) return;
-
-            BuildCanvas();
-            BuildBanner(level);
-            StartCoroutine(ShowBossIntro());
-        }
-
-        private void BuildCanvas()
-        {
-            var canvasObj = new GameObject("BossCanvas");
-            canvasObj.transform.SetParent(transform);
-            _canvas = canvasObj.AddComponent<Canvas>();
+            var c = new GameObject("BossCanvas", typeof(RectTransform));
+            c.transform.SetParent(transform, false);
+            _canvas = c.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _canvas.sortingOrder = 390;
+            _canvas.sortingOrder = 950;
+            var s = c.AddComponent<CanvasScaler>();
+            s.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            s.referenceResolution = new Vector2(1080, 1920);
+            s.matchWidthOrHeight = 0f;
+            c.AddComponent<GraphicRaycaster>();
 
-            var scaler = canvasObj.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
+            _panel = new GameObject("Panel", typeof(RectTransform));
+            _panel.transform.SetParent(c.transform, false);
+            var bg = _panel.AddComponent<Image>();
+            bg.color = new Color(0.05f, 0.02f, 0.10f, 0.98f);
+            var prt = _panel.GetComponent<RectTransform>();
+            prt.anchorMin = Vector2.zero;
+            prt.anchorMax = Vector2.one;
+            prt.offsetMin = Vector2.zero;
+            prt.offsetMax = Vector2.zero;
+            _panel.SetActive(false);
 
-            canvasObj.AddComponent<GraphicsRaycasterProxy>(); // fallback if no GraphicsRaycaster imported
-            canvasObj.AddComponent<GraphicRaycaster>();
+            MakeText("BOSS BATTLE", new Vector2(0f, 700f), 70, new Color(1f, 0.30f, 0.30f));
+
+            var avatar = new GameObject("BossAvatar", typeof(RectTransform));
+            avatar.transform.SetParent(_panel.transform, false);
+            _bossAvatar = avatar.AddComponent<Image>();
+            _bossAvatar.sprite = UISpriteFactory.Create3DSphereSprite(new Color(0.85f, 0.20f, 0.25f), 256);
+            _bossAvatar.raycastTarget = false;
+            var art = avatar.GetComponent<RectTransform>();
+            art.anchorMin = new Vector2(0.5f, 0.5f);
+            art.anchorMax = new Vector2(0.5f, 0.5f);
+            art.pivot = new Vector2(0.5f, 0.5f);
+            art.anchoredPosition = new Vector2(0f, 300f);
+            art.sizeDelta = new Vector2(300f, 300f);
+
+            _bossNameText = MakeText("GUARDIAN", new Vector2(0f, 80f), 60, new Color(1f, 0.85f, 0.30f));
+            _rewardText = MakeText("REWARD: 100 COINS", new Vector2(0f, 0f), 32, Color.white);
+
+            MakeText("Defeat the boss to earn extra coins!", new Vector2(0f, -80f), 24, new Color(0.85f, 0.85f, 0.95f));
+
+            var fightBtn = MakeButton("FIGHT!", new Vector2(0f, -250f), new Color(0.85f, 0.25f, 0.25f));
+            fightBtn.onClick.AddListener(OnFightClicked);
+
+            MakeButton("RETREAT", new Vector2(0f, -380f), new Color(0.4f, 0.4f, 0.45f)).onClick.AddListener(Hide);
         }
 
-        private void BuildBanner(int level)
+        public void ShowBossLevel(int level)
         {
-            _banner = new GameObject("BossBanner");
-            _banner.transform.SetParent(_canvas.transform, false);
-
-            var bg = _banner.AddComponent<Image>();
-            bg.color = new Color(0.6f, 0.08f, 0.08f, 0.95f);
-
-            var rt = _banner.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0f, 0.35f);
-            rt.anchorMax = new Vector2(1f, 0.65f);
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-
-            // Top border
-            var topLine = new GameObject("TopLine");
-            topLine.transform.SetParent(_banner.transform, false);
-            var tli = topLine.AddComponent<Image>();
-            tli.color = new Color(1f, 0.85f, 0.30f);
-            var tlRt = topLine.GetComponent<RectTransform>();
-            tlRt.anchorMin = new Vector2(0f, 1f);
-            tlRt.anchorMax = new Vector2(1f, 1f);
-            tlRt.pivot = new Vector2(0.5f, 1f);
-            tlRt.anchoredPosition = Vector2.zero;
-            tlRt.sizeDelta = new Vector2(0f, 8f);
-
-            // Bottom border
-            var botLine = new GameObject("BotLine");
-            botLine.transform.SetParent(_banner.transform, false);
-            var bli = botLine.AddComponent<Image>();
-            bli.color = new Color(1f, 0.85f, 0.30f);
-            var blRt = botLine.GetComponent<RectTransform>();
-            blRt.anchorMin = new Vector2(0f, 0f);
-            blRt.anchorMax = new Vector2(1f, 0f);
-            blRt.pivot = new Vector2(0.5f, 0f);
-            blRt.anchoredPosition = Vector2.zero;
-            blRt.sizeDelta = new Vector2(0f, 8f);
-
-            CreateText(_banner.transform, "BOSS LEVEL!", new Vector2(0f, 60f), 90,
-                new Color(1f, 0.85f, 0.30f), FontStyle.Bold);
-
-            CreateText(_banner.transform, $"Level {level} Challenge", new Vector2(0f, -30f), 45,
-                Color.white, FontStyle.Bold);
-
-            _banner.transform.localScale = new Vector3(0f, 1f, 1f);
+            if (_panel == null) return;
+            string name = BossLevelManager.GetBossName(level);
+            int reward = BossLevelManager.GetBossReward(level);
+            int diff = BossLevelManager.GetBossDifficulty(level);
+            _bossNameText.text = name;
+            _rewardText.text = "REWARD: " + reward + " COINS";
+            float r = 0.85f;
+            float g = 1f - diff * 0.25f;
+            float b = 1f - diff * 0.25f;
+            _bossAvatar.sprite = UISpriteFactory.Create3DSphereSprite(new Color(r, g, b), 256);
+            _panel.SetActive(true);
+            StartCoroutine(PulseAvatar());
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayLevelComplete();
         }
 
-        private IEnumerator ShowBossIntro()
+        private IEnumerator PulseAvatar()
         {
-            yield return new WaitForSecondsRealtime(0.3f);
-
-            if (Sound != null) Sound.PlayLevelComplete();
-
-            float duration = 0.5f;
-            float elapsed = 0f;
-            while (elapsed < duration)
+            var rt = _bossAvatar.GetComponent<RectTransform>();
+            while (_panel.activeSelf)
             {
-                elapsed += Time.unscaledDeltaTime;
-                float t = elapsed / duration;
-                _banner.transform.localScale = new Vector3(Mathf.SmoothStep(0f, 1f, t), 1f, 1f);
+                float sc = 1f + Mathf.Sin(Time.unscaledTime * 3f) * 0.1f;
+                rt.localScale = Vector3.one * sc;
                 yield return null;
             }
-
-            yield return new WaitForSecondsRealtime(2f);
-
-            elapsed = 0f;
-            while (elapsed < duration)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                float t = elapsed / duration;
-                _banner.transform.localScale = new Vector3(Mathf.SmoothStep(1f, 0f, t), 1f, 1f);
-                yield return null;
-            }
-
-            if (_banner != null) Destroy(_banner);
-            if (_canvas != null) Destroy(_canvas.gameObject);
+            rt.localScale = Vector3.one;
         }
 
-        private Text CreateText(Transform parent, string content, Vector2 pos, int size, Color color, FontStyle style)
+        public void Hide() { if (_panel != null) _panel.SetActive(false); }
+
+        private void OnFightClicked()
         {
-            var obj = new GameObject("Text");
-            obj.transform.SetParent(parent, false);
-            var txt = obj.AddComponent<Text>();
-            txt.text = content;
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = size;
-            txt.fontStyle = style;
-            txt.color = color;
-            txt.alignment = TextAnchor.MiddleCenter;
-            txt.raycastTarget = false;
-            var rt = obj.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(900f, 130f);
-            return txt;
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+            Hide();
+            int level = PlayerPrefs.GetInt("CurrentLevel", 1);
+            if (PlayerProgressManager.Instance != null)
+                PlayerProgressManager.Instance.AddCoins(BossLevelManager.GetBossReward(level));
+            UnityEngine.SceneManagement.SceneManager.LoadScene(
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+        }
+
+        private Text MakeText(string s, Vector2 p, int sz, Color c)
+        {
+            var o = new GameObject("T", typeof(RectTransform));
+            o.transform.SetParent(_panel.transform, false);
+            var t = o.AddComponent<Text>();
+            t.text = s;
+            t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            t.fontSize = sz;
+            t.fontStyle = FontStyle.Bold;
+            t.color = c;
+            t.alignment = TextAnchor.MiddleCenter;
+            t.raycastTarget = false;
+            var r = o.GetComponent<RectTransform>();
+            r.anchorMin = new Vector2(0.5f, 0.5f);
+            r.anchorMax = new Vector2(0.5f, 0.5f);
+            r.pivot = new Vector2(0.5f, 0.5f);
+            r.anchoredPosition = p;
+            r.sizeDelta = new Vector2(1000f, 100f);
+            return t;
+        }
+
+        private Button MakeButton(string s, Vector2 p, Color c)
+        {
+            var o = new GameObject("Btn_" + s, typeof(RectTransform));
+            o.transform.SetParent(_panel.transform, false);
+            var i = o.AddComponent<Image>();
+            i.sprite = UISpriteFactory.Create3DButtonSprite(c, 256, 40);
+            i.type = Image.Type.Sliced;
+            i.color = Color.white;
+            var b = o.AddComponent<Button>();
+            var r = o.GetComponent<RectTransform>();
+            r.anchorMin = new Vector2(0.5f, 0.5f);
+            r.anchorMax = new Vector2(0.5f, 0.5f);
+            r.pivot = new Vector2(0.5f, 0.5f);
+            r.anchoredPosition = p;
+            r.sizeDelta = new Vector2(600f, 110f);
+            var t = new GameObject("L", typeof(RectTransform));
+            t.transform.SetParent(o.transform, false);
+            var tx = t.AddComponent<Text>();
+            tx.text = s;
+            tx.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            tx.fontSize = 40;
+            tx.fontStyle = FontStyle.Bold;
+            tx.color = Color.white;
+            tx.alignment = TextAnchor.MiddleCenter;
+            tx.raycastTarget = false;
+            var tr = t.GetComponent<RectTransform>();
+            tr.anchorMin = Vector2.zero;
+            tr.anchorMax = Vector2.one;
+            tr.offsetMin = Vector2.zero;
+            tr.offsetMax = Vector2.zero;
+            return b;
         }
     }
-
-    // Tiny proxy class — prevents compile if GraphicRaycaster not yet imported
-    public class GraphicsRaycasterProxy : MonoBehaviour { }
 }

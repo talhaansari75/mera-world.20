@@ -129,7 +129,10 @@ namespace MeraWorld.Core
             return best;
         }
 
-        private List<string> GetWordsForLevel(int level) { int totalBanks = WordBankByLevel.Length + WordBanksExtra.Banks.Length; int index = (level - 1) % totalBanks; var source = index < WordBankByLevel.Length ? WordBankByLevel[index] : WordBanksExtra.Banks[index - WordBankByLevel.Length];
+        private List<string> GetWordsForLevel(int level)
+        {
+            int index = (level - 1) % WordBankByLevel.Length;
+            var source = WordBankByLevel[index];
 
             var list = new List<string>(source);
 
@@ -149,4 +152,3 @@ namespace MeraWorld.Core
         }
     }
 }
-

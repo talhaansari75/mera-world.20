@@ -624,7 +624,7 @@ namespace MeraWorld.Core
             grid.padding = new RectOffset(30, 30, 30, 30);
 
             int highest = Progress != null ? Progress.HighestLevelUnlocked : 1;
-            int totalLevels = Mathf.Max(highest + 10, 60);
+            int totalLevels = Mathf.Max(highest + 10, 100);
 
             for (int i = 1; i <= totalLevels; i++)
             {
