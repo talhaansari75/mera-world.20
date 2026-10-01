@@ -1063,3 +1063,74 @@
 **Estimated time to MVP launch:** 6-8 weeks  
 **Last updated:** 30 Sep 2026  
 **Next review:** 14 Oct 2026
+## DEFERRED - Baad Mein Karenge
+
+### Pet System (crashed - needs refactor)
+- [ ] PetData.cs - 7 pets define (crashed runtime)
+- [ ] PetManager.cs - buy/activate logic
+- [ ] PetSystemUI.cs - grid UI (RectTransform issue)
+- [ ] Fix: runtime canvas with RectTransform properly
+- [ ] Alternative: use prefabs instead of runtime generation
+
+### PostFX (Bloom + Vignette) - broke UI
+- [ ] PostFXSetup.cs - works but hides HomeCanvas
+- [ ] Fix: correct Camera/Volume priority
+- [ ] Only enable after UI verified
+
+### Ads (real)
+- [ ] AdMob account create
+- [ ] AdMob SDK integrate (better eCPM than Unity Ads)
+- [ ] Banner / Interstitial / Rewarded ad units
+- [ ] Test with real device
+
+### Missions + Leaderboard (real data)
+- [ ] MissionsManager.cs - daily/weekly tracking
+- [ ] MissionsUI.cs - display missions
+- [ ] LeaderboardManager.cs - local + online
+- [ ] LeaderboardUI.cs - display ranks
+
+### IAP (In-App Purchases)
+- [ ] Google Play Console setup
+- [ ] Remove Ads pack
+- [ ] Coin packs
+- [ ] Season pass
+
+### Audio (real files)
+- [ ] Kenney UI SFX pack download
+- [ ] Pixabay music tracks
+- [ ] Import into Assets/Resources/Audio/
+- [ ] Test with real device
+
+### Android Build
+- [ ] Test build on real phone
+- [ ] Fix any device-specific issues
+- [ ] Play Store signing key
+- [ ] AAB bundle format
+
+### Play Store Launch
+- [ ] Google Play Console account ($25)
+- [ ] Screenshots (8+ device types)
+- [ ] Feature graphic (1024x500)
+- [ ] App icon (512x512)
+- [ ] Privacy policy
+- [ ] Store description + keywords
+
+### Pet System - Alternative approach
+- [ ] Use Prefabs (not runtime generation)
+- [ ] Or scene-based (place pets in Editor)
+- [ ] Or use ScriptableObject for pet data
+
+### Completed (working)
+- [x] Home screen with PLAY/LEVELS/SOCIAL/SHOP/PROGRESS
+- [x] Grid + selection + word find
+- [x] Hint bulb (custom lightbulb icon)
+- [x] Achievements system (37 achievements)
+- [x] Statistics screen with real data
+- [x] Theme system (default/golden/ocean/sunset)
+- [x] Shop / Spin / Season / Free Coins menus
+- [x] Save system (encrypted)
+- [x] Tutorial (first-time UX)
+- [x] Bot AI (Rookie/Skilled/Champion/Legend)
+- [x] Levels 1-100 word banks
+- [x] Daily reward system
+- [x] Multiplayer menu with bot fallback
