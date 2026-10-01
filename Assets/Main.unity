@@ -187,6 +187,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &121982969
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 121982971}
+  - component: {fileID: 121982970}
+  m_Layer: 0
+  m_Name: PetSystemUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &121982970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 121982969}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c947ce781fb6fc94d9b36c27972b4ec6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.PetSystemUI
+--- !u!4 &121982971
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 121982969}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &343331811
 GameObject:
   m_ObjectHideFlags: 0
@@ -433,10 +477,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f66d3a6f258f9e419aa1ea73637a0b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.HintButtonUI
-  SelectionManager: {fileID: 420426493}
-  Progress: {fileID: 343331820}
-  WinScreen: {fileID: 0}
-  HintCost: 50
 --- !u!114 &343331822
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -500,8 +540,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3adc3f5f390fd3c47856b01c4b7ef830, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.SettingsScreenUI
-  Progress: {fileID: 343331820}
-  Sound: {fileID: 343331818}
 --- !u!114 &343331827
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -683,7 +721,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c947ce781fb6fc94d9b36c27972b4ec6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.PetSystemUI
-  Progress: {fileID: 343331820}
 --- !u!114 &343331841
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1069,8 +1106,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bd2a5b33b1b4c5479fe10f5176194b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.StatisticsUI
-  Progress: {fileID: 343331820}
-  Stats: {fileID: 343331873}
 --- !u!114 &343331873
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1554,7 +1589,6 @@ MonoBehaviour:
   SelectedColor: {r: 0.95, g: 0.75, b: 0.2, a: 1}
   FoundColor: {r: 0.25, g: 0.75, b: 0.3, a: 1}
   CoinsPerWord: 5
-  DebugLogging: 1
 --- !u!1 &1484417316
 GameObject:
   m_ObjectHideFlags: 0
@@ -1847,6 +1881,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1783624556
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1783624558}
+  - component: {fileID: 1783624557}
+  m_Layer: 0
+  m_Name: PetManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1783624557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1783624556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61648d9e53d2765459fed0f5948026fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.PetManager
+--- !u!4 &1783624558
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1783624556}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1820838605
 GameObject:
   m_ObjectHideFlags: 0
@@ -1991,3 +2069,5 @@ SceneRoots:
   - {fileID: 1820838607}
   - {fileID: 1484417318}
   - {fileID: 8185813}
+  - {fileID: 1783624558}
+  - {fileID: 121982971}
