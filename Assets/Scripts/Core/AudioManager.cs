@@ -43,6 +43,7 @@ namespace MeraWorld.Core
                 return;
             }
             Instance = this;
+            transform.parent = null;
             DontDestroyOnLoad(gameObject);
 
             LoadSettings();

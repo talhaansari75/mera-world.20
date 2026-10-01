@@ -29,6 +29,7 @@ namespace MeraWorld.Core
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+            transform.parent = null;
             DontDestroyOnLoad(gameObject);
 
             LoadFromPlayerPrefs();

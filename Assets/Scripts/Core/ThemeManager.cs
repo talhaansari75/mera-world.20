@@ -20,8 +20,8 @@ namespace MeraWorld.Core
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
 
-            if (transform.parent == null)
-                DontDestroyOnLoad(gameObject);
+            transform.parent = null;
+            DontDestroyOnLoad(gameObject);
 
             CurrentTheme = (Theme)PlayerPrefs.GetInt(KEY_THEME, 0);
             Debug.Log($"[Theme] Loaded: {CurrentTheme}");
