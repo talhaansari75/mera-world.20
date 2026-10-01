@@ -195,6 +195,7 @@ namespace MeraWorld.Core
             PlayerPrefs.Save();
 
             Debug.Log("[Pause] Returning to home");
+            HomeScreenUI.ForceShowHome();
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 

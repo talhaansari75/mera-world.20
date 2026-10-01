@@ -8,6 +8,7 @@ namespace MeraWorld.Core
     public class HomeScreenUI : MonoBehaviour
     {
         public static bool IsHomeVisible { get; private set; } = false;
+        public static HomeScreenUI Instance { get; private set; }
 
         [Header("References")]
         public PlayerProgressManager Progress;
@@ -37,6 +38,7 @@ namespace MeraWorld.Core
         // =================================================================
         void Start()
         {
+            Instance = this;
             if (Progress == null) Progress = PlayerProgressManager.Instance;
 
             // Clean up legacy PlayerPrefs from older versions
@@ -84,6 +86,7 @@ namespace MeraWorld.Core
         private void BuildHomeCanvas()
         {
             var canvasObj = new GameObject("HomeCanvas");
+            canvasObj.transform.SetParent(transform, false);
             _homeCanvas = canvasObj.AddComponent<Canvas>();
             _homeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _homeCanvas.sortingOrder = 500;
@@ -113,7 +116,7 @@ namespace MeraWorld.Core
             var haloObj = new GameObject("TitleHalo");
             haloObj.transform.SetParent(_homeCanvas.transform, false);
             var haloImg = haloObj.AddComponent<Image>();
-            haloImg.sprite = UISpriteFactory.CreateGlowSprite(new Color(1f, 0.75f, 0.25f, 0.45f), 256);
+            haloImg.sprite = UISpriteFactory.CreateGlowSprite(new Color(1f, 0.85f, 0.35f, 0.65f), 256);
             haloImg.raycastTarget = false;
             var haloRt = haloObj.GetComponent<RectTransform>();
             haloRt.anchorMin = new Vector2(0.5f, 0.5f);
@@ -125,7 +128,7 @@ namespace MeraWorld.Core
             // Settings gear
             CreateIconButton(_homeCanvas.transform, new Vector2(-30f, -30f), new Vector2(110f, 110f),
                 new Vector2(1f, 1f), new Vector2(1f, 1f),
-                new Color(0.30f, 0.35f, 0.50f), "SET", 36, OnSettingsClicked);
+                new Color(0.30f, 0.35f, 0.50f), "\u2699", 42, OnSettingsClicked);
 
             // Title
             _titleGroup = new GameObject("TitleGroup");
@@ -163,17 +166,17 @@ namespace MeraWorld.Core
                 new Vector2(700f, 170f), GREEN, 60, OnPlayClicked);
 
             // LEVELS button
-            Create3DButton(_homeCanvas.transform, "LEVELS", new Vector2(0f, 240f),
+            Create3DButton(_homeCanvas.transform, "\uD83C\uDFC6  LEVELS", new Vector2(0f, 240f),
                 new Vector2(700f, 130f), BLUE, 46, OnLevelsClicked);
 
             // Categories
             float catY = 60f;
             float spacing = 240f;
-            Create3DButton(_homeCanvas.transform, "SOCIAL", new Vector2(-spacing, catY),
+            Create3DButton(_homeCanvas.transform, "\uD83D\uDC65  SOCIAL", new Vector2(-spacing, catY),
                 new Vector2(220f, 180f), new Color(0.75f, 0.30f, 0.30f), 26, () => OpenCategory("social"));
-            Create3DButton(_homeCanvas.transform, "SHOP", new Vector2(0f, catY),
+            Create3DButton(_homeCanvas.transform, "\uD83D\uDECD  SHOP", new Vector2(0f, catY),
                 new Vector2(220f, 180f), new Color(0.90f, 0.55f, 0.20f), 26, () => OpenCategory("shop"));
-            Create3DButton(_homeCanvas.transform, "PROGRESS", new Vector2(spacing, catY),
+            Create3DButton(_homeCanvas.transform, "\uD83D\uDCCA  PROGRESS", new Vector2(spacing, catY),
                 new Vector2(220f, 180f), new Color(0.30f, 0.65f, 0.80f), 22, () => OpenCategory("progress"));
 
             // Footer
@@ -264,7 +267,7 @@ namespace MeraWorld.Core
             var cardObj = new GameObject("StatsCard");
             cardObj.transform.SetParent(parent, false);
             var cardImg = cardObj.AddComponent<Image>();
-            cardImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.18f, 0.24f, 0.42f), 256, 40);
+            cardImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.22f, 0.28f, 0.50f), 256, 40);
             cardImg.type = Image.Type.Sliced;
             cardImg.color = Color.white;
             cardImg.raycastTarget = false;
@@ -284,14 +287,14 @@ namespace MeraWorld.Core
             var divObj = new GameObject("Divider");
             divObj.transform.SetParent(cardObj.transform, false);
             var divImg = divObj.AddComponent<Image>();
-            divImg.color = new Color(0.4f, 0.5f, 0.7f, 0.5f);
+            divImg.color = new Color(0.6f, 0.7f, 0.95f, 0.8f);
             divImg.raycastTarget = false;
             var divRt = divObj.GetComponent<RectTransform>();
             divRt.anchorMin = new Vector2(0.5f, 0.5f);
             divRt.anchorMax = new Vector2(0.5f, 0.5f);
             divRt.pivot = new Vector2(0.5f, 0.5f);
             divRt.anchoredPosition = Vector2.zero;
-            divRt.sizeDelta = new Vector2(3f, 80f);
+            divRt.sizeDelta = new Vector2(4f, 90f);
 
             CreateIcon(cardObj.transform, new Vector2(70f, 0f), new Vector2(70f, 70f),
                 new Color(1f, 0.90f, 0.55f));
@@ -405,11 +408,11 @@ namespace MeraWorld.Core
             shadowObj.transform.SetParent(rootObj.transform, false);
             var bShadowImg = shadowObj.AddComponent<Image>();
             bShadowImg.sprite = UISpriteFactory.Create3DButtonSprite(
-                Color.Lerp(color, Color.black, 0.55f), 256, 40);
+                Color.Lerp(color, Color.black, 0.75f), 256, 40);
             bShadowImg.type = Image.Type.Sliced;
             bShadowImg.raycastTarget = false;
             var bsRt = bottomShadowSetup(shadowObj);
-            bsRt.anchoredPosition = new Vector2(0f, -8f);
+            bsRt.anchoredPosition = new Vector2(0f, -14f);
 
             var buttonObj = new GameObject("Button");
             buttonObj.transform.SetParent(rootObj.transform, false);
@@ -425,7 +428,7 @@ namespace MeraWorld.Core
             btnRt.anchorMin = Vector2.zero;
             btnRt.anchorMax = Vector2.one;
             btnRt.offsetMin = Vector2.zero;
-            btnRt.offsetMax = new Vector2(0f, 8f);
+            btnRt.offsetMax = new Vector2(0f, 14f);
 
             var colors = button.colors;
             colors.normalColor = Color.white;
@@ -446,8 +449,8 @@ namespace MeraWorld.Core
             txt.raycastTarget = false;
 
             var outline = textObj.AddComponent<Shadow>();
-            outline.effectColor = new Color(0f, 0f, 0f, 0.55f);
-            outline.effectDistance = new Vector2(2f, -2f);
+            outline.effectColor = new Color(0f, 0f, 0f, 0.9f);
+            outline.effectDistance = new Vector2(3f, -3f);
 
             var trt = textObj.GetComponent<RectTransform>();
             trt.anchorMin = Vector2.zero;
@@ -473,7 +476,7 @@ namespace MeraWorld.Core
         {
             float duration = 0.12f;
             float elapsed = 0f;
-            Vector2 start = new Vector2(0f, 8f);
+            Vector2 start = new Vector2(0f, 14f);
             Vector2 end = new Vector2(0f, 0f);
 
             while (elapsed < duration / 2f)
@@ -569,6 +572,7 @@ namespace MeraWorld.Core
         private void BuildLevelSelectCanvas()
         {
             var canvasObj = new GameObject("LevelSelectCanvas");
+            canvasObj.transform.SetParent(transform, false);
             _levelSelectCanvas = canvasObj.AddComponent<Canvas>();
             _levelSelectCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _levelSelectCanvas.sortingOrder = 501;
@@ -711,9 +715,24 @@ namespace MeraWorld.Core
 
             // Use static flag — survives scene reload only
             _skipHomeForThisSession = true;
+            ShowGameplay();
 
             Debug.Log($"➡️ Loading Level {level}...");
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        public static void ForceShowHome()
+        {
+            _skipHomeForThisSession = false;
+            if (Instance != null && Instance._homeCanvas != null)
+            {
+                Instance.ShowHome();
+                Debug.Log("[HomeScreen] ForceShowHome - home shown");
+            }
+            else
+            {
+                Debug.LogWarning("[HomeScreen] ForceShowHome - Instance or canvas null");
+            }
         }
 
         private void ShowGameplay()
@@ -728,6 +747,7 @@ namespace MeraWorld.Core
             if (UnityEngine.EventSystems.EventSystem.current == null)
             {
                 var es = new GameObject("EventSystem");
+                es.transform.SetParent(transform, false);
                 es.AddComponent<UnityEngine.EventSystems.EventSystem>();
 
                 var newModuleType = System.Type.GetType(
