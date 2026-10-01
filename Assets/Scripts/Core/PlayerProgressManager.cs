@@ -11,6 +11,7 @@ namespace MeraWorld.Core
         public static PlayerProgressManager Instance { get; private set; }
 
         private const string KEY_COINS        = "PlayerCoins";
+        private const string KEY_GEMS = "Gems";
         private const string KEY_CURRENT_LVL  = "CurrentLevel";
         private const string KEY_HIGHEST_LVL  = "HighestLevel";
         private const string KEY_TOTAL_STARS  = "TotalStars";
@@ -22,6 +23,7 @@ namespace MeraWorld.Core
         public int HighestLevelUnlocked = 1;
         public int TotalStars;
         public int TotalWordsFound;
+        public int Gems;
 
         public event System.Action<int> OnCoinsChanged;
         public event System.Action<int> OnLevelChanged;
@@ -47,6 +49,7 @@ namespace MeraWorld.Core
             HighestLevelUnlocked = PlayerPrefs.GetInt(KEY_HIGHEST_LVL, 1);
             TotalStars = PlayerPrefs.GetInt(KEY_TOTAL_STARS, 0);
             TotalWordsFound = PlayerPrefs.GetInt(KEY_TOTAL_WORDS, 0);
+            Gems = PlayerPrefs.GetInt(KEY_GEMS, 0);
         }
 
         public void Save()
@@ -56,6 +59,7 @@ namespace MeraWorld.Core
             PlayerPrefs.SetInt(KEY_HIGHEST_LVL, HighestLevelUnlocked);
             PlayerPrefs.SetInt(KEY_TOTAL_STARS, TotalStars);
             PlayerPrefs.SetInt(KEY_TOTAL_WORDS, TotalWordsFound);
+            PlayerPrefs.SetInt(KEY_GEMS, Gems);
             PlayerPrefs.Save();
         }
 
@@ -91,7 +95,8 @@ namespace MeraWorld.Core
             Save();
         }
 
-        public void AddStars(int stars)
+        public void AddGems(int amount) { Gems += amount; Save(); }
+public void AddStars(int stars)
         {
             TotalStars += stars;
             Save();
@@ -105,6 +110,7 @@ namespace MeraWorld.Core
             HighestLevelUnlocked = 1;
             TotalStars = 0;
             TotalWordsFound = 0;
+            Gems = 0;
             Save();
         }
     }
