@@ -39,8 +39,8 @@ namespace MeraWorld.Core
             var r = o.GetComponent<RectTransform>();
             r.anchorMin = new Vector2(0f, 1f); r.anchorMax = new Vector2(0f, 1f);
             r.pivot = new Vector2(0f, 1f);
-            r.anchoredPosition = new Vector2(20f, -20f);
-            r.sizeDelta = new Vector2(180f, 90f);
+            r.anchoredPosition = new Vector2(15f, -10f);
+            r.sizeDelta = new Vector2(120f, 65f);
 
             var avatar = new GameObject("Avatar", typeof(RectTransform));
             avatar.transform.SetParent(o.transform, false);
@@ -50,8 +50,8 @@ namespace MeraWorld.Core
             var ar = avatar.GetComponent<RectTransform>();
             ar.anchorMin = new Vector2(0f, 0.5f); ar.anchorMax = new Vector2(0f, 0.5f);
             ar.pivot = new Vector2(0f, 0.5f);
-            ar.anchoredPosition = new Vector2(15f, 0f);
-            ar.sizeDelta = new Vector2(60f, 60f);
+            ar.anchoredPosition = new Vector2(8f, 0f);
+            ar.sizeDelta = new Vector2(40f, 40f);
 
             var nameTxt = MakeText(o.transform, "PLAYER", new Vector2(85f, 20f), 18, Color.white, TextAnchor.MiddleLeft);
             var lvlTxt = MakeText(o.transform, "LV 1", new Vector2(85f, -12f), 16, new Color(0.85f, 0.90f, 1f), TextAnchor.MiddleLeft);
@@ -69,7 +69,7 @@ namespace MeraWorld.Core
             var r = _dailyBadge.GetComponent<RectTransform>();
             r.anchorMin = new Vector2(1f, 1f); r.anchorMax = new Vector2(1f, 1f);
             r.pivot = new Vector2(1f, 1f);
-            r.anchoredPosition = new Vector2(-20f, -180f);
+            r.anchoredPosition = new Vector2(-20f, -220f);
             r.sizeDelta = new Vector2(70f, 70f);
 
             MakeText(_dailyBadge.transform, "!", Vector2.zero, 60, Color.white, TextAnchor.MiddleCenter);
@@ -90,10 +90,10 @@ namespace MeraWorld.Core
 
         private void BuildQuickToggles()
         {
-            var musicBtn = MakeToggle("MUSIC", new Vector2(-180f, 80f), new Color(0.30f, 0.65f, 0.85f));
+            var musicBtn = MakeToggle("MUSIC", new Vector2(-180f, 200f), new Color(0.30f, 0.65f, 0.85f));
             musicBtn.onClick.AddListener(() => { if (AudioManager.Instance != null) AudioManager.Instance.SetMusicMuted(!AudioManager.Instance.MusicMuted); });
 
-            var sfxBtn = MakeToggle("SOUND", new Vector2(-320f, 80f), new Color(0.55f, 0.75f, 0.35f));
+            var sfxBtn = MakeToggle("SOUND", new Vector2(-320f, 200f), new Color(0.55f, 0.75f, 0.35f));
             sfxBtn.onClick.AddListener(() => { if (AudioManager.Instance != null) AudioManager.Instance.SetSFXMuted(!AudioManager.Instance.SFXMuted); });
         }
 
@@ -148,6 +148,10 @@ namespace MeraWorld.Core
         }
     }
 }
+
+
+
+
 
 
 
