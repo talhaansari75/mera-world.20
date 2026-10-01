@@ -40,7 +40,7 @@ namespace MeraWorld.Core
             r.anchorMin = new Vector2(0f, 1f); r.anchorMax = new Vector2(0f, 1f);
             r.pivot = new Vector2(0f, 1f);
             r.anchoredPosition = new Vector2(15f, -10f);
-            r.sizeDelta = new Vector2(120f, 65f);
+            r.sizeDelta = new Vector2(160f, 70f);
 
             var avatar = new GameObject("Avatar", typeof(RectTransform));
             avatar.transform.SetParent(o.transform, false);
@@ -53,8 +53,8 @@ namespace MeraWorld.Core
             ar.anchoredPosition = new Vector2(8f, 0f);
             ar.sizeDelta = new Vector2(40f, 40f);
 
-            var nameTxt = MakeText(o.transform, "PLAYER", new Vector2(85f, 20f), 18, Color.white, TextAnchor.MiddleLeft);
-            var lvlTxt = MakeText(o.transform, "LV 1", new Vector2(85f, -12f), 16, new Color(0.85f, 0.90f, 1f), TextAnchor.MiddleLeft);
+            var nameTxt = MakeText(o.transform, "PLAYER", new Vector2(55f, 14f), 18, Color.white, TextAnchor.MiddleLeft);
+            var lvlTxt = MakeText(o.transform, "LV 1", new Vector2(55f, -10f), 14, new Color(0.85f, 0.90f, 1f), TextAnchor.MiddleLeft);
         }
 
         private void BuildDailyBadge()
@@ -72,7 +72,7 @@ namespace MeraWorld.Core
             r.anchoredPosition = new Vector2(-20f, -220f);
             r.sizeDelta = new Vector2(70f, 70f);
 
-            MakeText(_dailyBadge.transform, "!", Vector2.zero, 60, Color.white, TextAnchor.MiddleCenter);
+            MakeText(_dailyBadge.transform, "!", Vector2.zero, 50, Color.white, TextAnchor.MiddleCenter);
 
             StartCoroutine(Pulse());
         }
@@ -128,7 +128,7 @@ namespace MeraWorld.Core
                 r.anchorMin = new Vector2(0f, 0.5f); r.anchorMax = new Vector2(1f, 0.5f);
                 r.pivot = new Vector2(0f, 0.5f);
                 r.anchoredPosition = pos;
-                r.sizeDelta = new Vector2(-120f, 40f);
+                r.sizeDelta = new Vector2(-70f, 40f);
             }
             else
             {
@@ -148,6 +148,11 @@ namespace MeraWorld.Core
         }
     }
 }
+
+
+
+
+
 
 
 
