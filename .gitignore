@@ -43,3 +43,8 @@ Thumbs.db
 # IMPORTANT: _archive/ ko ignore nahi karna
 !_archive/
 !_archive/**
+# Unity backups
+*.bak
+*.before_*
+*.broken*
+*~
