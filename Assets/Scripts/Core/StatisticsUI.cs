@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +9,7 @@ namespace MeraWorld.Core
 
         private Canvas _canvas;
         private GameObject _panel;
+        private Text _statsText;
 
         void Awake()
         {
@@ -17,13 +17,13 @@ namespace MeraWorld.Core
             Instance = this;
         }
 
-        void Start() { Invoke(nameof(Setup), 1.4f); }
+        void Start() { Invoke(nameof(Setup), 1.5f); }
 
         private void Setup() { BuildCanvas(); BuildPanel(); }
 
         private void BuildCanvas()
         {
-            var canvasObj = new GameObject("StatisticsCanvas");
+            var canvasObj = new GameObject("StatsCanvas");
             canvasObj.transform.SetParent(transform, false);
             _canvas = canvasObj.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -49,116 +49,66 @@ namespace MeraWorld.Core
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
-            CreateText(_panel.transform, "STATISTICS", new Vector2(0f, 830f), 60,
-                new Color(1f, 0.85f, 0.30f), FontStyle.Bold);
+            CreateText("STATISTICS", new Vector2(0f, 830f), 60, new Color(1f, 0.85f, 0.30f));
+            CreateSmallButton("BACK", new Vector2(-380f, 830f), new Color(0.5f, 0.5f, 0.55f), Hide);
 
-            CreateSmallButton(_panel.transform, "◀ BACK", new Vector2(-380f, 830f),
-                new Color(0.5f, 0.5f, 0.55f), Hide);
+            var statsObj = new GameObject("StatsText");
+            statsObj.transform.SetParent(_panel.transform, false);
+            _statsText = statsObj.AddComponent<Text>();
+            _statsText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            _statsText.fontSize = 32;
+            _statsText.color = Color.white;
+            _statsText.alignment = TextAnchor.UpperCenter;
+            _statsText.lineSpacing = 1.5f;
+            _statsText.raycastTarget = false;
+            var srt = statsObj.GetComponent<RectTransform>();
+            srt.anchorMin = new Vector2(0.5f, 0.5f);
+            srt.anchorMax = new Vector2(0.5f, 0.5f);
+            srt.pivot = new Vector2(0.5f, 0.5f);
+            srt.anchoredPosition = new Vector2(0f, 0f);
+            srt.sizeDelta = new Vector2(900f, 1400f);
 
             _panel.SetActive(false);
         }
 
         public void Show()
         {
-            RebuildContent();
+            if (_panel == null) return;
+            RefreshStats();
             _panel.SetActive(true);
         }
 
         public void Hide() { if (_panel != null) _panel.SetActive(false); }
 
-        private void RebuildContent()
+        private void RefreshStats()
         {
-            // Remove old content (everything except title + back button)
-            for (int i = _panel.transform.childCount - 1; i >= 0; i--)
-            {
-                var c = _panel.transform.GetChild(i);
-                if (c.name == "Text" || c.name.StartsWith("Btn_")) continue;
-                Destroy(c.gameObject);
-            }
+            var p = PlayerProgressManager.Instance;
+            int coins = p != null ? p.Coins : 0;
+            int level = p != null ? p.CurrentLevel : 1;
+            int highest = p != null ? p.HighestLevelUnlocked : 1;
+            int totalStars = p != null ? p.TotalStars : 0;
 
-            var stats = StatisticsManager.Instance;
-            if (stats == null) return;
+            int wordsFound = PlayerPrefs.GetInt("TotalWordsFound", 0);
+            int gamesPlayed = PlayerPrefs.GetInt("GamesPlayed", 0);
 
-            float y = 650f;
-            float step = 90f;
-
-            CreateStatRow("Words Found", stats.TotalWordsFound.ToString(), y); y -= step;
-            CreateStatRow("Levels Completed", stats.TotalLevelsCompleted.ToString(), y); y -= step;
-            CreateStatRow("Perfect Levels", stats.PerfectLevels.ToString(), y); y -= step;
-            CreateStatRow("Hints Used", stats.TotalHintsUsed.ToString(), y); y -= step;
-            CreateStatRow("Coins Earned", stats.TotalCoinsEarned.ToString(), y); y -= step;
-            CreateStatRow("Multiplayer Wins", stats.MultiplayerWins.ToString(), y); y -= step;
-            CreateStatRow("Multiplayer Losses", stats.MultiplayerLosses.ToString(), y); y -= step;
-            CreateStatRow("Current Streak", stats.CurrentStreak + " days", y); y -= step;
-            CreateStatRow("Best Streak", stats.BestStreak + " days", y); y -= step;
-            CreateStatRow("Games Played", stats.TotalGamesPlayed.ToString(), y); y -= step;
-
-            var ts = stats.GetTotalPlayTime();
-            CreateStatRow("Total Playtime", $"{ts.Hours}h {ts.Minutes}m", y); y -= step;
+            _statsText.text =
+                "Total Coins: " + coins + "\n\n" +
+                "Current Level: " + level + "\n\n" +
+                "Highest Level: " + highest + "\n\n" +
+                "Words Found: " + wordsFound + "\n\n" +
+                "Total Stars: " + totalStars + "\n\n" +
+                "Games Played: " + gamesPlayed;
         }
 
-        private void CreateStatRow(string label, string value, float y)
-        {
-            var row = new GameObject("Row");
-            row.transform.SetParent(_panel.transform, false);
-
-            var bg = row.AddComponent<Image>();
-            bg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.14f, 0.20f, 0.35f), 128, 20);
-            bg.type = Image.Type.Sliced;
-            bg.color = Color.white;
-            bg.raycastTarget = false;
-
-            var rt = row.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(0f, y);
-            rt.sizeDelta = new Vector2(900f, 70f);
-
-            // Label (left)
-            var lObj = new GameObject("Label");
-            lObj.transform.SetParent(row.transform, false);
-            var lt = lObj.AddComponent<Text>();
-            lt.text = label;
-            lt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            lt.fontSize = 30;
-            lt.fontStyle = FontStyle.Normal;
-            lt.color = new Color(0.85f, 0.90f, 1f);
-            lt.alignment = TextAnchor.MiddleLeft;
-            lt.raycastTarget = false;
-            var lRt = lObj.GetComponent<RectTransform>();
-            lRt.anchorMin = Vector2.zero;
-            lRt.anchorMax = new Vector2(0.6f, 1f);
-            lRt.offsetMin = new Vector2(30f, 0f);
-            lRt.offsetMax = Vector2.zero;
-
-            // Value (right)
-            var vObj = new GameObject("Value");
-            vObj.transform.SetParent(row.transform, false);
-            var vt = vObj.AddComponent<Text>();
-            vt.text = value;
-            vt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            vt.fontSize = 32;
-            vt.fontStyle = FontStyle.Bold;
-            vt.color = new Color(1f, 0.85f, 0.30f);
-            vt.alignment = TextAnchor.MiddleRight;
-            vt.raycastTarget = false;
-            var vRt = vObj.GetComponent<RectTransform>();
-            vRt.anchorMin = new Vector2(0.4f, 0f);
-            vRt.anchorMax = Vector2.one;
-            vRt.offsetMin = Vector2.zero;
-            vRt.offsetMax = new Vector2(-30f, 0f);
-        }
-
-        private Text CreateText(Transform parent, string content, Vector2 pos, int size, Color color, FontStyle style)
+        private Text CreateText(string content, Vector2 pos, int size, Color color)
         {
             var obj = new GameObject("Text");
-            obj.transform.SetParent(parent, false);
+            obj.transform.SetParent(_panel.transform, false);
             var txt = obj.AddComponent<Text>();
             txt.text = content;
             txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             txt.fontSize = size;
-            txt.fontStyle = style;
+            txt.fontStyle = FontStyle.Bold;
             txt.color = color;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.raycastTarget = false;
@@ -171,10 +121,10 @@ namespace MeraWorld.Core
             return txt;
         }
 
-        private void CreateSmallButton(Transform parent, string label, Vector2 pos, Color color, UnityEngine.Events.UnityAction onClick)
+        private void CreateSmallButton(string label, Vector2 pos, Color color, UnityEngine.Events.UnityAction onClick)
         {
-            var obj = new GameObject($"Btn_{label}");
-            obj.transform.SetParent(parent, false);
+            var obj = new GameObject("Btn_" + label);
+            obj.transform.SetParent(_panel.transform, false);
             var img = obj.AddComponent<Image>();
             img.sprite = UISpriteFactory.Create3DButtonSprite(color, 128, 30);
             img.type = Image.Type.Sliced;
