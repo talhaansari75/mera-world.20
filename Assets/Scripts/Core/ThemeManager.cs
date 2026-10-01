@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace MeraWorld.Core
 {
@@ -6,86 +7,43 @@ namespace MeraWorld.Core
     {
         public static ThemeManager Instance { get; private set; }
 
-        public const string THEME_DEFAULT = "default";
-        public const string THEME_GOLDEN = "golden";
-        public const string THEME_OCEAN = "ocean";
-        public const string THEME_FOREST = "forest";
-        public const string THEME_ROYAL = "royal";
+        public enum Theme { Default, Golden, Ocean, Sunset }
 
-        private const string KEY_THEME = "SelectedTheme";
+        private const string KEY_THEME = "Theme_Current";
 
-        public string CurrentTheme => PlayerPrefs.GetString(KEY_THEME, THEME_DEFAULT);
+        public Theme CurrentTheme { get; private set; } = Theme.Default;
+
+        public event System.Action<Theme> OnThemeChanged;
 
         void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+
+            if (transform.parent == null)
+                DontDestroyOnLoad(gameObject);
+
+            CurrentTheme = (Theme)PlayerPrefs.GetInt(KEY_THEME, 0);
+            Debug.Log($"[Theme] Loaded: {CurrentTheme}");
         }
 
-        public void SetTheme(string themeId)
+        public void SetTheme(Theme theme)
         {
-            PlayerPrefs.SetString(KEY_THEME, themeId);
+            CurrentTheme = theme;
+            PlayerPrefs.SetInt(KEY_THEME, (int)theme);
             PlayerPrefs.Save();
-            Debug.Log($"[Theme] Set to {themeId}");
+            ApplyTheme();
+            OnThemeChanged?.Invoke(theme);
         }
 
-        public Color GetTileTop()
+        public Color GetPrimaryColor()
         {
             switch (CurrentTheme)
             {
-                case THEME_GOLDEN: return new Color(1f, 0.85f, 0.30f);
-                case THEME_OCEAN: return new Color(0.35f, 0.85f, 0.95f);
-                case THEME_FOREST: return new Color(0.40f, 0.85f, 0.45f);
-                case THEME_ROYAL: return new Color(0.75f, 0.40f, 0.95f);
-                default: return new Color(0.42f, 0.68f, 1.00f);
-            }
-        }
-
-        public Color GetTileMid()
-        {
-            switch (CurrentTheme)
-            {
-                case THEME_GOLDEN: return new Color(0.85f, 0.55f, 0.15f);
-                case THEME_OCEAN: return new Color(0.15f, 0.55f, 0.75f);
-                case THEME_FOREST: return new Color(0.20f, 0.55f, 0.25f);
-                case THEME_ROYAL: return new Color(0.45f, 0.20f, 0.65f);
-                default: return new Color(0.20f, 0.42f, 0.85f);
-            }
-        }
-
-        public Color GetTileBottom()
-        {
-            switch (CurrentTheme)
-            {
-                case THEME_GOLDEN: return new Color(0.55f, 0.30f, 0.05f);
-                case THEME_OCEAN: return new Color(0.05f, 0.25f, 0.45f);
-                case THEME_FOREST: return new Color(0.08f, 0.25f, 0.12f);
-                case THEME_ROYAL: return new Color(0.20f, 0.05f, 0.35f);
-                default: return new Color(0.08f, 0.20f, 0.55f);
-            }
-        }
-
-        public Color GetBackgroundTop()
-        {
-            switch (CurrentTheme)
-            {
-                case THEME_GOLDEN: return new Color(0.25f, 0.15f, 0.05f);
-                case THEME_OCEAN: return new Color(0.05f, 0.15f, 0.30f);
-                case THEME_FOREST: return new Color(0.05f, 0.15f, 0.10f);
-                case THEME_ROYAL: return new Color(0.15f, 0.08f, 0.25f);
-                default: return new Color(0.08f, 0.14f, 0.30f);
-            }
-        }
-
-        public Color GetBackgroundBottom()
-        {
-            switch (CurrentTheme)
-            {
-                case THEME_GOLDEN: return new Color(0.10f, 0.05f, 0.02f);
-                case THEME_OCEAN: return new Color(0.02f, 0.05f, 0.12f);
-                case THEME_FOREST: return new Color(0.02f, 0.08f, 0.05f);
-                case THEME_ROYAL: return new Color(0.06f, 0.02f, 0.12f);
-                default: return new Color(0.03f, 0.05f, 0.14f);
+                case Theme.Golden: return new Color(1f, 0.75f, 0.20f);
+                case Theme.Ocean: return new Color(0.20f, 0.65f, 0.85f);
+                case Theme.Sunset: return new Color(0.95f, 0.45f, 0.25f);
+                default: return new Color(0.25f, 0.45f, 0.85f);
             }
         }
 
@@ -93,12 +51,35 @@ namespace MeraWorld.Core
         {
             switch (CurrentTheme)
             {
-                case THEME_GOLDEN: return new Color(1f, 0.85f, 0.30f);
-                case THEME_OCEAN: return new Color(0.35f, 0.85f, 0.95f);
-                case THEME_FOREST: return new Color(0.40f, 0.90f, 0.45f);
-                case THEME_ROYAL: return new Color(0.85f, 0.50f, 1f);
-                default: return new Color(1f, 0.85f, 0.30f);
+                case Theme.Golden: return new Color(1f, 0.90f, 0.55f);
+                case Theme.Ocean: return new Color(0.55f, 0.85f, 1f);
+                case Theme.Sunset: return new Color(1f, 0.75f, 0.45f);
+                default: return new Color(0.70f, 0.85f, 1f);
             }
+        }
+
+        private void ApplyTheme()
+        {
+            var themed = FindObjectsByType<ThemedImage>(FindObjectsSortMode.None);
+            foreach (var t in themed) t.Refresh();
+        }
+
+        public bool IsThemeUnlocked(Theme theme)
+        {
+            switch (theme)
+            {
+                case Theme.Default: return true;
+                case Theme.Golden: return PlayerPrefs.GetInt("Theme_Golden_Unlocked", 0) == 1;
+                case Theme.Ocean: return PlayerPrefs.GetInt("Theme_Ocean_Unlocked", 0) == 1;
+                case Theme.Sunset: return PlayerPrefs.GetInt("Theme_Sunset_Unlocked", 0) == 1;
+            }
+            return false;
+        }
+
+        public void UnlockTheme(Theme theme)
+        {
+            PlayerPrefs.SetInt($"Theme_{theme}_Unlocked", 1);
+            PlayerPrefs.Save();
         }
     }
 }

@@ -5,176 +5,161 @@ namespace MeraWorld.Core
 {
     public class HintButtonUI : MonoBehaviour
     {
-        [Header("References")]
-        public SelectionManager SelectionManager;
-        public PlayerProgressManager Progress;
-        public WinScreenUI WinScreen;
-
-        [Header("Settings")]
-        public int HintCost = 50;
-
         private Canvas _canvas;
-        private GameObject _buttonRoot;
-        private Button _button;
-        private Text _label;
+        private Text _hintCountText;
+        private Sprite _lightbulbSprite;
+        private const int HINT_COST = 50;
 
-        void Start()
-        {
-            Invoke(nameof(BuildUI), 0.3f);
-        }
+        void Start() { Invoke(nameof(Setup), 1.0f); }
 
-        private void BuildUI()
+        private void Setup()
         {
-            if (Progress == null) Progress = PlayerProgressManager.Instance;
-            if (SelectionManager == null) SelectionManager = FindFirstObjectByType<SelectionManager>();
-            if (WinScreen == null) WinScreen = FindFirstObjectByType<WinScreenUI>();
+            _lightbulbSprite = Resources.Load<Sprite>("Icons/hint-lightbulb");
+            if (_lightbulbSprite == null)
+            {
+                var tex = Resources.Load<Texture2D>("Icons/hint-lightbulb");
+                if (tex != null)
+                    _lightbulbSprite = Sprite.Create(tex,
+                        new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+            }
 
             BuildCanvas();
-            BuildHintButton();
-            UpdateButtonState();
-
-            if (Progress != null)
-                Progress.OnCoinsChanged += OnCoinsChanged;
+            BuildButton();
+            RefreshUI();
         }
 
         private void BuildCanvas()
         {
             var canvasObj = new GameObject("HintCanvas");
-            canvasObj.transform.SetParent(transform);
+            canvasObj.transform.SetParent(transform, false);
             _canvas = canvasObj.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _canvas.sortingOrder = 60;
+            _canvas.sortingOrder = 95;
 
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
-
+            scaler.matchWidthOrHeight = 0f;
             canvasObj.AddComponent<GraphicRaycaster>();
-
-            if (UnityEngine.EventSystems.EventSystem.current == null)
-            {
-                var es = new GameObject("EventSystem");
-                es.AddComponent<UnityEngine.EventSystems.EventSystem>();
-                es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
-            }
         }
 
-        private void BuildHintButton()
+        private void BuildButton()
         {
-            _buttonRoot = new GameObject("HintBtnRoot");
-            _buttonRoot.transform.SetParent(_canvas.transform, false);
+            var btnObj = new GameObject("HintButton");
+            btnObj.transform.SetParent(_canvas.transform, false);
 
-            var rootRt = _buttonRoot.AddComponent<RectTransform>();
-            rootRt.anchorMin = new Vector2(0.5f, 0f);
-            rootRt.anchorMax = new Vector2(0.5f, 0f);
-            rootRt.pivot = new Vector2(0.5f, 0f);
-            rootRt.anchoredPosition = new Vector2(0f, 40f);
-            rootRt.sizeDelta = new Vector2(500f, 120f);
+            var img = btnObj.AddComponent<Image>();
+            img.sprite = UISpriteFactory.Create3DButtonSprite(
+                new Color(0.95f, 0.75f, 0.20f), 256, 60);
+            img.type = Image.Type.Sliced;
+            img.color = Color.white;
 
-            // Bottom shadow
-            var shadowObj = new GameObject("BottomShadow");
-            shadowObj.transform.SetParent(_buttonRoot.transform, false);
-            var bShadowImg = shadowObj.AddComponent<Image>();
-            bShadowImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.60f, 0.42f, 0.08f), 256, 50);
-            bShadowImg.type = Image.Type.Sliced;
-            bShadowImg.raycastTarget = false;
-            var shRt = shadowObj.GetComponent<RectTransform>();
-            shRt.anchorMin = Vector2.zero;
-            shRt.anchorMax = Vector2.one;
-            shRt.offsetMin = Vector2.zero;
-            shRt.offsetMax = Vector2.zero;
-            shRt.anchoredPosition = new Vector2(0f, -8f);
+            var btn = btnObj.AddComponent<Button>();
+            btn.onClick.AddListener(OnHintClicked);
 
-            // Main button
-            var btnObj = new GameObject("Button");
-            btnObj.transform.SetParent(_buttonRoot.transform, false);
-            var btnImg = btnObj.AddComponent<Image>();
-            btnImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(1f, 0.82f, 0.25f), 256, 50);
-            btnImg.type = Image.Type.Sliced;
-            btnImg.color = Color.white;
+            // ═══════════════════════════════════════════════════════
+            // POSITION: Just ABOVE the "WORDS TO FIND" panel
+            // Words panel is at y=220 to y=440 (from bottom)
+            // So bulb sits at y=490, right side
+            // ═══════════════════════════════════════════════════════
+            var rt = btnObj.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(1f, 0f);   // bottom-right
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot = new Vector2(1f, 0f);
+            rt.anchoredPosition = new Vector2(-40f, 480f);  // just above words panel
+            rt.sizeDelta = new Vector2(150f, 150f);
 
-            _button = btnObj.AddComponent<Button>();
-            _button.onClick.AddListener(OnHintClicked);
+            // Lightbulb icon
+            var iconObj = new GameObject("Icon");
+            iconObj.transform.SetParent(btnObj.transform, false);
+            var iconImg = iconObj.AddComponent<Image>();
 
-            var btnRt = btnObj.GetComponent<RectTransform>();
-            btnRt.anchorMin = Vector2.zero;
-            btnRt.anchorMax = Vector2.one;
-            btnRt.offsetMin = Vector2.zero;
-            btnRt.offsetMax = new Vector2(0f, 8f);
-
-            // Label
-            var labelObj = new GameObject("Label");
-            labelObj.transform.SetParent(btnObj.transform, false);
-            _label = labelObj.AddComponent<Text>();
-            _label.text = $"HINT ({HintCost})";
-            _label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _label.fontSize = 48;
-            _label.fontStyle = FontStyle.Bold;
-            _label.color = new Color(0.15f, 0.10f, 0.05f);
-            _label.alignment = TextAnchor.MiddleCenter;
-            _label.raycastTarget = false;
-
-            var shadow = labelObj.AddComponent<Shadow>();
-            shadow.effectColor = new Color(1f, 1f, 1f, 0.35f);
-            shadow.effectDistance = new Vector2(1f, 1f);
-
-            var lrt = labelObj.GetComponent<RectTransform>();
-            lrt.anchorMin = Vector2.zero;
-            lrt.anchorMax = Vector2.one;
-            lrt.offsetMin = Vector2.zero;
-            lrt.offsetMax = Vector2.zero;
-        }
-
-        private void UpdateButtonState()
-        {
-            if (_button == null || Progress == null) return;
-
-            bool canAfford = Progress.Coins >= HintCost;
-            _button.interactable = canAfford;
-
-            var img = _button.GetComponent<Image>();
-            if (img != null)
+            if (_lightbulbSprite != null)
             {
-                img.sprite = UISpriteFactory.Create3DButtonSprite(
-                    canAfford ? new Color(1f, 0.82f, 0.25f) : new Color(0.40f, 0.35f, 0.25f),
-                    256, 50);
-                img.type = Image.Type.Sliced;
+                iconImg.sprite = _lightbulbSprite;
+                iconImg.preserveAspect = true;
             }
-        }
+            else
+            {
+                iconImg.sprite = UISpriteFactory.Create3DSphereSprite(
+                    new Color(1f, 0.85f, 0.20f), 64);
+            }
 
-        private void OnCoinsChanged(int amount) { UpdateButtonState(); }
+            iconImg.raycastTarget = false;
+            var iconRt = iconObj.GetComponent<RectTransform>();
+            iconRt.anchorMin = new Vector2(0.5f, 0.5f);
+            iconRt.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRt.pivot = new Vector2(0.5f, 0.5f);
+            iconRt.anchoredPosition = new Vector2(0f, 15f);
+            iconRt.sizeDelta = new Vector2(100f, 100f);
+
+            // Coin cost badge at bottom
+            var badgeObj = new GameObject("Badge");
+            badgeObj.transform.SetParent(btnObj.transform, false);
+            var badgeImg = badgeObj.AddComponent<Image>();
+            badgeImg.sprite = UISpriteFactory.Create3DSphereSprite(
+                new Color(0.85f, 0.25f, 0.25f), 64);
+            badgeImg.raycastTarget = false;
+
+            var badgeRt = badgeObj.GetComponent<RectTransform>();
+            badgeRt.anchorMin = new Vector2(0.5f, 0f);
+            badgeRt.anchorMax = new Vector2(0.5f, 0f);
+            badgeRt.pivot = new Vector2(0.5f, 0f);
+            badgeRt.anchoredPosition = new Vector2(0f, -15f);
+            badgeRt.sizeDelta = new Vector2(70f, 45f);
+
+            var badgeTextObj = new GameObject("BadgeText");
+            badgeTextObj.transform.SetParent(badgeObj.transform, false);
+            _hintCountText = badgeTextObj.AddComponent<Text>();
+            _hintCountText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            _hintCountText.fontSize = 26;
+            _hintCountText.fontStyle = FontStyle.Bold;
+            _hintCountText.color = Color.white;
+            _hintCountText.alignment = TextAnchor.MiddleCenter;
+            _hintCountText.raycastTarget = false;
+            var btRt = badgeTextObj.GetComponent<RectTransform>();
+            btRt.anchorMin = Vector2.zero;
+            btRt.anchorMax = Vector2.one;
+            btRt.offsetMin = Vector2.zero;
+            btRt.offsetMax = Vector2.zero;
+
+            var shadow = badgeTextObj.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.7f);
+            shadow.effectDistance = new Vector2(1f, -1f);
+        }
 
         private void OnHintClicked()
         {
-            if (Progress == null || SelectionManager == null) return;
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
 
-            if (!Progress.SpendCoins(HintCost))
+            int coins = PlayerProgressManager.Instance != null
+                ? PlayerProgressManager.Instance.Coins : 0;
+
+            if (coins < HINT_COST)
             {
-                Debug.Log("[Hint] Not enough coins!");
+                Debug.Log($"[Hint] Not enough coins ({coins}/{HINT_COST})");
                 return;
             }
 
-            var word = SelectionManager.GetRandomUnfoundWord();
-            if (string.IsNullOrEmpty(word))
-            {
-                Progress.AddCoins(HintCost);
-                return;
-            }
+            if (PlayerProgressManager.Instance != null)
+                PlayerProgressManager.Instance.AddCoins(-HINT_COST);
 
-            Debug.Log($"[Hint] Showing hint for: {word}");
-            SelectionManager.HintWord(word);
+            var sel = SelectionManager.Instance;
+            if (sel == null) return;
 
-            if (WinScreen != null) WinScreen.HintsUsed++;
+            string word = sel.GetRandomUnfoundWord();
+            if (string.IsNullOrEmpty(word)) return;
+
+            sel.HintWord(word);
             if (SoundManager.Instance != null) SoundManager.Instance.PlayWordFound();
 
-            UpdateButtonState();
+            RefreshUI();
         }
 
-        void OnDestroy()
+        private void RefreshUI()
         {
-            if (Progress != null)
-                Progress.OnCoinsChanged -= OnCoinsChanged;
+            if (_hintCountText == null) return;
+            _hintCountText.text = HINT_COST.ToString();
         }
     }
 }
