@@ -26,7 +26,7 @@ namespace MeraWorld.Core
 
             BuildProfileCard();
             BuildDailyBadge();
-            BuildQuickToggles();
+            BuildQuickToggles(); InvokeRepeating(nameof(UpdateVisibility), 1f, 0.5f);
         }
 
         private void BuildProfileCard()
@@ -139,6 +139,8 @@ namespace MeraWorld.Core
             }
             return t;
         }
+
+        private void UpdateVisibility() { if (_canvas == null) return; bool shouldBeVisible = HomeScreenUI.IsHomeVisible; if (_canvas.gameObject.activeSelf != shouldBeVisible) _canvas.gameObject.SetActive(shouldBeVisible); }
 
         private void OnDailyClick()
         {

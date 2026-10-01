@@ -19,7 +19,7 @@ namespace MeraWorld.Core
             Instance = this;
         }
 
-        void Start() { Invoke(nameof(Setup), 1.5f); }
+        void Start() { Invoke(nameof(Setup), 1.5f); Invoke(nameof(CheckBossLevel), 2.5f); }
 
         private void Setup()
         {
@@ -98,6 +98,8 @@ namespace MeraWorld.Core
             }
             rt.localScale = Vector3.one;
         }
+
+        private void CheckBossLevel() { var gm = FindFirstObjectByType<GameManager>(); if (gm == null) return; int currentLevel = gm.CurrentLevel; if (!BossLevelManager.IsBossLevel(currentLevel)) return; ShowBossLevel(currentLevel); }
 
         public void Hide() { if (_panel != null) _panel.SetActive(false); }
 
