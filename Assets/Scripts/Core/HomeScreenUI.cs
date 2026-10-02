@@ -26,8 +26,8 @@ namespace MeraWorld.Core
 
         private bool _showGameplayOnSetup = false;
 
-        private static readonly Color BG_TOP = new Color(0.08f, 0.14f, 0.30f);
-        private static readonly Color BG_BOTTOM = new Color(0.03f, 0.05f, 0.14f);
+        private static readonly Color BG_TOP = new Color(0.16f, 0.08f, 0.34f);
+        private static readonly Color BG_BOTTOM = new Color(0.02f, 0.02f, 0.08f);
         private static readonly Color GOLD = new Color(1f, 0.85f, 0.30f);
         private static readonly Color GREEN = new Color(0.25f, 0.65f, 0.35f);
         private static readonly Color BLUE = new Color(0.25f, 0.45f, 0.85f);
@@ -122,7 +122,7 @@ namespace MeraWorld.Core
             haloRt.anchorMin = new Vector2(0.5f, 0.5f);
             haloRt.anchorMax = new Vector2(0.5f, 0.5f);
             haloRt.pivot = new Vector2(0.5f, 0.5f);
-            haloRt.anchoredPosition = new Vector2(0f, 820f);
+            haloRt.anchoredPosition = new Vector2(0f, 700f);
             haloRt.sizeDelta = new Vector2(1200f, 1200f);
 
             // Settings gear
@@ -137,11 +137,14 @@ namespace MeraWorld.Core
             tgr.anchorMin = new Vector2(0.5f, 0.5f);
             tgr.anchorMax = new Vector2(0.5f, 0.5f);
             tgr.pivot = new Vector2(0.5f, 0.5f);
-            tgr.anchoredPosition = new Vector2(0f, 820f);
+            tgr.anchoredPosition = new Vector2(0f, 700f);
             tgr.sizeDelta = new Vector2(900f, 300f);
 
-            CreateText(_titleGroup.transform, "MERA WORD", new Vector2(0f, 50f), 110, GOLD, FontStyle.Bold, true);
-            CreateText(_titleGroup.transform, "SEARCH  JOURNEY", new Vector2(0f, -40f), 42, new Color(0.70f, 0.85f, 1f), FontStyle.Bold, true);
+            var titleTxt = CreateText(_titleGroup.transform, "MERA WORD", new Vector2(0f, 70f), 100, GOLD, FontStyle.Bold, true);
+            var titleOl = titleTxt.gameObject.AddComponent<Outline>();
+            titleOl.effectColor = new Color(0.45f, 0.15f, 0f, 0.95f);
+            titleOl.effectDistance = new Vector2(3f, -3f);
+            CreateText(_titleGroup.transform, "SEARCH  JOURNEY", new Vector2(0f, -50f), 36, new Color(0.70f, 0.85f, 1f), FontStyle.Bold, true);
 
             var lineObj = new GameObject("Divider");
             lineObj.transform.SetParent(_titleGroup.transform, false);
@@ -153,35 +156,35 @@ namespace MeraWorld.Core
             lineRt.anchorMin = new Vector2(0.5f, 0.5f);
             lineRt.anchorMax = new Vector2(0.5f, 0.5f);
             lineRt.pivot = new Vector2(0.5f, 0.5f);
-            lineRt.anchoredPosition = new Vector2(0f, -100f);
+            lineRt.anchoredPosition = new Vector2(0f, -110f);
             lineRt.sizeDelta = new Vector2(500f, 6f);
 
             // Stats card
             int coins = Progress != null ? Progress.Coins : 0;
             int stars = Progress != null ? Progress.TotalStars : 0;
-            CreateStatsCard(_homeCanvas.transform, new Vector2(0f, 620f), coins, stars);
+            CreateStatsCard(_homeCanvas.transform, new Vector2(0f, 480f), coins, stars);
 
             // PLAY button
-            Create3DButton(_homeCanvas.transform, "▶  PLAY", new Vector2(0f, 400f),
-                new Vector2(700f, 170f), GREEN, 60, OnPlayClicked);
+            Create3DButton(_homeCanvas.transform, "▶  PLAY", new Vector2(0f, 300f),
+                new Vector2(780f, 200f), GREEN, 68, OnPlayClicked);
 
             // LEVELS button
-            Create3DButton(_homeCanvas.transform, "\uD83C\uDFC6  LEVELS", new Vector2(0f, 240f),
+            Create3DButton(_homeCanvas.transform, "\uD83C\uDFC6  LEVELS", new Vector2(0f, 160f),
                 new Vector2(700f, 130f), BLUE, 46, OnLevelsClicked);
 
             // Categories
-            float catY = 60f;
+            float catY = -20f;
             float spacing = 240f;
             Create3DButton(_homeCanvas.transform, "\uD83D\uDC65  SOCIAL", new Vector2(-spacing, catY),
-                new Vector2(220f, 180f), new Color(0.75f, 0.30f, 0.30f), 26, () => OpenCategory("social"));
+                new Vector2(220f, 180f), new Color(0.75f, 0.30f, 0.30f), 22, () => OpenCategory("social"));
             Create3DButton(_homeCanvas.transform, "\uD83D\uDECD  SHOP", new Vector2(0f, catY),
-                new Vector2(220f, 180f), new Color(0.90f, 0.55f, 0.20f), 26, () => OpenCategory("shop"));
+                new Vector2(220f, 180f), new Color(0.90f, 0.55f, 0.20f), 22, () => OpenCategory("shop"));
             Create3DButton(_homeCanvas.transform, "\uD83D\uDCCA  PROGRESS", new Vector2(spacing, catY),
-                new Vector2(220f, 180f), new Color(0.30f, 0.65f, 0.80f), 22, () => OpenCategory("progress"));
+                new Vector2(240f, 180f), new Color(0.30f, 0.65f, 0.80f), 15, () => OpenCategory("progress"));
 
             // Footer
             CreateText(_homeCanvas.transform, "v1.0  •  Talha Ansari",
-                new Vector2(0f, -850f), 26, new Color(0.55f, 0.60f, 0.75f), FontStyle.Normal, false);
+                new Vector2(0f, -880f), 26, new Color(0.55f, 0.60f, 0.75f), FontStyle.Normal, false);
         }
 
         private void OpenCategory(string categoryId)
@@ -278,6 +281,17 @@ namespace MeraWorld.Core
             rt.anchoredPosition = pos;
             rt.sizeDelta = new Vector2(680f, 130f);
 
+            var cGlow = new GameObject("CoinGlow", typeof(RectTransform));
+            cGlow.transform.SetParent(cardObj.transform, false);
+            var cGlowImg = cGlow.AddComponent<Image>();
+            cGlowImg.sprite = UISpriteFactory.CreateGlowSprite(new Color(1f, 0.82f, 0.20f, 0.6f), 128);
+            cGlowImg.raycastTarget = false;
+            var cGlowRt = cGlow.GetComponent<RectTransform>();
+            cGlowRt.anchorMin = new Vector2(0.5f, 0.5f);
+            cGlowRt.anchorMax = new Vector2(0.5f, 0.5f);
+            cGlowRt.pivot = new Vector2(0.5f, 0.5f);
+            cGlowRt.anchoredPosition = new Vector2(-250f, 0f);
+            cGlowRt.sizeDelta = new Vector2(115f, 115f);
             CreateIcon(cardObj.transform, new Vector2(-250f, 0f), new Vector2(70f, 70f),
                 new Color(1f, 0.82f, 0.20f));
 
@@ -296,6 +310,17 @@ namespace MeraWorld.Core
             divRt.anchoredPosition = Vector2.zero;
             divRt.sizeDelta = new Vector2(4f, 90f);
 
+            var sGlow = new GameObject("StarGlow", typeof(RectTransform));
+            sGlow.transform.SetParent(cardObj.transform, false);
+            var sGlowImg = sGlow.AddComponent<Image>();
+            sGlowImg.sprite = UISpriteFactory.CreateGlowSprite(new Color(1f, 0.90f, 0.55f, 0.6f), 128);
+            sGlowImg.raycastTarget = false;
+            var sGlowRt = sGlow.GetComponent<RectTransform>();
+            sGlowRt.anchorMin = new Vector2(0.5f, 0.5f);
+            sGlowRt.anchorMax = new Vector2(0.5f, 0.5f);
+            sGlowRt.pivot = new Vector2(0.5f, 0.5f);
+            sGlowRt.anchoredPosition = new Vector2(70f, 0f);
+            sGlowRt.sizeDelta = new Vector2(115f, 115f);
             CreateIcon(cardObj.transform, new Vector2(70f, 0f), new Vector2(70f, 70f),
                 new Color(1f, 0.90f, 0.55f));
 
@@ -385,7 +410,7 @@ namespace MeraWorld.Core
                 if (_titleGroup != null)
                 {
                     var rt = _titleGroup.GetComponent<RectTransform>();
-                    float y = 820f + Mathf.Sin(Time.unscaledTime * 1.2f) * 8f;
+                    float y = 700f + Mathf.Sin(Time.unscaledTime * 1.2f) * 8f;
                     rt.anchoredPosition = new Vector2(0f, y);
                 }
                 yield return null;
@@ -412,7 +437,7 @@ namespace MeraWorld.Core
             bShadowImg.type = Image.Type.Sliced;
             bShadowImg.raycastTarget = false;
             var bsRt = bottomShadowSetup(shadowObj);
-            bsRt.anchoredPosition = new Vector2(0f, -14f);
+            bsRt.anchoredPosition = new Vector2(0f, -18f);
 
             var buttonObj = new GameObject("Button");
             buttonObj.transform.SetParent(rootObj.transform, false);
@@ -428,7 +453,7 @@ namespace MeraWorld.Core
             btnRt.anchorMin = Vector2.zero;
             btnRt.anchorMax = Vector2.one;
             btnRt.offsetMin = Vector2.zero;
-            btnRt.offsetMax = new Vector2(0f, 14f);
+            btnRt.offsetMax = new Vector2(0f, 18f);
 
             var colors = button.colors;
             colors.normalColor = Color.white;
@@ -476,7 +501,7 @@ namespace MeraWorld.Core
         {
             float duration = 0.12f;
             float elapsed = 0f;
-            Vector2 start = new Vector2(0f, 14f);
+            Vector2 start = new Vector2(0f, 18f);
             Vector2 end = new Vector2(0f, 0f);
 
             while (elapsed < duration / 2f)
