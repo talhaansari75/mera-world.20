@@ -48,3 +48,6 @@ Thumbs.db
 *.before_*
 *.broken*
 *~
+backup.cmd 
+restore.cmd 
+sel.txt 
