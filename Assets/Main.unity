@@ -266,7 +266,6 @@ GameObject:
   - component: {fileID: 343331834}
   - component: {fileID: 343331842}
   - component: {fileID: 343331841}
-  - component: {fileID: 343331840}
   - component: {fileID: 343331839}
   - component: {fileID: 343331838}
   - component: {fileID: 343331846}
@@ -305,7 +304,6 @@ GameObject:
   - component: {fileID: 343331879}
   - component: {fileID: 343331878}
   - component: {fileID: 343331877}
-  - component: {fileID: 343331876}
   - component: {fileID: 343331875}
   - component: {fileID: 343331890}
   - component: {fileID: 343331888}
@@ -710,18 +708,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.MusicManager
   MusicVolume: 0.25
---- !u!114 &343331840
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 343331811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c947ce781fb6fc94d9b36c27972b4ec6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.PetSystemUI
 --- !u!114 &343331841
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1143,18 +1129,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 149be0d58ea46d84094d9c985f9c9069, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.BossLevelUI
---- !u!114 &343331876
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 343331811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7c2c7891698616478bf0b1bb829b486, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ThemePickerUI
 --- !u!114 &343331877
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1167,6 +1141,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 654ad2a4233922f4883ba9f2dca4e7ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ThemeManager
+  allThemes: []
 --- !u!114 &343331878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2013,6 +1988,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1710653815
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1710653817}
+  - component: {fileID: 1710653818}
+  m_Layer: 0
+  m_Name: 'ThemeManager '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1710653817
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1710653815}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1710653818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1710653815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 654ad2a4233922f4883ba9f2dca4e7ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ThemeManager
+  allThemes: []
 --- !u!1 &1820838605
 GameObject:
   m_ObjectHideFlags: 0
@@ -2206,3 +2226,4 @@ SceneRoots:
   - {fileID: 2028821575}
   - {fileID: 1004019596}
   - {fileID: 310623409}
+  - {fileID: 1710653817}

@@ -24,6 +24,12 @@ namespace MeraWorld.Core
             BuildCoinsDisplay();
             BuildLevelDisplay();
 
+            if (HomeScreenUI.IsHomeVisible && _canvas != null) _canvas.gameObject.SetActive(false);
+
+            // Hide if home screen is visible
+            if (HomeScreenUI.IsHomeVisible && _canvas != null)
+                _canvas.gameObject.SetActive(false);
+
             if (Progress != null)
             {
                 Progress.OnCoinsChanged += UpdateCoins;
@@ -31,6 +37,16 @@ namespace MeraWorld.Core
                 UpdateCoins(Progress.Coins);
                 UpdateLevel(Progress.CurrentLevel);
             }
+        }
+
+        public void Hide()
+        {
+            if (_canvas != null) _canvas.gameObject.SetActive(false);
+        }
+
+        public void Show()
+        {
+            if (_canvas != null) _canvas.gameObject.SetActive(true);
         }
 
         private void BuildCanvas()
@@ -225,6 +241,16 @@ namespace MeraWorld.Core
         {
             if (_levelText != null)
                 _levelText.text = $"LEVEL {level}";
+        }
+
+        void LateUpdate()
+        {
+            if (_canvas == null) return;
+            if (HomeScreenUI.IsHomeVisible && _canvas.gameObject.activeSelf)
+            {
+                Debug.Log($"[TopBar] Hiding - HomeVisible={HomeScreenUI.IsHomeVisible}");
+                _canvas.gameObject.SetActive(false);
+            }
         }
 
         void OnDestroy()

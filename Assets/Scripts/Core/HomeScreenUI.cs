@@ -95,6 +95,7 @@ namespace MeraWorld.Core
             bgImg.type = Image.Type.Simple;
             bgImg.color = Color.white;
             bgImg.raycastTarget = false;
+            SaveBgReference(bgImg);
             var bgRt = bgObj.GetComponent<RectTransform>();
             bgRt.anchorMin = Vector2.zero;
             bgRt.anchorMax = Vector2.one;
@@ -111,7 +112,7 @@ namespace MeraWorld.Core
             haloRt.anchorMin = new Vector2(0.5f, 0.5f);
             haloRt.anchorMax = new Vector2(0.5f, 0.5f);
             haloRt.pivot = new Vector2(0.5f, 0.5f);
-            haloRt.anchoredPosition = new Vector2(0f, 700f);
+            haloRt.anchoredPosition = new Vector2(0f, 650f);
             haloRt.sizeDelta = new Vector2(1200f, 1200f);
 
             // Settings gear
@@ -126,7 +127,7 @@ namespace MeraWorld.Core
             tgr.anchorMin = new Vector2(0.5f, 0.5f);
             tgr.anchorMax = new Vector2(0.5f, 0.5f);
             tgr.pivot = new Vector2(0.5f, 0.5f);
-            tgr.anchoredPosition = new Vector2(0f, 700f);
+            tgr.anchoredPosition = new Vector2(0f, 650f);
             tgr.sizeDelta = new Vector2(900f, 300f);
 
             var titleTxt = CreateText(_titleGroup.transform, "MERA WORD", new Vector2(0f, 70f), 100, GOLD, FontStyle.Bold, true);
@@ -161,15 +162,8 @@ namespace MeraWorld.Core
             Create3DButton(_homeCanvas.transform, "\uD83C\uDFC6  LEVELS", new Vector2(0f, 160f),
                 new Vector2(700f, 130f), BLUE, 46, OnLevelsClicked);
 
-            // Categories
-            float catY = -20f;
-            float spacing = 240f;
-            Create3DButton(_homeCanvas.transform, "\uD83D\uDC65  SOCIAL", new Vector2(-spacing, catY),
-                new Vector2(220f, 180f), new Color(0.75f, 0.30f, 0.30f), 22, () => OpenCategory("social"));
-            Create3DButton(_homeCanvas.transform, "\uD83D\uDECD  SHOP", new Vector2(0f, catY),
-                new Vector2(220f, 180f), new Color(0.90f, 0.55f, 0.20f), 22, () => OpenCategory("shop"));
-            Create3DButton(_homeCanvas.transform, "\uD83D\uDCCA  PROGRESS", new Vector2(spacing, catY),
-                new Vector2(240f, 180f), new Color(0.30f, 0.65f, 0.80f), 15, () => OpenCategory("progress"));
+                        // Categories
+            FixBottomRowWithTheme();
 
             // Footer
             CreateText(_homeCanvas.transform, "v1.0  •  Talha Ansari",
@@ -260,7 +254,7 @@ namespace MeraWorld.Core
                 if (_titleGroup != null)
                 {
                     var rt = _titleGroup.GetComponent<RectTransform>();
-                    float y = 700f + Mathf.Sin(Time.unscaledTime * 1.2f) * 8f;
+                    float y = 650f + Mathf.Sin(Time.unscaledTime * 1.2f) * 8f;
                     rt.anchoredPosition = new Vector2(0f, y);
                 }
                 yield return null;
@@ -272,6 +266,8 @@ namespace MeraWorld.Core
             IsHomeVisible = true;
             _homeCanvas.gameObject.SetActive(true);
             _levelSelectCanvas.gameObject.SetActive(false);
+            var tb1 = FindFirstObjectByType<TopBarUI>();
+            if (tb1 != null) tb1.Hide();
         }
 
         private void OnPlayClicked()
@@ -312,6 +308,8 @@ namespace MeraWorld.Core
             IsHomeVisible = false;
             if (_homeCanvas != null) _homeCanvas.gameObject.SetActive(false);
             if (_levelSelectCanvas != null) _levelSelectCanvas.gameObject.SetActive(false);
+            var tb2 = FindFirstObjectByType<TopBarUI>();
+            if (tb2 != null) tb2.Show();
         }
 
         private void EnsureEventSystem()
