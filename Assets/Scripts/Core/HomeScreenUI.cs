@@ -59,6 +59,7 @@ namespace MeraWorld.Core
             BuildStarfield();
             StartCoroutine(AnimateStars());
             StartCoroutine(FloatTitle());
+            BuildThemeParticles();
 
             if (_showGameplayOnSetup)
             {
@@ -128,13 +129,21 @@ namespace MeraWorld.Core
             tgr.anchorMax = new Vector2(0.5f, 0.5f);
             tgr.pivot = new Vector2(0.5f, 0.5f);
             tgr.anchoredPosition = new Vector2(0f, 650f);
-            tgr.sizeDelta = new Vector2(900f, 300f);
+            tgr.sizeDelta = new Vector2(1000f, 400f);
 
-            var titleTxt = CreateText(_titleGroup.transform, "MERA WORD", new Vector2(0f, 70f), 100, GOLD, FontStyle.Bold, true);
-            var titleOl = titleTxt.gameObject.AddComponent<Outline>();
-            titleOl.effectColor = new Color(0.45f, 0.15f, 0f, 0.95f);
-            titleOl.effectDistance = new Vector2(3f, -3f);
-            CreateText(_titleGroup.transform, "SEARCH  JOURNEY", new Vector2(0f, -50f), 36, new Color(0.70f, 0.85f, 1f), FontStyle.Bold, true);
+            // Tagline (chhota, upar)
+            var tagline = CreateText(_titleGroup.transform, "MERA WORD", new Vector2(0f, 100f), 34, new Color(0.70f, 0.85f, 1f), FontStyle.Bold, true);
+
+            // Main title - 2 lines
+            var titleTxt1 = CreateText(_titleGroup.transform, "\u2726  SEARCH  \u2726", new Vector2(0f, 35f), 72, GOLD, FontStyle.Bold, true);
+            var titleOl1 = titleTxt1.gameObject.AddComponent<Outline>();
+            titleOl1.effectColor = new Color(0.45f, 0.15f, 0f, 0.95f);
+            titleOl1.effectDistance = new Vector2(3f, -3f);
+
+            var titleTxt2 = CreateText(_titleGroup.transform, "JOURNEY", new Vector2(0f, -35f), 72, GOLD, FontStyle.Bold, true);
+            var titleOl2 = titleTxt2.gameObject.AddComponent<Outline>();
+            titleOl2.effectColor = new Color(0.45f, 0.15f, 0f, 0.95f);
+            titleOl2.effectDistance = new Vector2(3f, -3f);
 
             var lineObj = new GameObject("Divider");
             lineObj.transform.SetParent(_titleGroup.transform, false);

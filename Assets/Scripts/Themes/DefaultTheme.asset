@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.GameTheme
   themeName: Ink & Starlight
   bgTop: {r: 0.16, g: 0.08, b: 0.34, a: 1}
-  bgBottom: {r: 0.02, g: 0.02, b: 0.08, a: 1}
+  bgBottom: {r: 0.6117647, g: 0.6117647, b: 0.6117647, a: 1}
   gold: {r: 1, g: 0.85, b: 0.3, a: 1}
   buttonGreen: {r: 0.25, g: 0.65, b: 0.35, a: 1}
   buttonBlue: {r: 0.25, g: 0.45, b: 0.85, a: 1}

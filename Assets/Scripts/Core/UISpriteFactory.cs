@@ -165,6 +165,35 @@ namespace MeraWorld.Core
             return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
         }
 
+        public static Sprite CreateRoundedBorderSprite(Color fillColor, Color borderColor, int size = 128, int radius = 24, float borderWidth = 4f)
+        {
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            tex.wrapMode = TextureWrapMode.Clamp;
+            tex.filterMode = FilterMode.Bilinear;
+
+            var pixels = new Color[size * size];
+            int outerR = radius;
+            int innerR = Mathf.Max(0, radius - (int)borderWidth);
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float outerA = RoundedAlpha(x, y, size, outerR);
+                    float innerA = RoundedAlpha(x, y, size, innerR);
+                    Color c;
+                    if (outerA < 0.5f) c = new Color(0, 0, 0, 0);
+                    else if (innerA < 0.5f) c = borderColor;
+                    else c = fillColor;
+                    pixels[y * size + x] = c;
+                }
+            }
+            tex.SetPixels(pixels);
+            tex.Apply();
+
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(radius, radius, radius, radius));
+        }
+
         private static float RoundedAlpha(int x, int y, int size, int radius)
         {
             int cx = x < radius ? radius : (x >= size - radius ? size - radius - 1 : x);

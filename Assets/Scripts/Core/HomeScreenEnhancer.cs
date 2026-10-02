@@ -140,7 +140,7 @@ namespace MeraWorld.Core
             return t;
         }
 
-        private void UpdateVisibility() { if (_canvas == null) return; bool shouldBeVisible = HomeScreenUI.IsHomeVisible; if (_canvas.gameObject.activeSelf != shouldBeVisible) _canvas.gameObject.SetActive(shouldBeVisible); }
+        private void UpdateVisibility() { if (_canvas == null) return; bool shouldBeVisible = false; if (_canvas.gameObject.activeSelf != shouldBeVisible) _canvas.gameObject.SetActive(shouldBeVisible); }
 
         private void OnDailyClick()
         {

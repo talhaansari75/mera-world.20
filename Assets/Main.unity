@@ -329,6 +329,7 @@ GameObject:
   - component: {fileID: 343331904}
   - component: {fileID: 343331903}
   - component: {fileID: 343331908}
+  - component: {fileID: 343331909}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1141,7 +1142,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 654ad2a4233922f4883ba9f2dca4e7ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ThemeManager
-  allThemes: []
+  allThemes:
+  - {fileID: 11400000, guid: 53ae135d9e683664a9e8bbaaf483a0bf, type: 2}
+  - {fileID: 11400000, guid: cd2f2c098e8ba9048a3bfaf5855c4748, type: 2}
+  - {fileID: 11400000, guid: be2791873ad744941b964f7d7ceb7dc6, type: 2}
+  - {fileID: 11400000, guid: a3f898b3ba1388f4dad617f939e1fe6f, type: 2}
 --- !u!114 &343331878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1515,6 +1520,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccd3b40b9cdc3f54e9f4cc0b58f18b4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.CategoryMenuUI
+--- !u!114 &343331909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343331811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dbb844f493183a4d975f72752898d54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ThemeSelectorUI
 --- !u!1 &420426491
 GameObject:
   m_ObjectHideFlags: 0
@@ -2029,10 +2046,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1710653815}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 654ad2a4233922f4883ba9f2dca4e7ae, type: 3}
+  m_Script: {fileID: 11500000, guid: 2dbb844f493183a4d975f72752898d54, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ThemeManager
-  allThemes: []
+  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.ThemeSelectorUI
 --- !u!1 &1820838605
 GameObject:
   m_ObjectHideFlags: 0

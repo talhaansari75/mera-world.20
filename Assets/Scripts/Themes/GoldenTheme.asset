@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91d69dab6d058684397b993090932680, type: 3}
   m_Name: GoldenTheme
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.GameTheme
-  themeName: Ink & Starlight
+  themeName: Golden
   bgTop: {r: 0.16, g: 0.08, b: 0.34, a: 1}
   bgBottom: {r: 0.02, g: 0.02, b: 0.08, a: 1}
   gold: {r: 1, g: 0.85, b: 0.3, a: 1}

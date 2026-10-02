@@ -1,7 +1,12 @@
 fileFormatVersion: 2
-guid: 6afe40c57842beb45b4ac8423d20eb2e
+guid: e776230601db4ffbbbd4e1266bdcdc23
+labels:
+- gvh_version-1.2.185
+- gvhp_exportpath-ExternalDependencyManager/Editor/1.2.185/Google.IOSResolver.pdb
+- gvh
+timeCreated: 1538009133
+licenseType: Pro
 DefaultImporter:
-  externalObjects: {}
   userData: 
   assetBundleName: 
   assetBundleVariant: 

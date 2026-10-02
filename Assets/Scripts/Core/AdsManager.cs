@@ -2,26 +2,38 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Advertisements;
 
 namespace MeraWorld.Core
 {
-    public class AdsManager : MonoBehaviour
+    public class AdsManager : MonoBehaviour,
+        IUnityAdsInitializationListener,
+        IUnityAdsLoadListener,
+        IUnityAdsShowListener
     {
         public static AdsManager Instance { get; private set; }
 
         [Header("Settings")]
-        public int InterstitialEveryNLevels = 3;   // Show interstitial every 3 level completions
+        public int InterstitialEveryNLevels = 3;
         public int RewardedCoinsAmount = 100;
         public int RewardedCooldownSeconds = 60;
+        public bool TestMode = true;
+
+        [Header("Unity Ads IDs")]
+        private const string GAME_ID = "800384686";
+        private const string BANNER_ID = "BP_Banner_Android";
+        private const string INTERSTITIAL_ID = "BP_Interstitial_Android";
+        private const string REWARDED_ID = "BP_Rewarded_Android";
 
         public event Action<int> OnRewardedCoinsEarned;
 
         private int _levelsSinceLastInterstitial = 0;
         private float _lastRewardedTime = -100f;
-        private Canvas _canvas;
-        private GameObject _interstitialPanel;
-        private GameObject _rewardedPanel;
-        private Text _interstitialCountdown;
+        private bool _initialized = false;
+        private bool _bannerLoaded = false;
+        private bool _interstitialLoaded = false;
+        private bool _rewardedLoaded = false;
+        private bool _isShowingAd = false;
 
         public bool AdsRemoved => PlayerPrefs.GetInt("RemoveAds", 0) == 1;
 
@@ -33,194 +45,94 @@ namespace MeraWorld.Core
 
         void Start()
         {
-            Invoke(nameof(Setup), 0.5f);
+            InitializeAds();
         }
 
-        private void Setup()
+        // ===================== INITIALIZATION =====================
+
+        private void InitializeAds()
         {
-            BuildCanvas();
-            BuildInterstitialPanel();
-            BuildRewardedPanel();
-
-            Debug.Log($"[Ads] Manager ready. Ads removed: {AdsRemoved}");
-        }
-
-        private void BuildCanvas()
-        {
-            var canvasObj = new GameObject("AdsCanvas");
-            canvasObj.transform.SetParent(transform);
-            _canvas = canvasObj.AddComponent<Canvas>();
-            _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _canvas.sortingOrder = 900;
-
-            var scaler = canvasObj.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
-
-            canvasObj.AddComponent<GraphicRaycaster>();
-
-            if (UnityEngine.EventSystems.EventSystem.current == null)
+            if (AdsRemoved)
             {
-                var es = new GameObject("EventSystem");
-                es.AddComponent<UnityEngine.EventSystems.EventSystem>();
-                es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+                Debug.Log("[Ads] Ads removed - skipping init");
+                return;
             }
-        }
 
-        // ===================== INTERSTITIAL (Full-screen ad between levels) =====================
-
-        private void BuildInterstitialPanel()
-        {
-            _interstitialPanel = new GameObject("InterstitialPanel");
-            _interstitialPanel.transform.SetParent(_canvas.transform, false);
-
-            var bg = _interstitialPanel.AddComponent<Image>();
-            bg.color = new Color(0.05f, 0.05f, 0.10f, 1f);
-
-            var rt = _interstitialPanel.GetComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-
-            // "AD" label
-            var adLabel = CreateText(_interstitialPanel.transform, "ADVERTISEMENT",
-                new Vector2(0f, 700f), 40, new Color(0.70f, 0.70f, 0.80f), FontStyle.Bold);
-
-            // Big placeholder
-            var boxObj = new GameObject("AdBox");
-            boxObj.transform.SetParent(_interstitialPanel.transform, false);
-            var boxImg = boxObj.AddComponent<Image>();
-            boxImg.color = new Color(0.15f, 0.18f, 0.28f);
-            var boxRt = boxObj.GetComponent<RectTransform>();
-            boxRt.anchorMin = new Vector2(0.5f, 0.5f);
-            boxRt.anchorMax = new Vector2(0.5f, 0.5f);
-            boxRt.pivot = new Vector2(0.5f, 0.5f);
-            boxRt.anchoredPosition = new Vector2(0f, 100f);
-            boxRt.sizeDelta = new Vector2(800f, 900f);
-
-            var boxTextObj = new GameObject("BoxText");
-            boxTextObj.transform.SetParent(boxObj.transform, false);
-            var boxText = boxTextObj.AddComponent<Text>();
-            boxText.text = "YOUR AD\nHERE";
-            boxText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            boxText.fontSize = 80;
-            boxText.fontStyle = FontStyle.Bold;
-            boxText.color = new Color(0.4f, 0.5f, 0.7f);
-            boxText.alignment = TextAnchor.MiddleCenter;
-            boxText.raycastTarget = false;
-            var btRt = boxTextObj.GetComponent<RectTransform>();
-            btRt.anchorMin = Vector2.zero;
-            btRt.anchorMax = Vector2.one;
-            btRt.offsetMin = Vector2.zero;
-            btRt.offsetMax = Vector2.zero;
-
-            // Countdown
-            _interstitialCountdown = CreateText(_interstitialPanel.transform, "5",
-                new Vector2(0f, -420f), 60, new Color(1f, 0.85f, 0.30f), FontStyle.Bold);
-
-            // Close button (disabled initially)
-            var closeBtnObj = new GameObject("CloseBtn");
-            closeBtnObj.transform.SetParent(_interstitialPanel.transform, false);
-            var closeImg = closeBtnObj.AddComponent<Image>();
-            closeImg.color = new Color(0.5f, 0.5f, 0.5f, 0.7f);
-            var closeBtn = closeBtnObj.AddComponent<Button>();
-            closeBtn.interactable = false;
-            closeBtn.onClick.AddListener(() =>
+            if (Advertisement.isInitialized)
             {
-                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-                _interstitialPanel.SetActive(false);
-                Time.timeScale = 1f;
-            });
-            var closeRt = closeBtnObj.GetComponent<RectTransform>();
-            closeRt.anchorMin = new Vector2(0.5f, 0f);
-            closeRt.anchorMax = new Vector2(0.5f, 0f);
-            closeRt.pivot = new Vector2(0.5f, 0f);
-            closeRt.anchoredPosition = new Vector2(0f, 100f);
-            closeRt.sizeDelta = new Vector2(500f, 120f);
+                _initialized = true;
+                OnInitializationComplete();
+                return;
+            }
 
-            var closeLabelObj = new GameObject("Label");
-            closeLabelObj.transform.SetParent(closeBtnObj.transform, false);
-            var closeLabel = closeLabelObj.AddComponent<Text>();
-            closeLabel.text = "CLOSE AD (5)";
-            closeLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            closeLabel.fontSize = 40;
-            closeLabel.fontStyle = FontStyle.Bold;
-            closeLabel.color = Color.white;
-            closeLabel.alignment = TextAnchor.MiddleCenter;
-            closeLabel.raycastTarget = false;
-            var clRt = closeLabelObj.GetComponent<RectTransform>();
-            clRt.anchorMin = Vector2.zero;
-            clRt.anchorMax = Vector2.one;
-            clRt.offsetMin = Vector2.zero;
-            clRt.offsetMax = Vector2.zero;
-
-            // Store close button and label for countdown
-            _interstitialPanel.SetActive(false);
+            Debug.Log("[Ads] Initializing Unity Ads...");
+            Advertisement.Initialize(GAME_ID, TestMode, this);
         }
 
-        // ===================== REWARDED (Watch ad for coins) =====================
-
-        private void BuildRewardedPanel()
+        public void OnInitializationComplete()
         {
-            _rewardedPanel = new GameObject("RewardedPanel");
-            _rewardedPanel.transform.SetParent(_canvas.transform, false);
+            _initialized = true;
+            Debug.Log("[Ads] Initialization complete");
 
-            var bg = _rewardedPanel.AddComponent<Image>();
-            bg.color = new Color(0.05f, 0.05f, 0.10f, 1f);
-
-            var rt = _rewardedPanel.GetComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-
-            CreateText(_rewardedPanel.transform, "REWARDED AD",
-                new Vector2(0f, 700f), 50, new Color(1f, 0.85f, 0.30f), FontStyle.Bold);
-
-            CreateText(_rewardedPanel.transform, $"Watch to earn {RewardedCoinsAmount} coins",
-                new Vector2(0f, 580f), 32, new Color(0.80f, 0.85f, 1f), FontStyle.Normal);
-
-            // Big placeholder
-            var boxObj = new GameObject("RewardedBox");
-            boxObj.transform.SetParent(_rewardedPanel.transform, false);
-            var boxImg = boxObj.AddComponent<Image>();
-            boxImg.color = new Color(0.20f, 0.15f, 0.25f);
-            var boxRt = boxObj.GetComponent<RectTransform>();
-            boxRt.anchorMin = new Vector2(0.5f, 0.5f);
-            boxRt.anchorMax = new Vector2(0.5f, 0.5f);
-            boxRt.pivot = new Vector2(0.5f, 0.5f);
-            boxRt.anchoredPosition = new Vector2(0f, 50f);
-            boxRt.sizeDelta = new Vector2(800f, 800f);
-
-            var boxTextObj = new GameObject("BoxText");
-            boxTextObj.transform.SetParent(boxObj.transform, false);
-            var boxText = boxTextObj.AddComponent<Text>();
-            boxText.text = "VIDEO\nPLAYS HERE";
-            boxText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            boxText.fontSize = 70;
-            boxText.fontStyle = FontStyle.Bold;
-            boxText.color = new Color(0.5f, 0.4f, 0.7f);
-            boxText.alignment = TextAnchor.MiddleCenter;
-            boxText.raycastTarget = false;
-            var btRt = boxTextObj.GetComponent<RectTransform>();
-            btRt.anchorMin = Vector2.zero;
-            btRt.anchorMax = Vector2.one;
-            btRt.offsetMin = Vector2.zero;
-            btRt.offsetMax = Vector2.zero;
-
-            CreateText(_rewardedPanel.transform, "Simulating 5-second ad...",
-                new Vector2(0f, -450f), 28, new Color(0.65f, 0.70f, 0.85f), FontStyle.Italic);
-
-            _rewardedPanel.SetActive(false);
+            LoadInterstitial();
+            LoadRewarded();
+            StartCoroutine(LoadBannerDelayed());
         }
 
-        // ===================== PUBLIC API =====================
+        public void OnInitializationFailed(UnityAdsInitializationError error, string message)
+        {
+            _initialized = false;
+            Debug.LogWarning($"[Ads] Init failed: {error} - {message}");
+        }
 
-        /// <summary>
-        /// Call after each level complete. Shows interstitial every N levels.
-        /// </summary>
+        // ===================== BANNER =====================
+
+        private IEnumerator LoadBannerDelayed()
+        {
+            yield return new WaitForSeconds(2f);
+
+            if (!_initialized || AdsRemoved) yield break;
+
+            Advertisement.Banner.SetPosition(BannerPosition.BOTTOM_CENTER);
+            var options = new BannerLoadOptions
+            {
+                loadCallback = () =>
+                {
+                    _bannerLoaded = true;
+                    Debug.Log("[Ads] Banner loaded");
+                    ShowBanner();
+                },
+                errorCallback = (msg) =>
+                {
+                    _bannerLoaded = false;
+                    Debug.LogWarning($"[Ads] Banner load error: {msg}");
+                }
+            };
+            Advertisement.Banner.Load(BANNER_ID, options);
+        }
+
+        public void ShowBanner()
+        {
+            if (!_initialized || AdsRemoved || !_bannerLoaded) return;
+
+            var options = new BannerOptions
+            {
+                showCallback = () => Debug.Log("[Ads] Banner shown"),
+                hideCallback = () => Debug.Log("[Ads] Banner hidden"),
+                clickCallback = () => Debug.Log("[Ads] Banner clicked")
+            };
+            Advertisement.Banner.Show(BANNER_ID, options);
+        }
+
+        public void HideBanner()
+        {
+            if (!_initialized) return;
+            Advertisement.Banner.Hide(false);
+            Debug.Log("[Ads] Banner hide requested");
+        }
+
+        // ===================== INTERSTITIAL =====================
+
         public void OnLevelCompleted()
         {
             if (AdsRemoved) return;
@@ -235,13 +147,28 @@ namespace MeraWorld.Core
 
         public void ShowInterstitial()
         {
-            if (AdsRemoved) return;
-            if (_interstitialPanel == null) return;
+            if (!_initialized || AdsRemoved) return;
+            if (!_interstitialLoaded)
+            {
+                Debug.Log("[Ads] Interstitial not loaded yet");
+                LoadInterstitial();
+                return;
+            }
+            if (_isShowingAd) return;
 
+            _isShowingAd = true;
             Debug.Log("[Ads] Showing interstitial");
-            _interstitialPanel.SetActive(true);
-            StartCoroutine(InterstitialCountdownRoutine());
+            Advertisement.Show(INTERSTITIAL_ID, this);
         }
+
+        public void LoadInterstitial()
+        {
+            if (!_initialized || AdsRemoved) return;
+            _interstitialLoaded = false;
+            Advertisement.Load(INTERSTITIAL_ID, this);
+        }
+
+        // ===================== REWARDED =====================
 
         public bool CanShowRewarded()
         {
@@ -257,102 +184,94 @@ namespace MeraWorld.Core
 
         public void ShowRewarded()
         {
-            if (_rewardedPanel == null) return;
+            if (!_initialized) return;
             if (!CanShowRewarded())
             {
-                Debug.Log($"[Ads] Rewarded on cooldown: {GetRewardedCooldownRemaining()}s left");
+                Debug.Log($"[Ads] Rewarded cooldown: {GetRewardedCooldownRemaining()}s");
                 return;
             }
+            if (!_rewardedLoaded)
+            {
+                Debug.Log("[Ads] Rewarded not loaded yet");
+                LoadRewarded();
+                return;
+            }
+            if (_isShowingAd) return;
 
-            Debug.Log("[Ads] Showing rewarded ad");
-            _rewardedPanel.SetActive(true);
-            StartCoroutine(RewardedRoutine());
+            _isShowingAd = true;
+            Debug.Log("[Ads] Showing rewarded");
+            Advertisement.Show(REWARDED_ID, this);
         }
 
-        private IEnumerator InterstitialCountdownRoutine()
+        public void LoadRewarded()
         {
-            float duration = 5f;
-            float elapsed = 0f;
-
-            // Find close button and label
-            var closeBtn = _interstitialPanel.transform.Find("CloseBtn")?.GetComponent<Button>();
-            var closeLabel = closeBtn?.GetComponentInChildren<Text>();
-
-            if (closeBtn != null)
-            {
-                closeBtn.interactable = false;
-                var img = closeBtn.GetComponent<Image>();
-                if (img != null) img.color = new Color(0.5f, 0.5f, 0.5f, 0.7f);
-            }
-
-            while (elapsed < duration)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                int remaining = Mathf.CeilToInt(duration - elapsed);
-
-                if (_interstitialCountdown != null)
-                    _interstitialCountdown.text = remaining.ToString();
-
-                if (closeLabel != null)
-                    closeLabel.text = $"CLOSE AD ({remaining})";
-
-                yield return null;
-            }
-
-            if (_interstitialCountdown != null) _interstitialCountdown.text = "0";
-            if (closeBtn != null)
-            {
-                closeBtn.interactable = true;
-                var img = closeBtn.GetComponent<Image>();
-                if (img != null) img.color = new Color(0.25f, 0.70f, 0.35f);
-            }
-            if (closeLabel != null) closeLabel.text = "CLOSE AD";
+            if (!_initialized || AdsRemoved) return;
+            _rewardedLoaded = false;
+            Advertisement.Load(REWARDED_ID, this);
         }
 
-        private IEnumerator RewardedRoutine()
+        // ===================== CALLBACKS =====================
+
+        public void OnUnityAdsAdLoaded(string placementId)
         {
-            // Simulate ad playing
-            float duration = 5f;
-            float elapsed = 0f;
+            Debug.Log($"[Ads] Loaded: {placementId}");
+            if (placementId == INTERSTITIAL_ID) _interstitialLoaded = true;
+            else if (placementId == REWARDED_ID) _rewardedLoaded = true;
+        }
 
-            while (elapsed < duration)
+        public void OnUnityAdsFailedToLoad(string placementId, UnityAdsLoadError error, string message)
+        {
+            Debug.LogWarning($"[Ads] Load failed {placementId}: {error} - {message}");
+            if (placementId == INTERSTITIAL_ID) _interstitialLoaded = false;
+            else if (placementId == REWARDED_ID) _rewardedLoaded = false;
+        }
+
+        public void OnUnityAdsShowStart(string placementId)
+        {
+            Debug.Log($"[Ads] Show started: {placementId}");
+        }
+
+        public void OnUnityAdsShowClick(string placementId)
+        {
+            Debug.Log($"[Ads] Show clicked: {placementId}");
+        }
+
+        public void OnUnityAdsShowComplete(string placementId, UnityAdsShowCompletionState state)
+        {
+            _isShowingAd = false;
+            Debug.Log($"[Ads] Show complete: {placementId} - {state}");
+
+            if (placementId == INTERSTITIAL_ID)
             {
-                elapsed += Time.unscaledDeltaTime;
-                yield return null;
+                LoadInterstitial();
             }
+            else if (placementId == REWARDED_ID)
+            {
+                if (state == UnityAdsShowCompletionState.COMPLETED)
+                {
+                    GrantRewarded();
+                }
+                LoadRewarded();
+            }
+        }
 
-            // Grant reward
+        public void OnUnityAdsShowFailure(string placementId, UnityAdsShowError error, string message)
+        {
+            _isShowingAd = false;
+            Debug.LogWarning($"[Ads] Show failed {placementId}: {error} - {message}");
+
+            if (placementId == INTERSTITIAL_ID) LoadInterstitial();
+            else if (placementId == REWARDED_ID) LoadRewarded();
+        }
+
+        private void GrantRewarded()
+        {
             if (PlayerProgressManager.Instance != null)
                 PlayerProgressManager.Instance.AddCoins(RewardedCoinsAmount);
 
             _lastRewardedTime = Time.unscaledTime;
             OnRewardedCoinsEarned?.Invoke(RewardedCoinsAmount);
-
             Debug.Log($"[Ads] Rewarded +{RewardedCoinsAmount} coins");
-
-            _rewardedPanel.SetActive(false);
-        }
-
-        private Text CreateText(Transform parent, string content, Vector2 pos, int size, Color color, FontStyle style)
-        {
-            var obj = new GameObject("Text");
-            obj.transform.SetParent(parent, false);
-            var txt = obj.AddComponent<Text>();
-            txt.text = content;
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = size;
-            txt.fontStyle = style;
-            txt.color = color;
-            txt.alignment = TextAnchor.MiddleCenter;
-            txt.supportRichText = true;
-            txt.raycastTarget = false;
-            var rt = obj.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(900f, 120f);
-            return txt;
         }
     }
 }
