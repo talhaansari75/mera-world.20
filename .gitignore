@@ -51,3 +51,6 @@ Thumbs.db
 backup.cmd 
 restore.cmd 
 sel.txt 
+.env.local 
+.env 
+*.env.local 

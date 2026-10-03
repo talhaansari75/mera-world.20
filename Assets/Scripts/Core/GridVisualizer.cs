@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using MeraWorld.WordSearch;
 
 namespace MeraWorld.Core
@@ -9,20 +9,20 @@ namespace MeraWorld.Core
         public GameManager GameManager;
         public SelectionManager SelectionManager;
 
-        // Ye 2 values badli hain — pehle 0.60f/0.10f the
-        private const float CellSize = 0.78f;
-        private const float CellGap  = 0.10f;
-        private const float GridOffsetX = 0f;
+        private const float MaxCellSize = 0.78f;
+        private const float CellGap = 0.10f;
         private const float GridOffsetY = 0.55f;
+
+        // Grid visible area ke andar rahe — safety margins
+        private const float WidthFillRatio  = 0.92f; // Screen ki 92% width
+        private const float HeightFillRatio = 0.75f; // Screen ki 75% height (top/bottom UI ke liye space)
 
         private static readonly Color TileTop    = new Color(0.42f, 0.68f, 1.00f);
         private static readonly Color TileMid    = new Color(0.20f, 0.42f, 0.85f);
         private static readonly Color TileBottom = new Color(0.08f, 0.20f, 0.55f);
-
         private static readonly Color PanelTop    = new Color(0.14f, 0.22f, 0.42f);
         private static readonly Color PanelBottom = new Color(0.05f, 0.08f, 0.20f);
         private static readonly Color GoldRim     = new Color(1.00f, 0.82f, 0.30f);
-
         private static readonly Color LetterColor       = new Color(1f, 1f, 1f);
         private static readonly Color LetterShadowColor = new Color(0f, 0f, 0f, 0.55f);
         private static readonly Color StarColor         = new Color(0.9f, 0.95f, 1.0f, 0.5f);
@@ -56,13 +56,26 @@ namespace MeraWorld.Core
             int rows = grid.Rows;
             int cols = grid.Columns;
 
-            float totalWidth  = cols * (CellSize + CellGap) - CellGap;
-            float totalHeight = rows * (CellSize + CellGap) - CellGap;
-            float originX = -totalWidth  / 2f + CellSize / 2f;
-            float originY =  totalHeight / 2f - CellSize / 2f;
+            // Camera ka actual visible area nikaalo (world units mein)
+            float camHalfHeight = Camera.main != null ? Camera.main.orthographicSize : 5f;
+            float camHalfWidth  = camHalfHeight * ((float)Screen.width / Screen.height);
 
-            float padX = CellSize * 0.9f;
-            float padY = CellSize * 0.9f;
+            float maxGridWidth  = (camHalfWidth * 2f) * WidthFillRatio;
+            float maxGridHeight = (camHalfHeight * 2f) * HeightFillRatio;
+
+            // Cell size calculate karo jo dono dimensions mein fit ho
+            float cellByWidth  = (maxGridWidth  - (cols - 1) * CellGap) / cols;
+            float cellByHeight = (maxGridHeight - (rows - 1) * CellGap) / rows;
+            float cellSize = Mathf.Min(Mathf.Min(cellByWidth, cellByHeight), MaxCellSize);
+            cellSize = Mathf.Max(cellSize, 0.30f); // minimum safety
+
+            float totalWidth  = cols * (cellSize + CellGap) - CellGap;
+            float totalHeight = rows * (cellSize + CellGap) - CellGap;
+            float originX = -totalWidth  / 2f + cellSize / 2f;
+            float originY =  totalHeight / 2f - cellSize / 2f;
+
+            float padX = cellSize * 0.9f;
+            float padY = cellSize * 0.9f;
             float panelW = totalWidth  + padX;
             float panelH = totalHeight + padY;
 
@@ -70,7 +83,7 @@ namespace MeraWorld.Core
 
             var rimObj = new GameObject("GoldRim");
             rimObj.transform.SetParent(transform);
-            rimObj.transform.position = new Vector3(GridOffsetX, GridOffsetY, 1.5f);
+            rimObj.transform.position = new Vector3(0f, GridOffsetY, 1.5f);
             var rimSr = rimObj.AddComponent<SpriteRenderer>();
             rimSr.sprite = _rimSprite;
             rimSr.color = GoldRim;
@@ -79,7 +92,7 @@ namespace MeraWorld.Core
 
             var rimDarkObj = new GameObject("RimDark");
             rimDarkObj.transform.SetParent(transform);
-            rimDarkObj.transform.position = new Vector3(GridOffsetX, GridOffsetY, 1.4f);
+            rimDarkObj.transform.position = new Vector3(0f, GridOffsetY, 1.4f);
             var rimDarkSr = rimDarkObj.AddComponent<SpriteRenderer>();
             rimDarkSr.sprite = _rimSprite;
             rimDarkSr.color = new Color(0.02f, 0.03f, 0.08f);
@@ -88,7 +101,7 @@ namespace MeraWorld.Core
 
             var panelObj = new GameObject("GridPanel");
             panelObj.transform.SetParent(transform);
-            panelObj.transform.position = new Vector3(GridOffsetX, GridOffsetY, 1f);
+            panelObj.transform.position = new Vector3(0f, GridOffsetY, 1f);
             var panelSr = panelObj.AddComponent<SpriteRenderer>();
             panelSr.sprite = _panelSprite;
             panelSr.color = Color.white;
@@ -101,15 +114,15 @@ namespace MeraWorld.Core
                 {
                     var cell = grid.GetCell(r, c);
                     Vector3 pos = new Vector3(
-                        originX + c * (CellSize + CellGap) + GridOffsetX,
-                        originY - r * (CellSize + CellGap) + GridOffsetY,
+                        originX + c * (cellSize + CellGap),
+                        originY - r * (cellSize + CellGap) + GridOffsetY,
                         0f);
 
-                    CreateCellVisual(pos, cell.Letter, r, c);
+                    CreateCellVisual(pos, cell.Letter, r, c, cellSize);
                 }
             }
 
-            Debug.Log($"GridVisualizer: Rendered {rows}x{cols} grid.");
+            Debug.Log($"GridVisualizer: {rows}x{cols} | cellSize: {cellSize:F3} | screen: {Screen.width}x{Screen.height} | aspect: {(float)Screen.width/Screen.height:F2}");
         }
 
         private void CreateStarfield(float width, float height, int count)
@@ -139,12 +152,12 @@ namespace MeraWorld.Core
             }
         }
 
-        private void CreateCellVisual(Vector3 position, char letter, int row, int col)
+        private void CreateCellVisual(Vector3 position, char letter, int row, int col, float cellSize)
         {
             var cellObj = new GameObject($"Cell_{row}_{col}");
             cellObj.transform.SetParent(transform);
             cellObj.transform.position = position;
-            cellObj.transform.localScale = new Vector3(CellSize, CellSize, 1f);
+            cellObj.transform.localScale = new Vector3(cellSize, cellSize, 1f);
 
             var shadowObj = new GameObject("Shadow");
             shadowObj.transform.SetParent(cellObj.transform, false);
@@ -231,7 +244,6 @@ namespace MeraWorld.Core
             for (int y = 0; y < size; y++)
             {
                 float t = (float)y / size;
-
                 Color rowColor;
                 if (t < 0.5f)
                     rowColor = Color.Lerp(TileBottom, TileMid, t * 2f);
@@ -242,12 +254,10 @@ namespace MeraWorld.Core
                 {
                     float dist = DistanceToCorner(x, y, size, radius);
                     float alpha = Mathf.Clamp01(radius - dist + 0.5f);
-
                     Color c = rowColor;
                     float topBand = Mathf.InverseLerp(0.78f, 0.92f, t);
                     float shineStrength = Mathf.Sin(topBand * Mathf.PI) * 0.35f;
                     c = Color.Lerp(c, Color.white, shineStrength);
-
                     c.a *= alpha;
                     pixels[y * size + x] = c;
                 }
@@ -333,9 +343,7 @@ namespace MeraWorld.Core
         {
             int cx = x < radius ? radius : (x >= size - radius ? size - radius - 1 : x);
             int cy = y < radius ? radius : (y >= size - radius ? size - radius - 1 : y);
-
             if (cx == x && cy == y) return 0f;
-
             float dx = x - cx;
             float dy = y - cy;
             return Mathf.Sqrt(dx * dx + dy * dy);

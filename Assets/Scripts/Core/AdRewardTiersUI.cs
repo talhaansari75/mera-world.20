@@ -175,13 +175,21 @@ namespace MeraWorld.Core
 
         private void OnBuyTier(RewardTier tier)
         {
-            // Grant coins directly (simulating ad watched)
-            if (Progress != null) Progress.AddCoins(tier.Coins);
+            if (Ads == null) Ads = AdsManager.Instance;
+            if (Ads == null)
+            {
+                Debug.LogWarning("[AdReward] AdsManager not found");
+                return;
+            }
 
-            if (SoundManager.Instance != null)
-                SoundManager.Instance.PlayCoinCollect();
+            if (!Ads.CanShowRewarded())
+            {
+                Debug.Log($"[AdReward] Cooldown: {Ads.GetRewardedCooldownRemaining()}s");
+                return;
+            }
 
-            Debug.Log($"[AdReward] Earned {tier.Coins} coins");
+            Debug.Log($"[AdReward] Requesting ad for {tier.Coins} coins");
+            Ads.ShowRewarded(tier.Coins);
             Hide();
         }
 
