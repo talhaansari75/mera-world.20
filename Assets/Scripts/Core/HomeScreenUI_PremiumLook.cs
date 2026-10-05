@@ -17,6 +17,7 @@ namespace MeraWorld.Core
             BuildPremiumPlayButton();
             BuildPremiumCategoryButtons();
             BuildPremiumBottomBar();
+
         }
 
         private void BuildPremiumHomeCanvas()
@@ -149,6 +150,7 @@ namespace MeraWorld.Core
 
         private void BuildPremiumPlayButton()
         {
+
             var playObj = new GameObject("PlayButton");
             playObj.transform.SetParent(_homeCanvas.transform, false);
             var playImg = playObj.AddComponent<Image>();

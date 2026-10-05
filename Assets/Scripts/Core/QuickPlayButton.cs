@@ -1,3 +1,4 @@
+#if false
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -101,3 +102,4 @@ namespace MeraWorld.Core
         }
     }
 }
+#endif
