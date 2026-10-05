@@ -22,14 +22,14 @@ namespace MeraWorld.Core
         private GameObject _toastObj;
         private Text _toastText;
 
-        private static readonly Color WARM_BG = new Color(0.35f, 0.10f, 0.05f, 1f);
-        private static readonly Color ROW_BG = new Color(0.55f, 0.20f, 0.10f, 1f);
-        private static readonly Color HEADER_BG = new Color(0.95f, 0.50f, 0.10f, 1f);
+        private static readonly Color ROW_BG = new Color(0.10f, 0.08f, 0.25f, 0.92f);
+        private static readonly Color HEADER_BG = new Color(0.80f, 0.55f, 0.15f, 1f);
         private static readonly Color GREEN = new Color(0.25f, 0.75f, 0.30f);
         private static readonly Color BLUE = new Color(0.20f, 0.45f, 0.90f);
         private static readonly Color RED = new Color(0.85f, 0.20f, 0.20f);
         private static readonly Color GREY = new Color(0.3f, 0.3f, 0.35f);
-        private static readonly Color GOLD = new Color(0.95f, 0.75f, 0.15f);
+        private static readonly Color GOLD = new Color(1f, 0.85f, 0.35f);
+        private static readonly Color TEXT_GOLD = new Color(1f, 0.85f, 0.35f);
 
         public const string KEY_SFX = "Settings_SFX_On";
         public const string KEY_VIBRATION = "Settings_Vibration_On";
@@ -55,7 +55,7 @@ namespace MeraWorld.Core
             Instance = this;
         }
 
-        void Start() { Invoke(nameof(Setup), 1.5f); }
+        void Start() { Invoke(nameof(Setup), 0.5f); }
 
         private void Setup()
         {
@@ -74,6 +74,7 @@ namespace MeraWorld.Core
             _canvas = c.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _canvas.sortingOrder = 960;
+
             var s = c.AddComponent<CanvasScaler>();
             s.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             s.referenceResolution = new Vector2(1080, 1920);
@@ -85,18 +86,39 @@ namespace MeraWorld.Core
         {
             _panel = new GameObject("Panel", typeof(RectTransform));
             _panel.transform.SetParent(_canvas.transform, false);
+
+            // Cosmic background
             var bg = _panel.AddComponent<Image>();
-            bg.color = WARM_BG;
+            bg.sprite = Resources.Load<Sprite>("UI/HomeScreen/Backgrounds/bg_space");
+            bg.color = Color.white;
+            bg.type = Image.Type.Simple;
+            bg.preserveAspect = false;
+
             var prt = _panel.GetComponent<RectTransform>();
             prt.anchorMin = Vector2.zero;
             prt.anchorMax = Vector2.one;
             prt.offsetMin = Vector2.zero;
             prt.offsetMax = Vector2.zero;
 
+            // Dark overlay for readability
+            var overlay = new GameObject("Overlay", typeof(RectTransform));
+            overlay.transform.SetParent(_panel.transform, false);
+            var ovImg = overlay.AddComponent<Image>();
+            ovImg.color = new Color(0f, 0f, 0.05f, 0.55f);
+            ovImg.raycastTarget = false;
+            var ovrt = overlay.GetComponent<RectTransform>();
+            ovrt.anchorMin = Vector2.zero;
+            ovrt.anchorMax = Vector2.one;
+            ovrt.offsetMin = Vector2.zero;
+            ovrt.offsetMax = Vector2.zero;
+
+            // Title bar
             var titleBar = new GameObject("TitleBar", typeof(RectTransform));
             titleBar.transform.SetParent(_panel.transform, false);
             var tb = titleBar.AddComponent<Image>();
-            tb.color = new Color(0.20f, 0.05f, 0.02f, 1f);
+            tb.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.15f, 0.10f, 0.25f), 256, 40);
+            tb.type = Image.Type.Sliced;
+            tb.color = Color.white;
             var trt = titleBar.GetComponent<RectTransform>();
             trt.anchorMin = new Vector2(0f, 1f);
             trt.anchorMax = new Vector2(1f, 1f);
@@ -104,15 +126,32 @@ namespace MeraWorld.Core
             trt.anchoredPosition = Vector2.zero;
             trt.sizeDelta = new Vector2(0f, 180f);
 
-            var title = MakeText(titleBar.transform, "Settings", Vector2.zero, 60, Color.white);
+            // Gold border on title bar bottom
+            var goldLine = new GameObject("GoldLine", typeof(RectTransform));
+            goldLine.transform.SetParent(titleBar.transform, false);
+            var glImg = goldLine.AddComponent<Image>();
+            glImg.color = TEXT_GOLD;
+            var glrt = goldLine.GetComponent<RectTransform>();
+            glrt.anchorMin = new Vector2(0f, 0f);
+            glrt.anchorMax = new Vector2(1f, 0f);
+            glrt.pivot = new Vector2(0.5f, 0f);
+            glrt.anchoredPosition = Vector2.zero;
+            glrt.sizeDelta = new Vector2(0f, 5f);
+
+            var title = MakeText(titleBar.transform, "SETTINGS", Vector2.zero, 70, TEXT_GOLD);
+            title.fontStyle = FontStyle.Bold;
+            var tOutline = title.gameObject.AddComponent<Outline>();
+            tOutline.effectColor = new Color(0.3f, 0.1f, 0f, 1f);
+            tOutline.effectDistance = new Vector2(3f, -3f);
             title.rectTransform.anchorMin = Vector2.zero;
             title.rectTransform.anchorMax = Vector2.one;
             title.rectTransform.offsetMin = Vector2.zero;
             title.rectTransform.offsetMax = Vector2.zero;
 
-            var backBtn = MakeButton(titleBar.transform, "<", new Vector2(-460f, 0f), new Vector2(100f, 100f), GREEN);
+            var backBtn = MakeButton(titleBar.transform, "<", new Vector2(-450f, 0f), new Vector2(100f, 100f), GREEN);
             backBtn.onClick.AddListener(Hide);
 
+            // Scroll view
             var scrollObj = new GameObject("ScrollView", typeof(RectTransform));
             scrollObj.transform.SetParent(_panel.transform, false);
             var scrollRt = scrollObj.GetComponent<RectTransform>();
@@ -179,7 +218,6 @@ namespace MeraWorld.Core
             bool loggedIn = PlayerPrefs.GetInt(KEY_LOGGED_IN, 0) == 1;
             string provider = PlayerPrefs.GetString(KEY_PROVIDER, "");
 
-            // ---- ACCOUNT ----
             BuildSection("ACCOUNT");
             if (loggedIn)
             {
@@ -194,34 +232,29 @@ namespace MeraWorld.Core
             BuildActionRow("Tutorial", "PLAY", GREEN, OnPlayTutorial);
             BuildActionRow("Practice Mode", "PLAY", GREEN, OnPracticeMode);
 
-            // ---- SOCIAL ----
             BuildSection("SOCIAL");
             bool followedInsta = PlayerPrefs.GetInt(KEY_FOLLOWED_INSTA, 0) == 1;
             bool likedFb = PlayerPrefs.GetInt(KEY_LIKED_FB, 0) == 1;
 
             BuildActionRow(
-                followedInsta ? "Instagram (Done)" : "Follow us on Instagram  +10",
+                followedInsta ? "Instagram (Done)" : "Follow Instagram  +10",
                 followedInsta ? "DONE" : "FOLLOW",
                 followedInsta ? GREY : GREEN,
                 OnInstagram);
 
             BuildActionRow(
-                likedFb ? "Facebook Page (Done)" : "Like our Facebook Page  +10",
+                likedFb ? "Facebook Page (Done)" : "Like Facebook Page  +10",
                 likedFb ? "DONE" : "LIKE",
                 likedFb ? GREY : GREEN,
                 OnFacebookLike);
 
-            // ---- GAME OPTIONS ----
             BuildSection("GAME OPTIONS");
             string langLabel = PlayerPrefs.GetInt(KEY_LANGUAGE, 0) == 0 ? "ENGLISH" : "URDU";
             BuildActionRow("Language", langLabel, GREEN, OnLanguageChange);
             BuildToggleRow("Sound Effects", KEY_SFX, 1, OnSfxToggle);
             BuildToggleRow("Vibration", KEY_VIBRATION, 1, OnVibrationToggle);
             BuildToggleRow("Notifications", KEY_NOTIFICATIONS, 1, OnNotificationsToggle);
-            BuildToggleRow("Pocket Effects", KEY_POCKET, 1, OnPocketToggle);
-            BuildToggleRow("Animated Strikers", KEY_STRIKERS, 1, OnStrikersToggle);
 
-            // ---- INFO ----
             BuildSection("INFO");
             BuildActionRow("More Games", "VIEW", BLUE, OnMoreGames);
             BuildActionRow("Help & Support", "VIEW", GREEN, OnHelpSupport);
@@ -229,9 +262,8 @@ namespace MeraWorld.Core
             BuildActionRow("Privacy Policy", "VIEW", GREEN, OnPrivacy);
             BuildActionRow("Delete Account", "DELETE", RED, OnDeleteAccount);
             BuildActionRow("Credits", "VIEW", GREEN, OnCredits);
-            BuildActionRow("Mini-Games Information", "VIEW", GREEN, OnMiniGames);
 
-            BuildInfoRow("Version", "1.0.0 (Production)");
+            BuildInfoRow("Version", "1.0.0");
             BuildInfoRow("User Id", GetUserId());
         }
 
@@ -249,6 +281,10 @@ namespace MeraWorld.Core
             bg.color = Color.white;
 
             var t = MakeText(obj.transform, title, Vector2.zero, 44, Color.white);
+            t.fontStyle = FontStyle.Bold;
+            var o = t.gameObject.AddComponent<Outline>();
+            o.effectColor = new Color(0.3f, 0.1f, 0f, 1f);
+            o.effectDistance = new Vector2(2f, -2f);
             t.rectTransform.anchorMin = Vector2.zero;
             t.rectTransform.anchorMax = Vector2.one;
             t.rectTransform.offsetMin = Vector2.zero;
@@ -268,15 +304,17 @@ namespace MeraWorld.Core
             bg.type = Image.Type.Sliced;
             bg.color = Color.white;
 
-            // ORIGINAL SIZES — 30 fontSize, -220 x-pos, 0.6 width
-            var lbl = MakeText(row.transform, label, new Vector2(-220f, 0f), 30, Color.white);
+            var lbl = MakeText(row.transform, label, new Vector2(-220f, 0f), 30, TEXT_GOLD);
             lbl.alignment = TextAnchor.MiddleLeft;
+            lbl.fontStyle = FontStyle.Bold;
+            var o = lbl.gameObject.AddComponent<Outline>();
+            o.effectColor = new Color(0f, 0f, 0f, 0.9f);
+            o.effectDistance = new Vector2(2f, -2f);
             lbl.rectTransform.anchorMin = new Vector2(0f, 0f);
             lbl.rectTransform.anchorMax = new Vector2(0.6f, 1f);
             lbl.rectTransform.offsetMin = new Vector2(30f, 0f);
             lbl.rectTransform.offsetMax = Vector2.zero;
 
-            // ORIGINAL SIZE — 320x90
             var btn = MakeButton(row.transform, btnText, new Vector2(270f, 0f), new Vector2(320f, 90f), btnColor);
             btn.onClick.AddListener(() =>
             {
@@ -298,9 +336,12 @@ namespace MeraWorld.Core
             bg.type = Image.Type.Sliced;
             bg.color = Color.white;
 
-            // ORIGINAL SIZE — 30 fontSize, -220 x-pos
-            var lbl = MakeText(row.transform, label, new Vector2(-220f, 0f), 30, Color.white);
+            var lbl = MakeText(row.transform, label, new Vector2(-220f, 0f), 30, TEXT_GOLD);
             lbl.alignment = TextAnchor.MiddleLeft;
+            lbl.fontStyle = FontStyle.Bold;
+            var o = lbl.gameObject.AddComponent<Outline>();
+            o.effectColor = new Color(0f, 0f, 0f, 0.9f);
+            o.effectDistance = new Vector2(2f, -2f);
             lbl.rectTransform.anchorMin = new Vector2(0f, 0f);
             lbl.rectTransform.anchorMax = new Vector2(0.6f, 1f);
             lbl.rectTransform.offsetMin = new Vector2(30f, 0f);
@@ -369,15 +410,17 @@ namespace MeraWorld.Core
             bg.type = Image.Type.Sliced;
             bg.color = Color.white;
 
-            // ORIGINAL SIZES — 28 fontSize
-            var lbl = MakeText(row.transform, label, new Vector2(-220f, 0f), 28, Color.white);
+            var lbl = MakeText(row.transform, label, new Vector2(-220f, 0f), 28, TEXT_GOLD);
             lbl.alignment = TextAnchor.MiddleLeft;
+            lbl.fontStyle = FontStyle.Bold;
+            var o = lbl.gameObject.AddComponent<Outline>();
+            o.effectColor = new Color(0f, 0f, 0f, 0.9f);
+            o.effectDistance = new Vector2(2f, -2f);
             lbl.rectTransform.anchorMin = new Vector2(0f, 0f);
             lbl.rectTransform.anchorMax = new Vector2(0.4f, 1f);
             lbl.rectTransform.offsetMin = new Vector2(30f, 0f);
             lbl.rectTransform.offsetMax = Vector2.zero;
 
-            // ORIGINAL SIZE — 22 fontSize
             var val = MakeText(row.transform, value, new Vector2(200f, 0f), 22, new Color(1f, 0.95f, 0.75f));
             val.alignment = TextAnchor.MiddleRight;
             val.rectTransform.anchorMin = new Vector2(0.4f, 0f);
@@ -409,7 +452,7 @@ namespace MeraWorld.Core
             brt.anchoredPosition = Vector2.zero;
             brt.sizeDelta = new Vector2(880f, 700f);
 
-            _confirmTitle = MakeText(box.transform, "Title", new Vector2(0f, 260f), 44, Color.white);
+            _confirmTitle = MakeText(box.transform, "Title", new Vector2(0f, 260f), 44, TEXT_GOLD);
             _confirmMsg = MakeText(box.transform, "Message", new Vector2(0f, 30f), 30, new Color(1f, 0.95f, 0.85f));
             _confirmMsg.rectTransform.sizeDelta = new Vector2(800f, 340f);
             _confirmMsg.horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -447,7 +490,7 @@ namespace MeraWorld.Core
             brt.anchoredPosition = Vector2.zero;
             brt.sizeDelta = new Vector2(920f, 1200f);
 
-            _infoTitle = MakeText(box.transform, "Title", new Vector2(0f, 500f), 46, Color.white);
+            _infoTitle = MakeText(box.transform, "Title", new Vector2(0f, 500f), 46, TEXT_GOLD);
             _infoMsg = MakeText(box.transform, "Message", new Vector2(0f, 0f), 28, new Color(1f, 0.95f, 0.85f));
             _infoMsg.rectTransform.sizeDelta = new Vector2(840f, 880f);
             _infoMsg.horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -465,7 +508,7 @@ namespace MeraWorld.Core
             _toastObj = new GameObject("Toast", typeof(RectTransform));
             _toastObj.transform.SetParent(_canvas.transform, false);
             var img = _toastObj.AddComponent<Image>();
-            img.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.1f, 0.1f, 0.15f, 0.95f), 256, 40);
+            img.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.15f, 0.10f, 0.30f, 0.98f), 256, 40);
             img.type = Image.Type.Sliced;
             var rt = _toastObj.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 1f);
@@ -474,7 +517,7 @@ namespace MeraWorld.Core
             rt.anchoredPosition = new Vector2(0f, -220f);
             rt.sizeDelta = new Vector2(880f, 110f);
 
-            _toastText = MakeText(_toastObj.transform, "", Vector2.zero, 30, Color.white);
+            _toastText = MakeText(_toastObj.transform, "", Vector2.zero, 30, TEXT_GOLD);
             _toastText.rectTransform.anchorMin = Vector2.zero;
             _toastText.rectTransform.anchorMax = Vector2.one;
             _toastText.rectTransform.offsetMin = Vector2.zero;
@@ -552,11 +595,14 @@ namespace MeraWorld.Core
             var tx = t.AddComponent<Text>();
             tx.text = s;
             tx.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            tx.fontSize = 32; // ORIGINAL
+            tx.fontSize = 32;
             tx.fontStyle = FontStyle.Bold;
             tx.color = Color.white;
             tx.alignment = TextAnchor.MiddleCenter;
             tx.raycastTarget = false;
+            var shadow = t.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.7f);
+            shadow.effectDistance = new Vector2(2f, -2f);
             var tr = t.GetComponent<RectTransform>();
             tr.anchorMin = Vector2.zero;
             tr.anchorMax = Vector2.one;
@@ -589,113 +635,21 @@ namespace MeraWorld.Core
             else ShowToast(reason);
         }
 
-        private void OnFacebookLogin()
-        {
-            PlayerPrefs.SetInt(KEY_LOGGED_IN, 1);
-            PlayerPrefs.SetString(KEY_PROVIDER, "Facebook");
-            PlayerPrefs.Save();
-            ShowToast("Logged in with Facebook");
-            RefreshUI();
-        }
-
-        private void OnGoogleLogin()
-        {
-            PlayerPrefs.SetInt(KEY_LOGGED_IN, 1);
-            PlayerPrefs.SetString(KEY_PROVIDER, "Google");
-            PlayerPrefs.Save();
-            ShowToast("Logged in with Google");
-            RefreshUI();
-        }
-
+        private void OnFacebookLogin() { PlayerPrefs.SetInt(KEY_LOGGED_IN, 1); PlayerPrefs.SetString(KEY_PROVIDER, "Facebook"); PlayerPrefs.Save(); ShowToast("Logged in with Facebook"); RefreshUI(); }
+        private void OnGoogleLogin() { PlayerPrefs.SetInt(KEY_LOGGED_IN, 1); PlayerPrefs.SetString(KEY_PROVIDER, "Google"); PlayerPrefs.Save(); ShowToast("Logged in with Google"); RefreshUI(); }
         private void OnLogout()
         {
             ShowConfirm("Logout", "Are you sure you want to logout?",
-                () => {
-                    PlayerPrefs.DeleteKey(KEY_LOGGED_IN);
-                    PlayerPrefs.DeleteKey(KEY_PROVIDER);
-                    PlayerPrefs.Save();
-                    ShowToast("Logged out");
-                    RefreshUI();
-                });
+                () => { PlayerPrefs.DeleteKey(KEY_LOGGED_IN); PlayerPrefs.DeleteKey(KEY_PROVIDER); PlayerPrefs.Save(); ShowToast("Logged out"); RefreshUI(); });
         }
-
-        private void OnPlayTutorial()
-        {
-            TutorialManager.ResetTutorial();
-            PlayerPrefs.Save();
-            ShowToast("Tutorial will show on next level");
-        }
-
-        private void OnPracticeMode()
-        {
-            PlayerPrefs.SetInt("GameMode_Practice", 1);
-            PlayerPrefs.Save();
-            ShowToast("Starting Practice Mode...");
-            Invoke(nameof(Hide), 1.2f);
-        }
-
-        private void OnInstagram()
-        {
-            Application.OpenURL(URL_INSTAGRAM);
-            if (PlayerPrefs.GetInt(KEY_FOLLOWED_INSTA, 0) == 1) { ShowToast("Thanks for following!"); return; }
-            PlayerPrefs.SetInt(KEY_FOLLOWED_INSTA, 1);
-            PlayerPrefs.Save();
-            GiveGems(10, "Followed Instagram!");
-            RefreshUI();
-        }
-
-        private void OnFacebookLike()
-        {
-            Application.OpenURL(URL_FACEBOOK);
-            if (PlayerPrefs.GetInt(KEY_LIKED_FB, 0) == 1) { ShowToast("Thanks for liking!"); return; }
-            PlayerPrefs.SetInt(KEY_LIKED_FB, 1);
-            PlayerPrefs.Save();
-            GiveGems(10, "Liked Facebook Page!");
-            RefreshUI();
-        }
-
-        private void OnLanguageChange()
-        {
-            int cur = PlayerPrefs.GetInt(KEY_LANGUAGE, 0);
-            int next = cur == 0 ? 1 : 0;
-            PlayerPrefs.SetInt(KEY_LANGUAGE, next);
-            PlayerPrefs.Save();
-            ShowToast(next == 0 ? "Language: English" : "Language: Urdu");
-            RefreshUI();
-        }
-
-        private void OnSfxToggle()
-        {
-            bool isOn = PlayerPrefs.GetInt(KEY_SFX, 1) == 1;
-            if (AudioManager.Instance != null) AudioManager.Instance.SetSFXMuted(!isOn);
-            ShowToast(isOn ? "Sound Effects ON" : "Sound Effects OFF");
-        }
-
-        private void OnVibrationToggle()
-        {
-            bool isOn = PlayerPrefs.GetInt(KEY_VIBRATION, 1) == 1;
-            if (isOn && Application.isMobilePlatform) { try { Handheld.Vibrate(); } catch { } }
-            ShowToast(isOn ? "Vibration ON" : "Vibration OFF");
-        }
-
-        private void OnNotificationsToggle()
-        {
-            bool isOn = PlayerPrefs.GetInt(KEY_NOTIFICATIONS, 1) == 1;
-            ShowToast(isOn ? "Notifications ON" : "Notifications OFF");
-        }
-
-        private void OnPocketToggle()
-        {
-            bool isOn = PlayerPrefs.GetInt(KEY_POCKET, 1) == 1;
-            ShowToast(isOn ? "Pocket Effects ON" : "Pocket Effects OFF");
-        }
-
-        private void OnStrikersToggle()
-        {
-            bool isOn = PlayerPrefs.GetInt(KEY_STRIKERS, 1) == 1;
-            ShowToast(isOn ? "Animated Strikers ON" : "Animated Strikers OFF");
-        }
-
+        private void OnPlayTutorial() { TutorialManager.ResetTutorial(); PlayerPrefs.Save(); ShowToast("Tutorial will show on next level"); }
+        private void OnPracticeMode() { PlayerPrefs.SetInt("GameMode_Practice", 1); PlayerPrefs.Save(); ShowToast("Starting Practice Mode..."); Invoke(nameof(Hide), 1.2f); }
+        private void OnInstagram() { Application.OpenURL(URL_INSTAGRAM); if (PlayerPrefs.GetInt(KEY_FOLLOWED_INSTA, 0) == 1) { ShowToast("Thanks for following!"); return; } PlayerPrefs.SetInt(KEY_FOLLOWED_INSTA, 1); PlayerPrefs.Save(); GiveGems(10, "Followed Instagram!"); RefreshUI(); }
+        private void OnFacebookLike() { Application.OpenURL(URL_FACEBOOK); if (PlayerPrefs.GetInt(KEY_LIKED_FB, 0) == 1) { ShowToast("Thanks for liking!"); return; } PlayerPrefs.SetInt(KEY_LIKED_FB, 1); PlayerPrefs.Save(); GiveGems(10, "Liked Facebook!"); RefreshUI(); }
+        private void OnLanguageChange() { int cur = PlayerPrefs.GetInt(KEY_LANGUAGE, 0); int next = cur == 0 ? 1 : 0; PlayerPrefs.SetInt(KEY_LANGUAGE, next); PlayerPrefs.Save(); ShowToast(next == 0 ? "Language: English" : "Language: Urdu"); RefreshUI(); }
+        private void OnSfxToggle() { bool isOn = PlayerPrefs.GetInt(KEY_SFX, 1) == 1; if (AudioManager.Instance != null) AudioManager.Instance.SetSFXMuted(!isOn); ShowToast(isOn ? "Sound Effects ON" : "Sound Effects OFF"); }
+        private void OnVibrationToggle() { bool isOn = PlayerPrefs.GetInt(KEY_VIBRATION, 1) == 1; if (isOn && Application.isMobilePlatform) { try { Handheld.Vibrate(); } catch { } } ShowToast(isOn ? "Vibration ON" : "Vibration OFF"); }
+        private void OnNotificationsToggle() { bool isOn = PlayerPrefs.GetInt(KEY_NOTIFICATIONS, 1) == 1; ShowToast(isOn ? "Notifications ON" : "Notifications OFF"); }
         private void OnMoreGames() { Application.OpenURL(URL_MORE_GAMES); }
         private void OnHelpSupport() { Application.OpenURL(URL_HELP); }
         private void OnTerms() { Application.OpenURL(URL_TERMS); }
@@ -704,20 +658,12 @@ namespace MeraWorld.Core
         private void OnDeleteAccount()
         {
             ShowConfirm("Delete Account",
-                "Are you sure? This will permanently erase ALL your progress:\n\n" +
-                "Coins, Gems, Levels, Achievements, Statistics, Settings.\n\n" +
-                "This cannot be undone.",
-                () => {
+                "Are you sure? This will permanently erase ALL your progress.\n\nThis cannot be undone.",
+                () =>
+                {
                     PlayerProgressManager.Instance.ResetAll();
                     PlayerPrefs.DeleteAll();
                     PlayerPrefs.Save();
-
-                    if (PlayerProgressManager.Instance != null) Destroy(PlayerProgressManager.Instance.gameObject);
-                    if (AchievementManager.Instance != null) Destroy(AchievementManager.Instance.gameObject);
-                    if (StatisticsManager.Instance != null) Destroy(StatisticsManager.Instance.gameObject);
-                    if (AudioManager.Instance != null) Destroy(AudioManager.Instance.gameObject);
-                    if (ThemeManager.Instance != null) Destroy(ThemeManager.Instance.gameObject);
-
                     ShowToast("Account deleted. Restarting...");
                     Invoke(nameof(RestartGame), 2f);
                 });
@@ -728,31 +674,7 @@ namespace MeraWorld.Core
         private void OnCredits()
         {
             ShowInfo("Credits",
-                "Mera World v1.0\n\n" +
-                "Developed by:\n   Talha Ansari\n\n" +
-                "Game Design:\n   Talha Ansari\n\n" +
-                "Programming:\n   Talha Ansari\n\n" +
-                "Art & UI:\n   Talha Ansari\n\n" +
-                "Audio:\n   (Your Audio Artist)\n\n" +
-                "Built with Unity 2022 LTS\n" +
-                "Universal Render Pipeline (2D)\n\n" +
-                "Copyright 2026 Mera World.\n" +
-                "All rights reserved.");
-        }
-
-        private void OnMiniGames()
-        {
-            ShowInfo("Mini-Games Information",
-                "CURRENT MINI-GAMES:\n\n" +
-                "WORD SEARCH (Available)\n" +
-                "   Find hidden words in the grid.\n" +
-                "   Difficulty scales by level.\n\n" +
-                "COMING SOON:\n\n" +
-                "CROSSWORD\n" +
-                "WORD SCRAMBLE\n" +
-                "TRIVIA QUIZ\n" +
-                "MULTIPLAYER RACE\n\n" +
-                "Stay tuned for updates!");
+                "Mera World v1.0\n\nDeveloped by:\n   Talha Ansari\n\nGame Design:\n   Talha Ansari\n\nProgramming:\n   Talha Ansari\n\nArt & UI:\n   Talha Ansari\n\nBuilt with Unity 6 LTS\n\nCopyright 2026 Mera World.");
         }
 
         public void Show()

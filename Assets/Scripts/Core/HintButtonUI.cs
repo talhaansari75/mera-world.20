@@ -50,7 +50,7 @@ namespace MeraWorld.Core
 
             var img = btnObj.AddComponent<Image>();
             img.sprite = UISpriteFactory.Create3DButtonSprite(
-                new Color(0.95f, 0.75f, 0.20f), 256, 60);
+                new Color(0.95f, 0.75f, 0.25f), 256, 60);
             img.type = Image.Type.Sliced;
             img.color = Color.white;
 

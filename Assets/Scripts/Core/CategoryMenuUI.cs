@@ -65,7 +65,7 @@ namespace MeraWorld.Core
             _panel.transform.SetParent(_canvas.transform, false);
 
             var bg = _panel.AddComponent<Image>();
-            bg.color = new Color(0.04f, 0.08f, 0.20f, 1f);
+            bg.sprite = Resources.Load<Sprite>("UI/HomeScreen/Backgrounds/bg_space"); bg.color = new Color(1f, 1f, 1f, 0.92f); bg.type = Image.Type.Simple;
 
             var rt = _panel.GetComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
@@ -242,7 +242,7 @@ namespace MeraWorld.Core
 
             Color displayColor = disabled
                 ? new Color(0.30f, 0.32f, 0.38f)
-                : item.Color;
+                : new Color(0.40f, 0.18f, 0.75f);
 
             // Bottom shadow (3D effect)
             var shadowObj = new GameObject("BottomShadow");

@@ -57,7 +57,7 @@ namespace MeraWorld.Core
             panelObj.transform.SetParent(_canvas.transform, false);
 
             var panelImg = panelObj.AddComponent<Image>();
-            panelImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.10f, 0.16f, 0.30f), 256, 40);
+            panelImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.22f, 0.10f, 0.45f), 256, 40);
             panelImg.type = Image.Type.Sliced;
             panelImg.color = Color.white;
             panelImg.raycastTarget = false;
@@ -78,7 +78,7 @@ namespace MeraWorld.Core
             titleObj.transform.SetParent(_panelTransform, false);
 
             var titleBg = titleObj.AddComponent<Image>();
-            titleBg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.75f, 0.55f, 0.15f), 128, 30);
+            titleBg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.85f, 0.60f, 0.15f), 128, 30);
             titleBg.type = Image.Type.Sliced;
             titleBg.color = Color.white;
             titleBg.raycastTarget = false;
@@ -148,7 +148,7 @@ namespace MeraWorld.Core
             var bgObj = new GameObject("BG");
             bgObj.transform.SetParent(cellObj.transform, false);
             var bgImg = bgObj.AddComponent<Image>();
-            bgImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.20f, 0.28f, 0.45f), 128, 20);
+            bgImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.30f, 0.15f, 0.55f), 128, 20);
             bgImg.type = Image.Type.Sliced;
             bgImg.color = Color.white;
             bgImg.raycastTarget = false;

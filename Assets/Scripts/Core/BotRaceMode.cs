@@ -145,7 +145,7 @@ namespace MeraWorld.Core
 
             var bg = _racePanel.AddComponent<Image>();
             bg.sprite = UISpriteFactory.Create3DButtonSprite(
-                new Color(0.10f, 0.15f, 0.28f), 256, 40);
+                new Color(0.15f, 0.08f, 0.32f), 256, 40);
             bg.type = Image.Type.Sliced;
             bg.color = Color.white;
             bg.raycastTarget = false;
@@ -219,7 +219,7 @@ namespace MeraWorld.Core
             bgObj.transform.SetParent(parent, false);
 
             var bgImg = bgObj.AddComponent<Image>();
-            bgImg.color = new Color(0.15f, 0.18f, 0.28f);
+            bgImg.color = new Color(0.20f, 0.12f, 0.35f);
             bgImg.raycastTarget = false;
 
             var bgRt = bgObj.GetComponent<RectTransform>();

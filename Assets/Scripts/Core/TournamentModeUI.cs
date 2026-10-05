@@ -69,7 +69,7 @@ namespace MeraWorld.Core
             _panel.transform.SetParent(_canvas.transform, false);
 
             var bg = _panel.AddComponent<Image>();
-            bg.color = new Color(0.06f, 0.10f, 0.24f, 1f);
+            bg.sprite = Resources.Load<Sprite>("UI/HomeScreen/Backgrounds/bg_space"); bg.color = new Color(1f, 1f, 1f, 0.92f); bg.type = Image.Type.Simple;
 
             var rt = _panel.GetComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
@@ -128,7 +128,7 @@ namespace MeraWorld.Core
             rowObj.transform.SetParent(_panel.transform, false);
 
             var img = rowObj.AddComponent<Image>();
-            img.color = new Color(0.15f, 0.20f, 0.35f, 0.75f);
+            img.color = new Color(0.25f, 0.12f, 0.48f, 0.85f);
             img.raycastTarget = false;
 
             var rt = rowObj.GetComponent<RectTransform>();

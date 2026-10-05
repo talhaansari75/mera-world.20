@@ -57,7 +57,7 @@ namespace MeraWorld.Core
             trackObj.transform.SetParent(_canvas.transform, false);
 
             var trackImg = trackObj.AddComponent<Image>();
-            trackImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.08f, 0.12f, 0.22f), 256, 30);
+            trackImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.22f, 0.10f, 0.45f), 256, 30);
             trackImg.type = Image.Type.Sliced;
             trackImg.color = Color.white;
             trackImg.raycastTarget = false;
@@ -74,7 +74,7 @@ namespace MeraWorld.Core
             fillObj.transform.SetParent(trackObj.transform, false);
 
             _fillBar = fillObj.AddComponent<Image>();
-            _fillBar.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.30f, 0.75f, 0.40f), 128, 20);
+            _fillBar.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.85f, 0.55f, 1f), 128, 20);
             _fillBar.type = Image.Type.Sliced;
             _fillBar.color = Color.white;
             _fillBar.raycastTarget = false;
@@ -129,9 +129,9 @@ namespace MeraWorld.Core
                 _progressText.text = $"{found} / {_totalWords}";
 
             if (pct < 0.4f)
-                _fillBar.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.30f, 0.75f, 0.40f), 128, 20);
+                _fillBar.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.85f, 0.55f, 1f), 128, 20);
             else if (pct < 0.8f)
-                _fillBar.sprite = UISpriteFactory.Create3DButtonSprite(new Color(1f, 0.75f, 0.25f), 128, 20);
+                _fillBar.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.85f, 0.55f, 1f), 128, 20);
             else
                 _fillBar.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.95f, 0.45f, 0.25f), 128, 20);
 

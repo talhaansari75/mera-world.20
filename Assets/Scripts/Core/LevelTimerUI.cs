@@ -50,7 +50,7 @@ namespace MeraWorld.Core
             container.transform.SetParent(_canvas.transform, false);
 
             var containerImg = container.AddComponent<Image>();
-            containerImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.15f, 0.20f, 0.35f), 128, 20);
+            containerImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.15f, 0.08f, 0.32f), 128, 20);
             containerImg.type = Image.Type.Sliced;
             containerImg.color = Color.white;
             containerImg.raycastTarget = false;

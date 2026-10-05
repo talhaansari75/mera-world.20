@@ -50,7 +50,7 @@ namespace MeraWorld.Core
             _panel.transform.SetParent(_canvas.transform, false);
 
             var bg = _panel.AddComponent<Image>();
-            bg.color = new Color(0.10f, 0.15f, 0.30f, 0.95f);
+            bg.color = new Color(0.22f, 0.10f, 0.45f, 0.98f);
 
             var rt = _panel.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 0.5f);

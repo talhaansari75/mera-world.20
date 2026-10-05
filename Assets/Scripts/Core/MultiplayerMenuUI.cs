@@ -58,7 +58,7 @@ namespace MeraWorld.Core
             _panel.transform.SetParent(_canvas.transform, false);
 
             var bg = _panel.AddComponent<Image>();
-            bg.color = new Color(0.06f, 0.10f, 0.24f, 1f);
+            bg.sprite = Resources.Load<Sprite>("UI/HomeScreen/Backgrounds/bg_space"); bg.color = new Color(1f, 1f, 1f, 0.92f); bg.type = Image.Type.Simple;
 
             var rt = _panel.GetComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
@@ -86,7 +86,7 @@ namespace MeraWorld.Core
             // Find Match button
             _findMatchButton = CreateBigButton(_panel.transform, "FIND MATCH",
                 new Vector2(0f, 100f), new Vector2(700f, 180f),
-                new Color(0.25f, 0.65f, 0.35f), 55, OnFindMatchClicked);
+                new Color(0.55f, 0.25f, 0.85f), 55, OnFindMatchClicked);
 
             // Searching panel (hidden)
             BuildSearchingPanel();
@@ -155,7 +155,7 @@ namespace MeraWorld.Core
                     if (img != null)
                     {
                         img.sprite = UISpriteFactory.Create3DButtonSprite(
-                            new Color(0.25f, 0.65f, 0.35f), 256, 40);
+                            new Color(0.55f, 0.25f, 0.85f), 256, 40);
                         img.type = Image.Type.Sliced;
                     }
                 }

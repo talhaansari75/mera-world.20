@@ -45,7 +45,7 @@ namespace MeraWorld.Core
 
             bool showGameplay = _skipHomeForThisSession;
             _skipHomeForThisSession = false;
-            _showGameplayOnSetup = showGameplay;
+            _showGameplayOnSetup = false;
 
             Debug.Log($"[HomeScreen] Start — showGameplay={showGameplay}");
             Invoke(nameof(Setup), 0.2f);
@@ -54,11 +54,11 @@ namespace MeraWorld.Core
         private void Setup()
         {
             EnsureEventSystem();
-            BuildHomeCanvas();
+            BuildPremiumHomeScreen();
             BuildLevelSelectCanvas();
             BuildStarfield();
-            StartCoroutine(AnimateStars());
-            StartCoroutine(FloatTitle());
+            // DISABLED
+            // DISABLED
 
             if (_showGameplayOnSetup)
             {

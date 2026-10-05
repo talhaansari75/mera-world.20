@@ -15,9 +15,9 @@ namespace MeraWorld.Core
         private const float GridOffsetX = 0f;
         private const float GridOffsetY = 0.55f;
 
-        private static readonly Color TileTop    = new Color(0.42f, 0.68f, 1.00f);
-        private static readonly Color TileMid    = new Color(0.20f, 0.42f, 0.85f);
-        private static readonly Color TileBottom = new Color(0.08f, 0.20f, 0.55f);
+        private static readonly Color TileTop    = new Color(0.55f, 0.35f, 0.90f);
+        private static readonly Color TileMid    = new Color(0.28f, 0.14f, 0.62f);
+        private static readonly Color TileBottom = new Color(0.10f, 0.04f, 0.28f);
 
         private static readonly Color PanelTop    = new Color(0.14f, 0.22f, 0.42f);
         private static readonly Color PanelBottom = new Color(0.05f, 0.08f, 0.20f);

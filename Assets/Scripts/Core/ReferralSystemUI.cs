@@ -63,7 +63,7 @@ namespace MeraWorld.Core
             _panel.transform.SetParent(_canvas.transform, false);
 
             var bg = _panel.AddComponent<Image>();
-            bg.color = new Color(0.06f, 0.10f, 0.24f, 1f);
+            bg.sprite = Resources.Load<Sprite>("UI/HomeScreen/Backgrounds/bg_space"); bg.color = new Color(1f, 1f, 1f, 0.92f); bg.type = Image.Type.Simple;
 
             var rt = _panel.GetComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
@@ -83,7 +83,7 @@ namespace MeraWorld.Core
             var cardObj = new GameObject("CodeCard");
             cardObj.transform.SetParent(_panel.transform, false);
             var cImg = cardObj.AddComponent<Image>();
-            cImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.25f, 0.45f, 0.85f), 256, 40);
+            cImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.45f, 0.25f, 0.85f), 256, 40);
             cImg.type = Image.Type.Sliced;
             cImg.color = Color.white;
             cImg.raycastTarget = false;

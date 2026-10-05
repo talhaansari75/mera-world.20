@@ -56,7 +56,7 @@ namespace MeraWorld.Core
             bgObj.transform.SetParent(_canvas.transform, false);
 
             var img = bgObj.AddComponent<Image>();
-            img.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.10f, 0.16f, 0.30f), 256, 20);
+            img.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.15f, 0.08f, 0.32f), 256, 20);
             img.type = Image.Type.Sliced;
             img.color = Color.white;
             img.raycastTarget = false;
@@ -120,7 +120,7 @@ namespace MeraWorld.Core
             textContainer.transform.SetParent(_canvas.transform, false);
 
             var textBg = textContainer.AddComponent<Image>();
-            textBg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.10f, 0.16f, 0.30f), 128, 20);
+            textBg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.15f, 0.08f, 0.32f), 128, 20);
             textBg.type = Image.Type.Sliced;
             textBg.color = Color.white;
             textBg.raycastTarget = false;
@@ -162,7 +162,7 @@ namespace MeraWorld.Core
             container.transform.SetParent(_canvas.transform, false);
 
             var containerImg = container.AddComponent<Image>();
-            containerImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.70f, 0.50f, 0.15f), 128, 20);
+            containerImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.65f, 0.45f, 0.15f), 128, 20);
             containerImg.type = Image.Type.Sliced;
             containerImg.color = Color.white;
             containerImg.raycastTarget = false;

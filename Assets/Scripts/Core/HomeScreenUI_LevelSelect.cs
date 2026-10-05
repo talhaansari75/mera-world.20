@@ -26,8 +26,8 @@ namespace MeraWorld.Core
             var bgObj = new GameObject("Background");
             bgObj.transform.SetParent(_levelSelectCanvas.transform, false);
             var bgImg = bgObj.AddComponent<Image>();
-            bgImg.sprite = UISpriteFactory.CreateGradientSprite(BG_BOTTOM, BG_TOP, 32, 256);
-            bgImg.color = Color.white;
+            bgImg.sprite = Resources.Load<Sprite>("UI/HomeScreen/Backgrounds/bg_space");
+            bgImg.color = new Color(1f, 1f, 1f, 0.92f);
             var bgRt = bgObj.GetComponent<RectTransform>();
             bgRt.anchorMin = Vector2.zero;
             bgRt.anchorMax = Vector2.one;
@@ -83,7 +83,7 @@ namespace MeraWorld.Core
 
             var cardImg = cardObj.AddComponent<Image>();
             cardImg.sprite = UISpriteFactory.Create3DButtonSprite(
-                unlocked ? new Color(0.25f, 0.55f, 0.90f) : new Color(0.25f, 0.28f, 0.35f),
+                unlocked ? new Color(0.45f, 0.20f, 0.75f) : new Color(0.20f, 0.12f, 0.30f),
                 256, 40);
             cardImg.type = Image.Type.Sliced;
             cardImg.color = Color.white;

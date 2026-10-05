@@ -42,7 +42,7 @@ namespace MeraWorld.Core
             _panel.transform.SetParent(_canvas.transform, false);
 
             var bg = _panel.AddComponent<Image>();
-            bg.color = new Color(0.06f, 0.10f, 0.24f, 1f);
+            bg.sprite = Resources.Load<Sprite>("UI/HomeScreen/Backgrounds/bg_space"); bg.color = new Color(1f, 1f, 1f, 0.92f); bg.type = Image.Type.Simple;
 
             var rt = _panel.GetComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
@@ -76,7 +76,7 @@ namespace MeraWorld.Core
             cardObj.transform.SetParent(_panel.transform, false);
 
             var img = cardObj.AddComponent<Image>();
-            img.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.20f, 0.28f, 0.42f), 256, 40);
+            img.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.28f, 0.15f, 0.52f), 256, 40);
             img.type = Image.Type.Sliced;
             img.color = Color.white;
             img.raycastTarget = false;
