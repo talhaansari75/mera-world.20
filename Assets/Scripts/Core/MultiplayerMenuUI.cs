@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -87,6 +87,11 @@ namespace MeraWorld.Core
             _findMatchButton = CreateBigButton(_panel.transform, "FIND MATCH",
                 new Vector2(0f, 100f), new Vector2(700f, 180f),
                 new Color(0.55f, 0.25f, 0.85f), 55, OnFindMatchClicked);
+
+            // === TEST BUTTON (DEV ONLY) ===
+            CreateBigButton(_panel.transform, "TEST BOT RACE (DEV)",
+                new Vector2(0f, -150f), new Vector2(700f, 120f),
+                new Color(0.85f, 0.30f, 0.30f), 32, OnTestBotRaceClicked);
 
             // Searching panel (hidden)
             BuildSearchingPanel();
@@ -267,6 +272,28 @@ namespace MeraWorld.Core
             }
         }
 
+        private void OnTestBotRaceClicked()
+        {
+            Debug.Log("[TEST] Starting multiplayer bot race...");
+
+            // Hide this menu
+            Hide();
+
+            // Hide home screen, show gameplay
+            var home = FindFirstObjectByType<HomeScreenUI>();
+            if (home != null) home.ForceShowGameplay();
+
+            // WAHI multiplayer BotRaceMode use karo (production)
+            var brm = FindFirstObjectByType<BotRaceMode>();
+            if (brm == null)
+            {
+                var go = new GameObject("BotRaceMode");
+                brm = go.AddComponent<BotRaceMode>();
+            }
+
+            brm.ForceStartRace();
+        }
+
         private void UpdateTimer(float remaining)
         {
             if (_timerText != null)
@@ -285,8 +312,11 @@ namespace MeraWorld.Core
                 PlayerPrefs.Save();
             }
 
+            // SkipHome flag set karo - HomeScreenUI isko read karega
             PlayerPrefs.SetInt("SkipHome", 1);
             PlayerPrefs.Save();
+
+            Debug.Log("[Multiplayer] Loading scene with SkipHome=1");
 
             UnityEngine.SceneManagement.SceneManager.LoadScene(
                 UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
@@ -406,3 +436,4 @@ namespace MeraWorld.Core
         }
     }
 }
+

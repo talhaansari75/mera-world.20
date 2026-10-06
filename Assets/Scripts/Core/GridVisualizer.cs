@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using MeraWorld.WordSearch;
 
 namespace MeraWorld.Core
@@ -9,7 +9,7 @@ namespace MeraWorld.Core
         public GameManager GameManager;
         public SelectionManager SelectionManager;
 
-        // Ye 2 values badli hain — pehle 0.60f/0.10f the
+        // Ye 2 values badli hain â€” pehle 0.60f/0.10f the
         private const float CellSize = 0.78f;
         private const float CellGap  = 0.10f;
         private const float GridOffsetX = 0f;
@@ -342,3 +342,5 @@ namespace MeraWorld.Core
         }
     }
 }
+
+

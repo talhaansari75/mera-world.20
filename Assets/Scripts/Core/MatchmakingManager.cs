@@ -1,19 +1,9 @@
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 
 namespace MeraWorld.Core
 {
-    /// <summary>
-    /// Online-only matchmaking.
-    /// 1. Check internet
-    /// 2. Search for a real player for up to N seconds
-    /// 3. If none found, send bot name back as fallback
-    ///
-    /// NOTE: This only returns the opponent NAME. The actual race is
-    /// run by BotRaceMode in the gameplay scene. So we don't need to
-    /// spawn any MonoBehaviour here.
-    /// </summary>
     public class MatchmakingManager : MonoBehaviour
     {
         public static MatchmakingManager Instance { get; private set; }
@@ -23,7 +13,7 @@ namespace MeraWorld.Core
 
         public event Action<MatchResult> OnMatchFound;
         public event Action<string> OnMatchmakingFailed;
-        public event Action<float> OnSearchTick; // remaining seconds
+        public event Action<float> OnSearchTick;
 
         public class MatchResult
         {
@@ -63,7 +53,6 @@ namespace MeraWorld.Core
         {
             _isSearching = true;
 
-            // Step 1: Verify connection
             yield return InternetChecker.VerifyConnection();
 
             if (!InternetChecker.IsOnline)
@@ -73,12 +62,9 @@ namespace MeraWorld.Core
                 yield break;
             }
 
-            // Step 2: Try to find a real player
             Debug.Log("[Matchmaking] Searching for real player...");
             float elapsed = 0f;
 
-            // TODO: Replace with real backend call (PlayFab / Photon / custom server).
-            // Right now no backend exists, so a real player will never be found.
             bool realPlayerFound = false;
             string opponentName = null;
 
@@ -87,20 +73,22 @@ namespace MeraWorld.Core
                 elapsed += Time.unscaledDeltaTime;
                 OnSearchTick?.Invoke(SearchTimeoutSeconds - elapsed);
 
-                // Real matchmaking code would go here:
-                // realPlayerFound = Lobby.FindOpponent(out opponentName);
-
                 if (realPlayerFound) break;
                 yield return null;
             }
 
-            // Step 3: Fallback to bot
             if (!realPlayerFound)
             {
                 Debug.Log("[Matchmaking] No real player found. Using bot fallback...");
                 _isSearching = false;
 
                 string botName = BotNames[UnityEngine.Random.Range(0, BotNames.Length)];
+
+                // NEW: BotRaceMode ko signal do
+                PlayerPrefs.SetInt("BotRace_Enabled", 1);
+                PlayerPrefs.SetString("BotRace_OpponentName", botName);
+                PlayerPrefs.Save();
+
                 OnMatchFound?.Invoke(new MatchResult
                 {
                     IsBot = true,
@@ -111,6 +99,11 @@ namespace MeraWorld.Core
 
             Debug.Log($"[Matchmaking] Matched with real player: {opponentName}");
             _isSearching = false;
+
+            // Real player match - bot band rakho
+            PlayerPrefs.SetInt("BotRace_Enabled", 0);
+            PlayerPrefs.Save();
+
             OnMatchFound?.Invoke(new MatchResult
             {
                 IsBot = false,

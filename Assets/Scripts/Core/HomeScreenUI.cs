@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -13,6 +13,7 @@ namespace MeraWorld.Core
         [Header("References")]
         public PlayerProgressManager Progress;
 
+        private static bool _skipHomeForThisSession = false;
         private Canvas _homeCanvas;
         private Canvas _levelSelectCanvas;
         private GameObject _starfieldParent;
@@ -21,8 +22,7 @@ namespace MeraWorld.Core
 
         private const string STARS_KEY_PREFIX = "Stars_Level_";
 
-        private static bool _skipHomeForThisSession = false;
-        private bool _showGameplayOnSetup = false;
+                private bool _showGameplayOnSetup = false;
 
         private static readonly Color BG_TOP = new Color(0.16f, 0.08f, 0.34f);
         private static readonly Color BG_BOTTOM = new Color(0.02f, 0.02f, 0.08f);
@@ -35,19 +35,17 @@ namespace MeraWorld.Core
             Instance = this;
             if (Progress == null) Progress = PlayerProgressManager.Instance;
 
-            if (PlayerPrefs.HasKey("SkipHome"))
+            // Multiplayer mode check (PlayerPrefs scene reload survive karta hai)
+            bool skipHome = PlayerPrefs.GetInt("SkipHome", 0) == 1;
+            if (skipHome)
             {
-                PlayerPrefs.DeleteKey("SkipHome");
-                PlayerPrefs.Save();
+                Debug.Log("[HomeScreen] Multiplayer mode - skipping home");
             }
 
             IsHomeVisible = true;
+            _showGameplayOnSetup = skipHome;
 
-            bool showGameplay = _skipHomeForThisSession;
-            _skipHomeForThisSession = false;
-            _showGameplayOnSetup = false;
-
-            Debug.Log($"[HomeScreen] Start — showGameplay={showGameplay}");
+            Debug.Log("[HomeScreen] Start - showGameplay=" + skipHome);
             Invoke(nameof(Setup), 0.2f);
         }
 
@@ -154,7 +152,7 @@ namespace MeraWorld.Core
             CreateStatsCard(_homeCanvas.transform, new Vector2(0f, 480f), coins, stars);
 
             // PLAY button
-            Create3DButton(_homeCanvas.transform, "▶  PLAY", new Vector2(0f, 300f),
+            Create3DButton(_homeCanvas.transform, "â–¶  PLAY", new Vector2(0f, 300f),
                 new Vector2(780f, 200f), GREEN, 68, OnPlayClicked);
 
             // LEVELS button
@@ -172,7 +170,7 @@ namespace MeraWorld.Core
                 new Vector2(240f, 180f), new Color(0.30f, 0.65f, 0.80f), 15, () => OpenCategory("progress"));
 
             // Footer
-            CreateText(_homeCanvas.transform, "v1.0  •  Talha Ansari",
+            CreateText(_homeCanvas.transform, "v1.0  â€¢  Talha Ansari",
                 new Vector2(0f, -880f), 26, new Color(0.55f, 0.60f, 0.75f), FontStyle.Normal, false);
         }
 
@@ -293,6 +291,26 @@ namespace MeraWorld.Core
             if (s != null) s.Show();
         }
 
+        /// <summary>
+        /// Multiplayer mode mein call karein — scene load hone par home screen skip ho jayegi.
+        /// </summary>
+        public static void SkipHomeThisSession()
+        {
+            _skipHomeForThisSession = true;
+            Debug.Log("[HomeScreen] SkipHomeThisSession flag set");
+        }
+
+        /// <summary>
+        /// Scene reload ke bina seedha gameplay dikhao. Test ke liye.
+        /// </summary>
+        public void ForceShowGameplay()
+        {
+            Debug.Log("[HomeScreen] ForceShowGameplay called");
+            IsHomeVisible = false;
+            if (_homeCanvas != null) _homeCanvas.gameObject.SetActive(false);
+            if (_levelSelectCanvas != null) _levelSelectCanvas.gameObject.SetActive(false);
+        }
+
         public static void ForceShowHome()
         {
             _skipHomeForThisSession = false;
@@ -333,3 +351,8 @@ namespace MeraWorld.Core
         }
     }
 }
+
+
+
+
+

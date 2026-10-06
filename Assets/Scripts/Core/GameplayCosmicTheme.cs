@@ -1,10 +1,20 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace MeraWorld.Core
 {
     public class GameplayCosmicTheme : MonoBehaviour
     {
         private GameObject _bgObj;
+
+        [Header("Background Style")]
+        [Tooltip("Light mode ON - white/cream background")]
+        public bool LightMode = true;
+
+        [Tooltip("Top color of gradient")]
+        public Color TopColor = new Color(1.00f, 0.99f, 0.95f);    // cream white
+
+        [Tooltip("Bottom color of gradient")]
+        public Color BottomColor = new Color(0.98f, 0.96f, 0.90f); // light cream
 
         void Start()
         {
@@ -15,13 +25,27 @@ namespace MeraWorld.Core
         {
             if (_bgObj != null) Destroy(_bgObj);
 
-            _bgObj = new GameObject("GameplayCosmicBG");
+            _bgObj = new GameObject("GameplayBackground");
             _bgObj.transform.SetParent(transform, false);
 
             var sr = _bgObj.AddComponent<SpriteRenderer>();
-            sr.sprite = Resources.Load<Sprite>("UI/HomeScreen/Backgrounds/bg_space");
+
+            // TEST MODE: cream background
+            // PRODUCTION: space background
+            if (false)
+            {
+                sr.sprite = UISpriteFactory.Create3DSphereSprite(TestModeTheme.CreamBG, 4);
+                sr.color = Color.white;
+                Debug.Log("[GameplayTheme] TEST MODE - cream background");
+            }
+            else
+            {
+                sr.sprite = Resources.Load<Sprite>("UI/HomeScreen/Backgrounds/bg_space");
+                sr.color = Color.white;
+                Debug.Log("[GameplayTheme] PRODUCTION - space background");
+            }
+
             sr.sortingOrder = -1000;
-            sr.color = Color.white;
 
             var cam = Camera.main;
             if (cam != null && sr.sprite != null)
@@ -35,7 +59,10 @@ namespace MeraWorld.Core
 
             _bgObj.transform.position = new Vector3(0f, 0f, 5f);
 
-            Debug.Log("[GameplayCosmic] Background applied as SpriteRenderer");
+            Debug.Log("[GameplayTheme] Background applied - LightMode=" + LightMode);
         }
     }
 }
+
+
+

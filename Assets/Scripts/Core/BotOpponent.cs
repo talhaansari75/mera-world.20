@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,16 +6,22 @@ namespace MeraWorld.Core
 {
     public enum BotDifficulty
     {
-        Rookie,     // Easy
-        Skilled,    // Medium
-        Champion,   // Hard
-        Legend      // Very Hard
+        Rookie,
+        Skilled,
+        Champion,
+        Legend
     }
 
     /// <summary>
-    /// Bot opponent — simulates a real player finding words.
-    /// Difficulty affects speed, mistakes, and catch-up logic.
-    /// This is a plain C# class (not MonoBehaviour).
+    /// Bot opponent — 100% human-like behaviour.
+    /// Human-like means:
+    /// - Variable speed (not consistent)
+    /// - Distraction pauses
+    /// - Bursts of focus
+    /// - Fatigue near end
+    /// - Momentum when ahead
+    /// - Panic when player is close to winning
+    /// - Consistency within a single match
     /// </summary>
     public class BotOpponent
     {
@@ -28,18 +34,26 @@ namespace MeraWorld.Core
         private readonly List<string> _targetWords;
         private readonly System.Random _rng;
 
-        // Speed parameters (seconds per word)
+        // Base speed (seconds per word)
         private float _minTimePerWord;
         private float _maxTimePerWord;
+
+        // Per-match "human" personality (locked at construction)
+        private float _focusMultiplier;      // 0.85 - 1.15  (how focused today)
+        private float _burstiness;           // 0 - 1        (how often bursts happen)
+        private float _distractionChance;    // 0.03 - 0.10  (chance of long pause)
+        private float _mistakeTendency;      // 0 - 1        (how often wrong attempts)
 
         // Runtime state
         private float _nextFindTime;
         private float _elapsed;
         private int _mistakesMade = 0;
-        private const int MAX_MISTAKES = 2;
+        private const int MAX_MISTAKES = 3;
 
-        // Player's current found count — set by BotRaceMode
+        // Player's found count — set by BotRaceMode
         private int _playerFoundCount = 0;
+        private int _playerFoundAtLastBotWord = 0;
+        private int _botWordStreak = 0;
 
         public event Action<string> OnWordFound;
 
@@ -55,6 +69,8 @@ namespace MeraWorld.Core
             Difficulty = difficulty;
 
             ConfigureDifficulty(difficulty);
+            ConfigureHumanPersonality();
+
             _nextFindTime = GetNextFindDelay(isFirstWord: true);
         }
 
@@ -81,22 +97,48 @@ namespace MeraWorld.Core
             }
         }
 
+        /// <summary>
+        /// Set a random "human" personality for this match.
+        /// This is locked for the whole match — same as a real player's mood today.
+        /// </summary>
+        private void ConfigureHumanPersonality()
+        {
+            // Focus: 0.85x to 1.15x speed swing
+            _focusMultiplier = 0.85f + (float)_rng.NextDouble() * 0.30f;
+
+            // Burstiness: 20% - 50% chance of burst after finding a word
+            _burstiness = 0.20f + (float)_rng.NextDouble() * 0.30f;
+
+            // Distraction: 3% - 10% chance of a long pause
+            _distractionChance = 0.03f + (float)_rng.NextDouble() * 0.07f;
+
+            // Mistakes: 0.3 - 0.8 tendency
+            _mistakeTendency = 0.30f + (float)_rng.NextDouble() * 0.50f;
+        }
+
         // ---------------------------------------------------------------
-        // Player score sync (for catch-up logic)
+        // Player score sync (for catch-up and panic logic)
         // ---------------------------------------------------------------
+
+        /// <summary>
+        /// Testing ke liye bot ki speed badhao (1x = normal, 15x = super fast).
+        /// </summary>
+        public void SetSpeedMultiplier(float multiplier)
+        {
+            if (multiplier <= 0f) multiplier = 1f;
+            _minTimePerWord /= multiplier;
+            _maxTimePerWord /= multiplier;
+            _focusMultiplier = 1f;   // personality slowdown off
+            Debug.Log($"[Bot] Speed set to {multiplier}x (now {_minTimePerWord:F2}s - {_maxTimePerWord:F2}s per word)");
+        }
 
         public void SetPlayerFoundCount(int count)
         {
             _playerFoundCount = count;
         }
 
-        private int GetPlayerFoundCount()
-        {
-            return _playerFoundCount;
-        }
-
         // ---------------------------------------------------------------
-        // Update — call from MonoBehaviour Update()
+        // Update
         // ---------------------------------------------------------------
 
         public void Update(float deltaTime)
@@ -128,6 +170,11 @@ namespace MeraWorld.Core
             FoundWordList.Add(word);
             FoundWords++;
 
+            // Track streak
+            if (FoundWords - _playerFoundAtLastBotWord >= 1)
+                _botWordStreak++;
+            _playerFoundAtLastBotWord = _playerFoundCount;
+
             OnWordFound?.Invoke(word);
 
             _elapsed = 0f;
@@ -135,34 +182,68 @@ namespace MeraWorld.Core
         }
 
         // ---------------------------------------------------------------
-        // Delay calculation
+        // Human-like delay calculation
         // ---------------------------------------------------------------
 
         private float GetNextFindDelay(bool isFirstWord)
         {
+            // Base delay: random between min and max
             float baseDelay = Mathf.Lerp(
                 _minTimePerWord,
                 _maxTimePerWord,
                 (float)_rng.NextDouble());
 
-            if (isFirstWord)
-                baseDelay *= 0.7f;
+            // === 1. Focus multiplier (fixed for the match) ===
+            baseDelay *= _focusMultiplier;
 
-            // Occasional "mistake" (fake searching delay)
-            if (_mistakesMade < MAX_MISTAKES && _rng.NextDouble() < 0.15)
+            // === 2. Warm-up: first word takes 25% longer (looking at the grid) ===
+            if (isFirstWord)
+                baseDelay *= 1.25f;
+
+            // === 3. Fatigue: last 25% of words take 10% longer ===
+            float progress = (float)FoundWords / Mathf.Max(1, _targetWords.Count);
+            if (progress > 0.75f)
+                baseDelay *= 1.10f;
+
+            // === 4. Momentum: bot on a streak of 2+ → 15% faster ===
+            if (_botWordStreak >= 2)
+                baseDelay *= 0.85f;
+
+            // === 5. Panic: player is 1 word from winning → 25% faster ===
+            int playerRemaining = _targetWords.Count - _playerFoundCount;
+            if (playerRemaining <= 1 && !IsFinished)
+                baseDelay *= 0.75f;
+
+            // === 6. Complacency: bot is 3+ words ahead → 15% slower (chill) ===
+            int diff = FoundWords - _playerFoundCount;
+            if (diff >= 3)
+                baseDelay *= 1.15f;
+
+            // === 7. Catch-up: player is 2+ ahead → 25% faster ===
+            if (diff <= -2)
+                baseDelay *= 0.75f;
+
+            // === 8. Occasional mistakes (fake searching) ===
+            if (_mistakesMade < MAX_MISTAKES && _rng.NextDouble() < _mistakeTendency * 0.3f)
             {
                 _mistakesMade++;
-                baseDelay *= 1.6f;
+                baseDelay *= 1.5f;
             }
 
-            // Catch-up / slowdown logic
-            int diff = GetPlayerFoundCount() - FoundWords;
-            if (diff >= 2)
-                baseDelay *= 0.7f;   // Bot behind → speed up
-            else if (diff <= -2)
-                baseDelay *= 1.2f;   // Bot ahead → slow down (give player chance)
+            // === 9. Burst mode: after a word, sometimes the next one is fast ===
+            if (!isFirstWord && _rng.NextDouble() < _burstiness)
+            {
+                baseDelay *= 0.55f;   // 45% faster — feels like "I see it!"
+            }
 
-            return baseDelay;
+            // === 10. Distraction: rare long pause (like a call came) ===
+            if (_rng.NextDouble() < _distractionChance)
+            {
+                baseDelay *= 2.8f;
+            }
+
+            // Safety: never less than 0.4 seconds (super human)
+            return Mathf.Max(0.4f, baseDelay);
         }
 
         // ---------------------------------------------------------------
@@ -191,3 +272,4 @@ namespace MeraWorld.Core
         }
     }
 }
+

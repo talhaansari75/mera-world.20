@@ -1,11 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace MeraWorld.Core
 {
-    /// <summary>
-    /// Auto-setup helper v2 — creates missing components AND wires references.
-    /// Attach to any empty GameObject in the gameplay scene.
-    /// </summary>
     public class GameBootstrap : MonoBehaviour
     {
         [Header("Auto-Create Missing Components")]
@@ -21,11 +17,28 @@ namespace MeraWorld.Core
         [Header("Debug")]
         public bool LogSetup = true;
 
+        // Guard: har scene pe sirf ek baar RunSetup chalega
+        private static bool _hasRunThisScene = false;
+
+        // Awake ab kuch nahi karta - MultiplayerSessionFlag scene load pe RunSetup call karega
         void Awake()
         {
+            // Naya scene load hone pe reset
+            _hasRunThisScene = false;
+        }
+
+        public void RunSetup()
+        {
+            // Guard: agar already chal chuka hai to skip
+            if (_hasRunThisScene)
+            {
+                if (LogSetup) Debug.Log("[Bootstrap] Already ran this scene - skipping");
+                return;
+            }
+            _hasRunThisScene = true;
+
             if (LogSetup) Debug.Log("[Bootstrap] === Starting scene setup ===");
 
-            // Find shared dependencies
             var gameManager = FindFirstObjectByType<GameManager>();
             var selectionManager = FindFirstObjectByType<SelectionManager>();
             var progress = PlayerProgressManager.Instance;
@@ -37,68 +50,24 @@ namespace MeraWorld.Core
             }
 
             if (selectionManager == null)
-                Debug.LogWarning("[Bootstrap] SelectionManager missing. Will try to create.");
-
-            // ---- Create components in order ----
+                Debug.LogWarning("[Bootstrap] SelectionManager missing.");
 
             if (CreateGridVisualizer)
             {
                 var gv = EnsureComponent<GridVisualizer>("GridVisualizer");
-                if (gv != null)
-                {
-                    gv.GameManager = gameManager;
-                    gv.SelectionManager = selectionManager;
-                    if (LogSetup) Debug.Log("[Bootstrap] GridVisualizer wired");
-                }
+                if (gv != null) { gv.GameManager = gameManager; gv.SelectionManager = selectionManager; }
             }
 
             if (CreateWordListUI)
             {
                 var wl = EnsureComponent<WordListUI>("WordListUI");
-                if (wl != null)
-                {
-                    wl.GameManager = gameManager;
-                    wl.SelectionManager = selectionManager;
-                    if (LogSetup) Debug.Log("[Bootstrap] WordListUI wired");
-                }
+                if (wl != null) { wl.GameManager = gameManager; wl.SelectionManager = selectionManager; }
             }
 
-            if (CreateTopBarUI)
-            {
-                var tb = EnsureComponent<TopBarUI>("TopBarUI");
-                if (tb != null)
-                {
-                    // TopBarUI usually finds Progress itself
-                    if (LogSetup) Debug.Log("[Bootstrap] TopBarUI wired");
-                }
-            }
-
-            if (CreateHintButtonUI)
-            {
-                var hb = EnsureComponent<HintButtonUI>("HintButtonUI");
-                if (hb != null)
-                {
-                    if (LogSetup) Debug.Log("[Bootstrap] HintButtonUI wired");
-                }
-            }
-
-            if (CreateWinScreenUI)
-            {
-                var ws = EnsureComponent<WinScreenUI>("WinScreenUI");
-                if (ws != null)
-                {
-                    if (LogSetup) Debug.Log("[Bootstrap] WinScreenUI wired");
-                }
-            }
-
-            if (CreateLevelTimerUI)
-            {
-                var lt = EnsureComponent<LevelTimerUI>("LevelTimerUI");
-                if (lt != null)
-                {
-                    if (LogSetup) Debug.Log("[Bootstrap] LevelTimerUI wired");
-                }
-            }
+            if (CreateTopBarUI) EnsureComponent<TopBarUI>("TopBarUI");
+            if (CreateHintButtonUI) EnsureComponent<HintButtonUI>("HintButtonUI");
+            if (CreateWinScreenUI) EnsureComponent<WinScreenUI>("WinScreenUI");
+            if (CreateLevelTimerUI) EnsureComponent<LevelTimerUI>("LevelTimerUI");
 
             if (CreateBotRaceMode)
             {
@@ -109,10 +78,12 @@ namespace MeraWorld.Core
                     br.SelectionManager = selectionManager;
                     br.Progress = progress;
                     if (LogSetup) Debug.Log("[Bootstrap] BotRaceMode wired");
+
+                    // Scene reload pe flags check karo
+                    br.RecheckFlagsOnSceneReload();
                 }
             }
 
-            // HomeScreenUI goes LAST so it can overlay everything
             if (CreateHomeScreenUI)
             {
                 var hs = EnsureComponent<HomeScreenUI>("HomeScreenUI");
@@ -131,16 +102,18 @@ namespace MeraWorld.Core
             var existing = FindFirstObjectByType<T>();
             if (existing != null)
             {
-                if (LogSetup) Debug.Log($"[Bootstrap] {typeof(T).Name} already exists on '{existing.gameObject.name}'");
+                if (LogSetup) Debug.Log($"[Bootstrap] {typeof(T).Name} exists on '{existing.gameObject.name}'");
                 return existing;
             }
 
             var go = new GameObject(objectName);
             go.transform.SetParent(transform, false);
             var comp = go.AddComponent<T>();
-
             if (LogSetup) Debug.Log($"[Bootstrap] Created {typeof(T).Name}");
             return comp;
         }
     }
 }
+
+
+
