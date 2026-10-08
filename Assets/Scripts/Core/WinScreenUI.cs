@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -36,8 +36,21 @@ namespace MeraWorld.Core
         {
             EnsureEventSystem();
             BuildHiddenPanel();
+
+            // Self-find references (GameBootstrap ne wire nahi kiya)
+            if (GameManager == null) GameManager = FindFirstObjectByType<GameManager>();
+            if (SelectionManager == null) SelectionManager = FindFirstObjectByType<SelectionManager>();
+
             if (SelectionManager != null)
-                SelectionManager.OnLevelComplete += ShowWinScreen;
+            {
+                MeraWorld.Core.SelectionManager.OnLevelComplete -= ShowWinScreen;
+                MeraWorld.Core.SelectionManager.OnLevelComplete += ShowWinScreen;
+                Debug.Log("[WinScreen] Subscribed to OnLevelComplete");
+            }
+            else
+            {
+                Debug.LogError("[WinScreen] SelectionManager NULL - subscribe nahi hua!");
+            }
         }
 
         private void EnsureEventSystem()
@@ -185,6 +198,8 @@ namespace MeraWorld.Core
 
         private void ShowWinScreen()
         {
+            Debug.Log("[WinScreen] *** ShowWinScreen ENTERED *** _panel=" + (_panel != null) + " _canvas=" + (_canvas != null));
+            Debug.Log("[WinScreen] *** ShowWinScreen CALLED *** _panel null? " + (_panel == null) + " _canvas null? " + (_canvas == null));
             if (_panel == null) return;
 
             float elapsed = Time.time - _levelStartTime;
@@ -236,8 +251,12 @@ namespace MeraWorld.Core
 
         private void OnNextLevel()
         {
+            Debug.Log("[WinScreen] *** NEXT LEVEL CLICKED ***");
+            if (_panel != null) _panel.SetActive(false);   // Win screen hide
+
             int currentLevel = GameManager != null ? GameManager.CurrentLevel : 1;
             int nextLevel = currentLevel + 1;
+            Debug.Log("[WinScreen] currentLevel=" + currentLevel + " nextLevel=" + nextLevel);
 
             if (PlayerProgressManager.Instance != null)
             {
@@ -254,11 +273,14 @@ namespace MeraWorld.Core
             PlayerPrefs.SetInt("SkipHome", 1);
             PlayerPrefs.Save();
 
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            UnityEngine.SceneManagement.SceneManager.LoadScene(
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
         }
 
         private void OnReplay()
         {
+            Debug.Log("[WinScreen] *** REPLAY CLICKED ***");
+            if (_panel != null) _panel.SetActive(false);
             PlayerPrefs.SetInt("SkipHome", 1);
             PlayerPrefs.Save();
 
@@ -267,6 +289,8 @@ namespace MeraWorld.Core
 
         private void OnHome()
         {
+            Debug.Log("[WinScreen] *** HOME CLICKED ***");
+            if (_panel != null) _panel.SetActive(false);
             PlayerPrefs.SetInt("SkipHome", 0);
             PlayerPrefs.Save();
 
@@ -318,7 +342,7 @@ namespace MeraWorld.Core
         void OnDestroy()
         {
             if (SelectionManager != null)
-                SelectionManager.OnLevelComplete -= ShowWinScreen;
+                MeraWorld.Core.SelectionManager.OnLevelComplete -= ShowWinScreen;
         }
     }
 }

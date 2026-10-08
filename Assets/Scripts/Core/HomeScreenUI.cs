@@ -33,13 +33,16 @@ namespace MeraWorld.Core
         void Start()
         {
             Instance = this;
+            Debug.Log("[HomeScreen] ***** START called *****");
             if (Progress == null) Progress = PlayerProgressManager.Instance;
 
             // Multiplayer mode check (PlayerPrefs scene reload survive karta hai)
             bool skipHome = PlayerPrefs.GetInt("SkipHome", 0) == 1;
             if (skipHome)
             {
-                Debug.Log("[HomeScreen] Multiplayer mode - skipping home");
+                PlayerPrefs.DeleteKey("SkipHome");
+                PlayerPrefs.Save();
+                Debug.Log("[HomeScreen] Multiplayer mode - skipping home (flag cleared)");
             }
 
             IsHomeVisible = true;
@@ -51,6 +54,7 @@ namespace MeraWorld.Core
 
         private void Setup()
         {
+            Debug.Log("[HomeScreen] ***** SETUP called ***** _showGameplayOnSetup=" + _showGameplayOnSetup);
             EnsureEventSystem();
             BuildPremiumHomeScreen();
             BuildLevelSelectCanvas();
@@ -305,14 +309,46 @@ namespace MeraWorld.Core
         /// </summary>
         public void ForceShowGameplay()
         {
-            Debug.Log("[HomeScreen] ForceShowGameplay called");
+            Debug.Log("[HomeScreen] ===== ForceShowGameplay (ROBUST) =====");
             IsHomeVisible = false;
+
             if (_homeCanvas != null) _homeCanvas.gameObject.SetActive(false);
             if (_levelSelectCanvas != null) _levelSelectCanvas.gameObject.SetActive(false);
+
+            // ROBUST: naam se dhoondh ke hide karo
+            var allCanvases = transform.GetComponentsInChildren<Canvas>(true);
+            int hidden = 0;
+            foreach (var cv in allCanvases)
+            {
+                if (cv == null) continue;
+                string n = cv.gameObject.name;
+                if (n.Contains("HomeCanvas") || n.Contains("LevelSelectCanvas"))
+                {
+                    cv.gameObject.SetActive(false);
+                    hidden++;
+                    Debug.Log("[HomeScreen] Robust-hid: " + n);
+                }
+            }
+
+            // Extra: hierarchy children bhi check
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                var child = transform.GetChild(i);
+                if (child.name.Contains("Home") || child.name.Contains("LevelSelect"))
+                {
+                    child.gameObject.SetActive(false);
+                    Debug.Log("[HomeScreen] Force-hid child: " + child.name);
+                }
+            }
+
+            Debug.Log("[HomeScreen] ForceShowGameplay done - total hidden=" + hidden);
         }
 
         public static void ForceShowHome()
         {
+            // Test mode OFF when returning home
+            TestModeTheme.Disable();
+
             _skipHomeForThisSession = false;
             if (Instance != null && Instance._homeCanvas != null)
             {
@@ -340,17 +376,18 @@ namespace MeraWorld.Core
                 es.transform.SetParent(transform, false);
                 es.AddComponent<UnityEngine.EventSystems.EventSystem>();
 
-                var newModuleType = System.Type.GetType(
-                    "UnityEngine.InputSystem.UI.InputSystemUIInputModule, Unity.InputSystem");
-
-                if (newModuleType != null)
-                    es.AddComponent(newModuleType);
-                else
-                    es.AddComponent(typeof(UnityEngine.EventSystems.StandaloneInputModule));
+                // FIX: SelectionManager Old Input use karta hai.
+                // StandaloneInputModule (Old) force karo taaki phone touch chale.
+                es.AddComponent(typeof(UnityEngine.EventSystems.StandaloneInputModule));
+                Debug.Log("[HomeScreen] EventSystem created with StandaloneInputModule");
             }
         }
     }
 }
+
+
+
+
 
 
 

@@ -52,21 +52,45 @@ namespace MeraWorld.Core
             if (selectionManager == null)
                 Debug.LogWarning("[Bootstrap] SelectionManager missing.");
 
+            // Scene reload pe level dobara load karo (DontDestroyOnLoad fix)
+            gameManager.ReloadFromProgress();
+
             if (CreateGridVisualizer)
             {
                 var gv = EnsureComponent<GridVisualizer>("GridVisualizer");
-                if (gv != null) { gv.GameManager = gameManager; gv.SelectionManager = selectionManager; }
+                if (gv != null)
+                {
+                    gv.GameManager = gameManager;
+                    gv.SelectionManager = selectionManager;
+                    gv.BuildVisuals();
+                    if (LogSetup) Debug.Log("[Bootstrap] GridVisualizer wired + rebuilt");
+                }
             }
 
             if (CreateWordListUI)
             {
                 var wl = EnsureComponent<WordListUI>("WordListUI");
-                if (wl != null) { wl.GameManager = gameManager; wl.SelectionManager = selectionManager; }
+                if (wl != null)
+                {
+                    wl.GameManager = gameManager;
+                    wl.SelectionManager = selectionManager;
+                    wl.ForceRebuild();
+                    if (LogSetup) Debug.Log("[Bootstrap] WordListUI wired + rebuilt");
+                }
             }
 
             if (CreateTopBarUI) EnsureComponent<TopBarUI>("TopBarUI");
             if (CreateHintButtonUI) EnsureComponent<HintButtonUI>("HintButtonUI");
-            if (CreateWinScreenUI) EnsureComponent<WinScreenUI>("WinScreenUI");
+            if (CreateWinScreenUI)
+            {
+                var ws = EnsureComponent<WinScreenUI>("WinScreenUI");
+                if (ws != null)
+                {
+                    if (ws.GameManager == null) ws.GameManager = gameManager;
+                    if (ws.SelectionManager == null) ws.SelectionManager = selectionManager;
+                    if (LogSetup) Debug.Log("[Bootstrap] WinScreenUI wired");
+                }
+            }
             if (CreateLevelTimerUI) EnsureComponent<LevelTimerUI>("LevelTimerUI");
 
             if (CreateBotRaceMode)
@@ -94,6 +118,14 @@ namespace MeraWorld.Core
                 }
             }
 
+            // MultiplayerMenuUI panel ko hide karo (scene reload ke baad wapas show ho jata hai)
+            var mmUI = FindFirstObjectByType<MultiplayerMenuUI>();
+            if (mmUI != null)
+            {
+                mmUI.Hide();
+                Debug.Log("[Bootstrap] MultiplayerMenuUI hidden");
+            }
+
             if (LogSetup) Debug.Log("[Bootstrap] === Scene setup complete ===");
         }
 
@@ -114,6 +146,7 @@ namespace MeraWorld.Core
         }
     }
 }
+
 
 
 

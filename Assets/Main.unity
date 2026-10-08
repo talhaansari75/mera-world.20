@@ -1514,6 +1514,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7e4a24b6baf8cb4e95a09b25a2536cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.GameplayCosmicTheme
+  LightMode: 1
+  TopColor: {r: 0.98, g: 0.96, b: 1, a: 1}
+  BottomColor: {r: 0.92, g: 0.88, b: 1, a: 1}
 --- !u!1 &420426491
 GameObject:
   m_ObjectHideFlags: 0
@@ -2058,7 +2061,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2028821575}
-  - component: {fileID: 2028821576}
   m_Layer: 0
   m_Name: HomeScreenEnhancer
   m_TagString: Untagged
@@ -2081,18 +2083,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2028821576
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2028821574}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6dfb77d360354aa4bb8998e869bd0b43, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MeraWorld.Core.HomeScreenEnhancer
 --- !u!1 &2138983427
 GameObject:
   m_ObjectHideFlags: 0

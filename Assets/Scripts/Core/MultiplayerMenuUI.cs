@@ -274,24 +274,22 @@ namespace MeraWorld.Core
 
         private void OnTestBotRaceClicked()
         {
-            Debug.Log("[TEST] Starting multiplayer bot race...");
+            Debug.Log("[TEST] Test mode - reload scene with cream theme");
 
-            // Hide this menu
+            // TestMode enable
+            TestModeTheme.Enable();
+
+            // HIDE this menu before reload
             Hide();
 
-            // Hide home screen, show gameplay
-            var home = FindFirstObjectByType<HomeScreenUI>();
-            if (home != null) home.ForceShowGameplay();
+            // Flags
+            PlayerPrefs.SetInt("SkipHome", 1);
+            PlayerPrefs.SetInt("ForceTestRace", 1);
+            PlayerPrefs.Save();
 
-            // WAHI multiplayer BotRaceMode use karo (production)
-            var brm = FindFirstObjectByType<BotRaceMode>();
-            if (brm == null)
-            {
-                var go = new GameObject("BotRaceMode");
-                brm = go.AddComponent<BotRaceMode>();
-            }
-
-            brm.ForceStartRace();
+            // Scene reload
+            UnityEngine.SceneManagement.SceneManager.LoadScene(
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
         }
 
         private void UpdateTimer(float remaining)

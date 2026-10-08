@@ -6,63 +6,71 @@ namespace MeraWorld.Core
     {
         private GameObject _bgObj;
 
-        [Header("Background Style")]
-        [Tooltip("Light mode ON - white/cream background")]
-        public bool LightMode = true;
-
-        [Tooltip("Top color of gradient")]
-        public Color TopColor = new Color(1.00f, 0.99f, 0.95f);    // cream white
-
-        [Tooltip("Bottom color of gradient")]
-        public Color BottomColor = new Color(0.98f, 0.96f, 0.90f); // light cream
-
         void Start()
         {
             Invoke(nameof(BuildBackground), 0.05f);
         }
 
-        void BuildBackground()
+        public void BuildBackground()
         {
             if (_bgObj != null) Destroy(_bgObj);
+
+            var cam = Camera.main;
+            if (cam == null) { Debug.LogError("[GameplayTheme] No main camera!"); return; }
+
+            // FORCE camera setup
+            cam.clearFlags = CameraClearFlags.SolidColor;
+
+            if (TestModeTheme.IsActive)
+            {
+                cam.backgroundColor = new Color(0.98f, 0.96f, 0.90f);
+                Debug.Log("[GameplayTheme] TEST camera cream set");
+            }
+
+            // TEST MODE: camera solid cream
+            if (TestModeTheme.IsActive)
+            {
+                cam.clearFlags = CameraClearFlags.SolidColor;
+                cam.backgroundColor = TestModeTheme.CreamBG;
+                Debug.Log("[GameplayTheme] TEST MODE - camera cream");
+
+                // Sprite bhi lagao backup ke liye
+                _bgObj = new GameObject("GameplayBackground");
+                _bgObj.transform.SetParent(transform, false);
+                var sr = _bgObj.AddComponent<SpriteRenderer>();
+                sr.sprite = UISpriteFactory.Create3DSphereSprite(TestModeTheme.CreamBG, 4);
+                sr.color = Color.white;
+                sr.sortingOrder = -1000;
+                float wh = cam.orthographicSize * 2.5f;
+                float ww = wh * ((float)Screen.width / Screen.height);
+                _bgObj.transform.localScale = new Vector3(ww, wh, 1f);
+                _bgObj.transform.position = new Vector3(0f, 0f, 5f);
+                return;
+            }
+
+            // PRODUCTION
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = new Color(0.05f, 0.05f, 0.15f);
 
             _bgObj = new GameObject("GameplayBackground");
             _bgObj.transform.SetParent(transform, false);
 
-            var sr = _bgObj.AddComponent<SpriteRenderer>();
+            var sr2 = _bgObj.AddComponent<SpriteRenderer>();
+            sr2.sprite = Resources.Load<Sprite>("UI/HomeScreen/Backgrounds/bg_space");
+            sr2.color = Color.white;
+            sr2.sortingOrder = -1000;
 
-            // TEST MODE: cream background
-            // PRODUCTION: space background
-            if (false)
-            {
-                sr.sprite = UISpriteFactory.Create3DSphereSprite(TestModeTheme.CreamBG, 4);
-                sr.color = Color.white;
-                Debug.Log("[GameplayTheme] TEST MODE - cream background");
-            }
-            else
-            {
-                sr.sprite = Resources.Load<Sprite>("UI/HomeScreen/Backgrounds/bg_space");
-                sr.color = Color.white;
-                Debug.Log("[GameplayTheme] PRODUCTION - space background");
-            }
-
-            sr.sortingOrder = -1000;
-
-            var cam = Camera.main;
-            if (cam != null && sr.sprite != null)
+            if (sr2.sprite != null)
             {
                 float worldHeight = cam.orthographicSize * 2f;
                 float worldWidth = worldHeight * ((float)Screen.width / Screen.height);
-                float spriteW = sr.sprite.bounds.size.x;
-                float spriteH = sr.sprite.bounds.size.y;
+                float spriteW = sr2.sprite.bounds.size.x;
+                float spriteH = sr2.sprite.bounds.size.y;
                 _bgObj.transform.localScale = new Vector3(worldWidth / spriteW, worldHeight / spriteH, 1f);
             }
-
             _bgObj.transform.position = new Vector3(0f, 0f, 5f);
-
-            Debug.Log("[GameplayTheme] Background applied - LightMode=" + LightMode);
+            Debug.Log("[GameplayTheme] PRODUCTION - space bg");
         }
     }
 }
-
-
 

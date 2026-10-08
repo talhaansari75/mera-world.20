@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,7 +21,15 @@ namespace MeraWorld.Core
         public int CoinsPerWord = 5;
 
         public event Action<string> OnWordFound;
-        public event Action OnLevelComplete;
+        public static event Action OnLevelComplete;
+
+        /// <summary>
+        /// Play session start pe static event clear karo.
+        /// </summary>
+        public static void ClearLevelCompleteListeners()
+        {
+            OnLevelComplete = null;
+        }
 
         private static readonly Color[] WordColors = new Color[]
         {
@@ -56,9 +64,9 @@ namespace MeraWorld.Core
 
         void Update()
         {
-            // ═══════════════════════════════════════════════════════════════
+            // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             // GATE #1: Home screen visible? SKIP everything silently.
-            // ═══════════════════════════════════════════════════════════════
+            // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             if (HomeScreenUI.IsHomeVisible)
             {
                 if (_isDragging)
@@ -66,12 +74,12 @@ namespace MeraWorld.Core
                     _isDragging = false;
                     ClearSelection();
                 }
-                return;   // ← EARLY EXIT, no input, no physics
+                return;   // â† EARLY EXIT, no input, no physics
             }
 
-            // ═══════════════════════════════════════════════════════════════
+            // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             // GATE #2: No grid? SKIP.
-            // ═══════════════════════════════════════════════════════════════
+            // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             if (_cam == null) _cam = Camera.main;
             if (_grid == null && GameManager != null) _grid = GameManager.LastGeneratedGrid;
             if (_cam == null || _grid == null) return;
@@ -166,6 +174,10 @@ namespace MeraWorld.Core
 
         private void Validate()
         {
+            Debug.Log("[SelectionManager] Validate() called, selection count = " + _selection.Count);
+            foreach (var t in _selection)
+                Debug.Log("[SelectionManager] Tile: " + t.Row + "," + t.Column + " = " + t.Letter);
+            if (_grid == null) Debug.Log("[SelectionManager] GRID IS NULL!");
             if (_grid == null) { ClearSelection(); return; }
 
             var cells = new List<GridCell>();
@@ -220,6 +232,7 @@ namespace MeraWorld.Core
 
             OnWordFound?.Invoke(word);
 
+            Debug.Log($"[SelectionManager] COMPLETION CHECK: found={_foundWords.Count} total={GameManager.Words.Count}");
             if (GameManager != null && _foundWords.Count >= GameManager.Words.Count)
             {
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayLevelComplete();
@@ -234,6 +247,8 @@ namespace MeraWorld.Core
 
                 if (ComboSystem.Instance != null) ComboSystem.Instance.ResetCombo();
 
+                int _subCount = OnLevelComplete != null ? OnLevelComplete.GetInvocationList().Length : 0;
+                Debug.Log("[SelectionManager] *** INVOKING OnLevelComplete *** subscribers=" + _subCount);
                 OnLevelComplete?.Invoke();
             }
         }
@@ -355,3 +370,5 @@ namespace MeraWorld.Core
         }
     }
 }
+
+

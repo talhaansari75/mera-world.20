@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,6 +34,42 @@ namespace MeraWorld.Core
                 SelectionManager.OnWordFound += OnWordFound;
         }
 
+        /// <summary>
+        /// Scene reload ke baad forcefully rebuild karo.
+        /// </summary>
+        public void ForceRebuild()
+        {
+            Debug.Log("[WordListUI] ForceRebuild called");
+
+            // Purana canvas destroy
+            if (_canvas != null)
+            {
+                Destroy(_canvas.gameObject);
+                _canvas = null;
+            }
+
+            // Dictionaries clear
+            _wordTexts.Clear();
+            _wordBackgrounds.Clear();
+            _foundWords.Clear();
+            _panelTransform = null;
+
+            // Rebuild fresh
+            BuildCanvas();
+            BuildPanel();
+            BuildTitle();
+            BuildWords();
+
+            // Re-subscribe
+            if (SelectionManager != null)
+            {
+                SelectionManager.OnWordFound -= OnWordFound;
+                SelectionManager.OnWordFound += OnWordFound;
+            }
+
+            Debug.Log("[WordListUI] ForceRebuild done, words=" + _wordTexts.Count);
+        }
+
         private void BuildCanvas()
         {
             var canvasObj = new GameObject("WordListCanvas");
@@ -57,7 +93,10 @@ namespace MeraWorld.Core
             panelObj.transform.SetParent(_canvas.transform, false);
 
             var panelImg = panelObj.AddComponent<Image>();
-            panelImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.22f, 0.10f, 0.45f), 256, 40);
+            var panelColor = MeraWorld.Core.TestModeTheme.IsActive 
+                ? new Color(0.95f, 0.92f, 0.85f) 
+                : new Color(0.22f, 0.10f, 0.45f);
+            panelImg.sprite = UISpriteFactory.Create3DButtonSprite(panelColor, 256, 40);
             panelImg.type = Image.Type.Sliced;
             panelImg.color = Color.white;
             panelImg.raycastTarget = false;
@@ -78,7 +117,10 @@ namespace MeraWorld.Core
             titleObj.transform.SetParent(_panelTransform, false);
 
             var titleBg = titleObj.AddComponent<Image>();
-            titleBg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.85f, 0.60f, 0.15f), 128, 30);
+            var titleColor = MeraWorld.Core.TestModeTheme.IsActive 
+                   ? new Color(0.90f, 0.75f, 0.45f) 
+                   : new Color(0.85f, 0.60f, 0.15f);
+            titleBg.sprite = UISpriteFactory.Create3DButtonSprite(titleColor, 128, 30);
             titleBg.type = Image.Type.Sliced;
             titleBg.color = Color.white;
             titleBg.raycastTarget = false;
@@ -97,7 +139,7 @@ namespace MeraWorld.Core
             text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             text.fontSize = 22;
             text.fontStyle = FontStyle.Bold;
-            text.color = Color.white;
+            text.color = MeraWorld.Core.TestModeTheme.IsActive ? new Color(0.35f, 0.20f, 0.10f) : Color.white;
             text.alignment = TextAnchor.MiddleCenter;
             text.raycastTarget = false;
 
@@ -148,7 +190,10 @@ namespace MeraWorld.Core
             var bgObj = new GameObject("BG");
             bgObj.transform.SetParent(cellObj.transform, false);
             var bgImg = bgObj.AddComponent<Image>();
-            bgImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.30f, 0.15f, 0.55f), 128, 20);
+            var pillColor = MeraWorld.Core.TestModeTheme.IsActive 
+                  ? new Color(0.95f, 0.92f, 0.85f) 
+                  : new Color(0.30f, 0.15f, 0.55f);
+            bgImg.sprite = UISpriteFactory.Create3DButtonSprite(pillColor, 128, 20);
             bgImg.type = Image.Type.Sliced;
             bgImg.color = Color.white;
             bgImg.raycastTarget = false;
@@ -168,7 +213,7 @@ namespace MeraWorld.Core
             text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             text.fontSize = 22;
             text.fontStyle = FontStyle.Bold;
-            text.color = Color.white;
+            text.color = MeraWorld.Core.TestModeTheme.IsActive ? new Color(0.35f, 0.20f, 0.10f) : Color.white;
             text.alignment = TextAnchor.MiddleCenter;
             text.raycastTarget = false;
 
@@ -195,10 +240,12 @@ namespace MeraWorld.Core
             _foundWords.Add(word);
 
             // Change text color + add checkmark
+            
+            // NEW: Check if Text/BG are valid
             if (_wordTexts.TryGetValue(word, out var text))
             {
-                text.text = "✓ " + word;
-                text.color = new Color(0.60f, 1f, 0.60f);
+                text.text = "âœ“ " + word;
+                text.color = MeraWorld.Core.TestModeTheme.IsActive ? new Color(0.10f, 0.55f, 0.20f) : new Color(0.60f, 1f, 0.60f);
             }
 
             // Change background to green
@@ -219,3 +266,6 @@ namespace MeraWorld.Core
         }
     }
 }
+
+
+

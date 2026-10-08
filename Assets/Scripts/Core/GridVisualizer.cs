@@ -15,12 +15,24 @@ namespace MeraWorld.Core
         private const float GridOffsetX = 0f;
         private const float GridOffsetY = 0.55f;
 
-        private static readonly Color TileTop    = new Color(0.55f, 0.35f, 0.90f);
-        private static readonly Color TileMid    = new Color(0.28f, 0.14f, 0.62f);
-        private static readonly Color TileBottom = new Color(0.10f, 0.04f, 0.28f);
+        private static readonly Color ProdTileTop    = new Color(0.55f, 0.35f, 0.90f);
+        private static readonly Color ProdTileMid    = new Color(0.28f, 0.14f, 0.62f);
+        private static readonly Color ProdTileBottom = new Color(0.10f, 0.04f, 0.28f);
 
-        private static readonly Color PanelTop    = new Color(0.14f, 0.22f, 0.42f);
-        private static readonly Color PanelBottom = new Color(0.05f, 0.08f, 0.20f);
+        private static readonly Color TestTileTop    = new Color(1.00f, 0.99f, 0.96f);
+        private static readonly Color TestTileMid    = new Color(0.97f, 0.95f, 0.90f);
+        private static readonly Color TestTileBottom = new Color(0.92f, 0.88f, 0.82f);
+        private static readonly Color TestPanelTop    = new Color(0.98f, 0.96f, 0.90f);
+        private static readonly Color TestPanelBottom = new Color(0.88f, 0.84f, 0.76f);
+
+        private static Color TileTop    { get { return TestModeTheme.IsActive ? TestTileTop    : ProdTileTop;    } }
+        private static Color TileMid    { get { return TestModeTheme.IsActive ? TestTileMid    : ProdTileMid;    } }
+        private static Color TileBottom { get { return TestModeTheme.IsActive ? TestTileBottom : ProdTileBottom; } }
+        private static Color PanelTop    { get { return TestModeTheme.IsActive ? TestPanelTop    : ProdPanelTop;    } }
+        private static Color PanelBottom { get { return TestModeTheme.IsActive ? TestPanelBottom : ProdPanelBottom; } }
+
+        private static readonly Color ProdPanelTop    = new Color(0.14f, 0.22f, 0.42f);
+        private static readonly Color ProdPanelBottom = new Color(0.05f, 0.08f, 0.20f);
         private static readonly Color GoldRim     = new Color(1.00f, 0.82f, 0.30f);
 
         private static readonly Color LetterColor       = new Color(1f, 1f, 1f);
@@ -48,8 +60,18 @@ namespace MeraWorld.Core
             Invoke(nameof(BuildVisuals), 0.1f);
         }
 
-        private void BuildVisuals()
+        public void BuildVisuals()
         {
+            // Purane grid objects clear karo (scene reload pe leftover)
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                var child = transform.GetChild(i);
+                if (child.name.StartsWith("Cell_") || child.name.Contains("Grid") || child.name.Contains("Tile") || child.name.Contains("Letter") || child.name.Contains("Rim") || child.name.Contains("Star") || child.name.Contains("Panel") || child.name.Contains("Gold"))
+                {
+                    Destroy(child.gameObject);
+                }
+            }
+            Debug.Log("[GridVisualizer] Old grid cleared, rebuilding...");
             var grid = GameManager.LastGeneratedGrid;
             if (grid == null) return;
 
@@ -172,7 +194,7 @@ namespace MeraWorld.Core
             {
                 tile.Manager = SelectionManager;
                 tile.SetColors(
-                    Color.white,
+                    TestModeTheme.IsActive ? TestModeTheme.WhiteTileTop : Color.white,
                     new Color(1f, 0.85f, 0.30f, 0.98f),
                     new Color(0.35f, 0.95f, 0.55f, 0.98f));
             }
@@ -184,7 +206,7 @@ namespace MeraWorld.Core
 
             var tms = textShadowObj.AddComponent<TextMesh>();
             tms.text = letter.ToString();
-            tms.color = LetterShadowColor;
+            tms.color = TestModeTheme.IsActive ? TestModeTheme.BrownShadow : LetterShadowColor;
             tms.fontSize = 100;
             tms.characterSize = 0.058f;
             tms.anchor = TextAnchor.MiddleCenter;
@@ -206,7 +228,7 @@ namespace MeraWorld.Core
 
             var tm = textObj.AddComponent<TextMesh>();
             tm.text = letter.ToString();
-            tm.color = LetterColor;
+            tm.color = TestModeTheme.IsActive ? TestModeTheme.BrownLetter : LetterColor;
             tm.fontSize = 100;
             tm.characterSize = 0.058f;
             tm.anchor = TextAnchor.MiddleCenter;
@@ -342,5 +364,8 @@ namespace MeraWorld.Core
         }
     }
 }
+
+
+
 
 

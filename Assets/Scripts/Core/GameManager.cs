@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using MeraWorld.WordSearch;
 
@@ -102,6 +102,36 @@ namespace MeraWorld.Core
             if (result.FailedWords.Count > 0)
                 foreach (var w in result.FailedWords)
                     Debug.LogWarning($"  FAIL {w} (dropped)");
+        }
+
+        /// <summary>
+        /// Scene reload pe naya level load karo. DontDestroyOnLoad ki wajah se Awake dobara nahi chalta.
+        /// </summary>
+        public void ReloadFromProgress()
+        {
+            int newLevel = PlayerProgressManager.Instance != null
+                ? PlayerProgressManager.Instance.CurrentLevel
+                : PlayerPrefs.GetInt("CurrentLevel", 1);
+
+            if (newLevel == CurrentLevel && LastGeneratedGrid != null)
+            {
+                Debug.Log("[GameManager] Same level, skip reload");
+                return;
+            }
+
+            CurrentLevel = newLevel;
+            var requestedWords = GetWordsForLevel(CurrentLevel);
+            int seed = CurrentLevel * 7919 + 13;
+
+            Debug.Log($"[GameManager] === RELOAD: Level {CurrentLevel} ===");
+            Debug.Log($"[GameManager] Words: {string.Join(", ", requestedWords)}");
+            Debug.Log($"[GameManager] Seed: {seed}");
+
+            var result = GenerateWithRetry(requestedWords, seed);
+            LastGeneratedGrid = result.Grid;
+            Words = new List<string>(result.PlacedWords);
+
+            Debug.Log($"[GameManager] RELOAD placed: {result.PlacedWords.Count} / {requestedWords.Count}");
         }
 
         private WordSearchGenerator.Result GenerateWithRetry(List<string> requestedWords, int seed)

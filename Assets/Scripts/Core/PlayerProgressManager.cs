@@ -1,10 +1,10 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace MeraWorld.Core
 {
     /// <summary>
     /// Saves and loads player progress (coins, level, stars).
-    /// Single source of truth — sab systems yahan se data lete hain.
+    /// Single source of truth â€” sab systems yahan se data lete hain.
     /// </summary>
     public class PlayerProgressManager : MonoBehaviour
     {
@@ -39,7 +39,7 @@ namespace MeraWorld.Core
 
             Load();
 
-            Debug.Log($"[Progress] Loaded — Coins: {Coins}, Level: {CurrentLevel}, Highest: {HighestLevelUnlocked}");
+            Debug.Log($"[Progress] Loaded â€” Coins: {Coins}, Level: {CurrentLevel}, Highest: {HighestLevelUnlocked}");
         }
 
         public void Load()
@@ -68,7 +68,7 @@ namespace MeraWorld.Core
             Coins += amount;
             Save();
             OnCoinsChanged?.Invoke(Coins);
-            Debug.Log($"[Progress] +{amount} coins → total {Coins}");
+            Debug.Log($"[Progress] +{amount} coins â†’ total {Coins}");
         }
 
         public bool SpendCoins(int amount)
@@ -82,6 +82,8 @@ namespace MeraWorld.Core
 
         public void SetCurrentLevel(int level)
         {
+            Debug.Log("[Progress] SetCurrentLevel called with " + level);
+            Debug.Log("[Progress] SetCurrentLevel called with " + level);
             CurrentLevel = level;
             if (CurrentLevel > HighestLevelUnlocked)
                 HighestLevelUnlocked = CurrentLevel;

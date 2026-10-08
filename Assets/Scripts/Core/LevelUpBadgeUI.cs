@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,7 +28,7 @@ namespace MeraWorld.Core
 
             // Hook after win screen shows
             if (SelectionManager.Instance != null)
-                SelectionManager.Instance.OnLevelComplete += OnLevelComplete;
+                MeraWorld.Core.SelectionManager.OnLevelComplete += OnLevelComplete;
         }
 
         private void BuildCanvas()
@@ -117,7 +117,7 @@ namespace MeraWorld.Core
         void OnDestroy()
         {
             if (SelectionManager.Instance != null)
-                SelectionManager.Instance.OnLevelComplete -= OnLevelComplete;
+                MeraWorld.Core.SelectionManager.OnLevelComplete -= OnLevelComplete;
         }
     }
 }
