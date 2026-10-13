@@ -10,8 +10,8 @@ namespace MeraWorld.Core
         public SelectionManager SelectionManager;
 
         // Ye 2 values badli hain Ã¢â‚¬â€ pehle 0.60f/0.10f the
-        private const float CellSize = 0.88f;
-        private const float CellGap  = 0.12f;
+        private const float CellSize = 0.72f;
+        private const float CellGap  = 0.08f;
         private const float GridOffsetX = 0f;
         private const float GridOffsetY = 0.55f;
 
@@ -340,17 +340,10 @@ namespace MeraWorld.Core
             float scaleY = availableHeight / gridHeight;
             float scale  = Mathf.Min(scaleX, scaleY);
 
-            // Sirf tab scale karo jab zaroorat ho
-            if (scale < 1f)
-            {
-                transform.localScale = new Vector3(scale, scale, 1f);
-                Debug.Log($"[GridVisualizer] Grid scaled to {scale:F2} for screen {Screen.width}x{Screen.height}");
-            }
-            else
-            {
-                transform.localScale = Vector3.one;
-            }
-
+            // FIX: Hamesha scale apply karo (mobile portrait me overflow rokne ke liye)
+            float finalScale = Mathf.Min(scale, 1.0f);
+            transform.localScale = new Vector3(finalScale, finalScale, 1f);
+            Debug.Log($"[GridVisualizer] Grid scaled to {finalScale:F2} (avail {availableWidth:F2}x{availableHeight:F2}, grid {gridWidth:F2}x{gridHeight:F2}) screen {Screen.width}x{Screen.height}");
             // Grid ko center mein rakho
             transform.localPosition = Vector3.zero;
         }
