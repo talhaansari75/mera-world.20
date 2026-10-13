@@ -51,6 +51,11 @@ namespace MeraWorld.Core
 
         private IEnumerator ShowWordPopup(string word)
         {
+            // SAFETY: agar canvas destroy ho gaya to coroutine band karo
+            if (this == null || gameObject == null) yield break;
+            if (_canvas == null) yield break;
+            // Safety: agar canvas destroy ho gaya to coroutine band karo
+            if (this == null || gameObject == null) yield break;
             var popup = new GameObject("WordPopup");
             popup.transform.SetParent(_canvas.transform, false);
 

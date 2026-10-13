@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -53,11 +53,16 @@ namespace MeraWorld.Core
             _categoryText = textObj.AddComponent<Text>();
             _categoryText.text = "WORDS";
             _categoryText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _categoryText.fontSize = 22;
+            _categoryText.fontSize = 26;
             _categoryText.fontStyle = FontStyle.Bold;
-            _categoryText.color = new Color(0.60f, 0.75f, 1f);
+            _categoryText.color = new Color(1f, 0.90f, 0.55f);
             _categoryText.alignment = TextAnchor.MiddleCenter;
             _categoryText.raycastTarget = false;
+
+            // Gold shadow for premium look
+            var shadow = textObj.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.7f);
+            shadow.effectDistance = new Vector2(2f, -2f);
 
             var rt = textObj.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 1f);

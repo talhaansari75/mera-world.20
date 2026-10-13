@@ -1,6 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+using DG.Tweening;
 
 namespace MeraWorld.Core
 {
@@ -59,18 +61,18 @@ namespace MeraWorld.Core
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(0f, 550f);
-            rt.sizeDelta = new Vector2(500f, 130f);
+            rt.anchoredPosition = new Vector2(0f, 780f);
+            rt.sizeDelta = new Vector2(420f, 110f);
 
             var textObj = new GameObject("Text");
             textObj.transform.SetParent(_badge.transform, false);
-            var txt = textObj.AddComponent<Text>();
+            var txt = textObj.AddComponent<TextMeshProUGUI>();
             txt.text = "PERFECT!";
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            var pf = Resources.Load<TMP_FontAsset>("Fonts/Poppins-Bold SDF"); if (pf != null) txt.font = pf;
             txt.fontSize = 60;
-            txt.fontStyle = FontStyle.Bold;
+            txt.fontStyle = FontStyles.Bold;
             txt.color = new Color(0.20f, 0.10f, 0.05f);
-            txt.alignment = TextAnchor.MiddleCenter;
+            txt.alignment = TextAlignmentOptions.Center;
             txt.raycastTarget = false;
 
             var trt = textObj.GetComponent<RectTransform>();

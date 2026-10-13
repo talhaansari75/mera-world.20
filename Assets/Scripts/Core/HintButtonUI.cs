@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace MeraWorld.Core
@@ -49,49 +49,39 @@ namespace MeraWorld.Core
             btnObj.transform.SetParent(_canvas.transform, false);
 
             var img = btnObj.AddComponent<Image>();
-            img.sprite = UISpriteFactory.Create3DButtonSprite(
-                new Color(0.95f, 0.75f, 0.25f), 256, 60);
-            img.type = Image.Type.Sliced;
+            // Try premium bulb first
+            Sprite premiumBulb = Resources.Load<Sprite>("UI/Premium/hint_bulb");
+            if (premiumBulb != null)
+            {
+                img.sprite = premiumBulb;
+                img.type = Image.Type.Simple;
+                img.color = Color.white;
+                Debug.Log("[Hint] Premium bulb loaded!");
+            }
+            else
+            {
+                img.sprite = UISpriteFactory.Create3DButtonSprite(new Color(1f, 0.80f, 0.20f), 256, 60);
+                img.type = Image.Type.Sliced;
+                img.color = Color.white;
+            }
             img.color = Color.white;
 
             var btn = btnObj.AddComponent<Button>();
             btn.onClick.AddListener(OnHintClicked);
 
-            // ═══════════════════════════════════════════════════════
+            // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             // POSITION: Just ABOVE the "WORDS TO FIND" panel
             // Words panel is at y=220 to y=440 (from bottom)
             // So bulb sits at y=490, right side
-            // ═══════════════════════════════════════════════════════
+            // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             var rt = btnObj.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(1f, 0f);   // bottom-right
             rt.anchorMax = new Vector2(1f, 0f);
             rt.pivot = new Vector2(1f, 0f);
-            rt.anchoredPosition = new Vector2(-40f, 480f);  // just above words panel
-            rt.sizeDelta = new Vector2(150f, 150f);
+            rt.anchoredPosition = new Vector2(-30f, 540f);  // just above words panel
+            rt.sizeDelta = new Vector2(160f, 160f);
 
-            // Lightbulb icon
-            var iconObj = new GameObject("Icon");
-            iconObj.transform.SetParent(btnObj.transform, false);
-            var iconImg = iconObj.AddComponent<Image>();
-
-            if (_lightbulbSprite != null)
-            {
-                iconImg.sprite = _lightbulbSprite;
-                iconImg.preserveAspect = true;
-            }
-            else
-            {
-                iconImg.sprite = UISpriteFactory.Create3DSphereSprite(
-                    new Color(1f, 0.85f, 0.20f), 64);
-            }
-
-            iconImg.raycastTarget = false;
-            var iconRt = iconObj.GetComponent<RectTransform>();
-            iconRt.anchorMin = new Vector2(0.5f, 0.5f);
-            iconRt.anchorMax = new Vector2(0.5f, 0.5f);
-            iconRt.pivot = new Vector2(0.5f, 0.5f);
-            iconRt.anchoredPosition = new Vector2(0f, 15f);
-            iconRt.sizeDelta = new Vector2(100f, 100f);
+            // Icon block removed - premium bulb image khud dikhega
 
             // Coin cost badge at bottom
             var badgeObj = new GameObject("Badge");
@@ -163,3 +153,8 @@ namespace MeraWorld.Core
         }
     }
 }
+
+
+
+
+

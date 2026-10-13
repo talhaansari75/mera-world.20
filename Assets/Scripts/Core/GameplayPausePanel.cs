@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -12,7 +12,30 @@ namespace MeraWorld.Core
         private GameObject _panel;
         private bool _isPaused = false;
 
-        void Start() { Invoke(nameof(Setup), 1.2f); }
+        void Awake()
+        {
+            // If PauseMenuUI (premium) exists, this is a duplicate — destroy self
+            var premium = FindFirstObjectByType<PauseMenuUI>();
+            if (premium != null)
+            {
+                Debug.Log("[GameplayPausePanel] PauseMenuUI found in Awake — destroying self");
+                Destroy(this);  // only component, NOT the GameObject
+                return;
+            }
+        }
+
+        void Start()
+        {
+            // Double-check (in case PauseMenuUI was created after Awake)
+            var premium = FindFirstObjectByType<PauseMenuUI>();
+            if (premium != null)
+            {
+                Debug.Log("[GameplayPausePanel] PauseMenuUI found in Start — destroying self");
+                Destroy(this);  // only component, NOT the GameObject
+                return;
+            }
+            Invoke(nameof(Setup), 1.2f);
+        }
 
         void Update()
         {
@@ -158,13 +181,13 @@ namespace MeraWorld.Core
             ttrt.offsetMin = Vector2.zero;
             ttrt.offsetMax = Vector2.zero;
 
-            CreateBigButton(_panel.transform, "▶  RESUME", new Vector2(0f, 250f),
+            CreateBigButton(_panel.transform, "â–¶  RESUME", new Vector2(0f, 250f),
                 new Vector2(600f, 130f), new Color(0.25f, 0.70f, 0.35f), Resume);
-            CreateBigButton(_panel.transform, "↻  RESTART", new Vector2(0f, 90f),
+            CreateBigButton(_panel.transform, "â†»  RESTART", new Vector2(0f, 90f),
                 new Vector2(600f, 130f), new Color(0.30f, 0.50f, 0.80f), Restart);
-            CreateBigButton(_panel.transform, "⚙  SETTINGS", new Vector2(0f, -70f),
+            CreateBigButton(_panel.transform, "âš™  SETTINGS", new Vector2(0f, -70f),
                 new Vector2(600f, 130f), new Color(0.45f, 0.35f, 0.65f), OpenSettings);
-            CreateBigButton(_panel.transform, "🏠  HOME", new Vector2(0f, -230f),
+            CreateBigButton(_panel.transform, "ðŸ   HOME", new Vector2(0f, -230f),
                 new Vector2(600f, 130f), new Color(0.50f, 0.50f, 0.55f), GoHome);
 
             _panel.SetActive(false);
@@ -193,7 +216,7 @@ namespace MeraWorld.Core
             Time.timeScale = 1f;
             PlayerPrefs.SetInt("SkipHome", 1);
             PlayerPrefs.Save();
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            // SceneManager.LoadScene(...) DISABLED - in-place restart
         }
 
         private void OpenSettings()
@@ -208,7 +231,7 @@ namespace MeraWorld.Core
             Time.timeScale = 1f;
             PlayerPrefs.SetInt("SkipHome", 0);
             PlayerPrefs.Save();
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            // SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // DISABLED - blank screen fix
         }
 
         void OnDestroy() { Time.timeScale = 1f; }
@@ -293,3 +316,4 @@ namespace MeraWorld.Core
         }
     }
 }
+

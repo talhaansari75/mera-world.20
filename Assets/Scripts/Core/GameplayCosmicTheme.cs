@@ -5,72 +5,89 @@ namespace MeraWorld.Core
     public class GameplayCosmicTheme : MonoBehaviour
     {
         private GameObject _bgObj;
+        private GameObject _patternObj;
 
-        void Start()
-        {
-            Invoke(nameof(BuildBackground), 0.05f);
-        }
+        // Fallback colors
+        private static readonly Color BgDeep = new Color(0.10f, 0.03f, 0.22f);
+        private static readonly Color BgMid  = new Color(0.18f, 0.06f, 0.35f);
+        private static readonly Color BgTop  = new Color(0.24f, 0.08f, 0.45f);
+        private static readonly Color PatternColor = new Color(0.55f, 0.25f, 0.80f, 0.30f);
+
+        void Start() { Invoke(nameof(BuildBackground), 0.05f); }
+        void OnEnable() { Invoke(nameof(BuildBackground), 0.1f); }
 
         public void BuildBackground()
         {
             if (_bgObj != null) Destroy(_bgObj);
+            if (_patternObj != null) Destroy(_patternObj);
 
             var cam = Camera.main;
-            if (cam == null) { Debug.LogError("[GameplayTheme] No main camera!"); return; }
+            if (cam == null) return;
 
-            // FORCE camera setup
             cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = BgDeep;
 
-            if (TestModeTheme.IsActive)
-            {
-                cam.backgroundColor = new Color(0.98f, 0.96f, 0.90f);
-                Debug.Log("[GameplayTheme] TEST camera cream set");
-            }
-
-            // TEST MODE: camera solid cream
-            if (TestModeTheme.IsActive)
-            {
-                cam.clearFlags = CameraClearFlags.SolidColor;
-                cam.backgroundColor = TestModeTheme.CreamBG;
-                Debug.Log("[GameplayTheme] TEST MODE - camera cream");
-
-                // Sprite bhi lagao backup ke liye
-                _bgObj = new GameObject("GameplayBackground");
-                _bgObj.transform.SetParent(transform, false);
-                var sr = _bgObj.AddComponent<SpriteRenderer>();
-                sr.sprite = UISpriteFactory.Create3DSphereSprite(TestModeTheme.CreamBG, 4);
-                sr.color = Color.white;
-                sr.sortingOrder = -1000;
-                float wh = cam.orthographicSize * 2.5f;
-                float ww = wh * ((float)Screen.width / Screen.height);
-                _bgObj.transform.localScale = new Vector3(ww, wh, 1f);
-                _bgObj.transform.position = new Vector3(0f, 0f, 5f);
-                return;
-            }
-
-            // PRODUCTION
-            cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(0.05f, 0.05f, 0.15f);
+            float worldHeight = cam.orthographicSize * 2.5f;
+            float worldWidth = worldHeight * ((float)Screen.width / Screen.height);
 
             _bgObj = new GameObject("GameplayBackground");
             _bgObj.transform.SetParent(transform, false);
-
-            var sr2 = _bgObj.AddComponent<SpriteRenderer>();
-            sr2.sprite = Resources.Load<Sprite>("UI/HomeScreen/Backgrounds/bg_space");
-            sr2.color = Color.white;
-            sr2.sortingOrder = -1000;
-
-            if (sr2.sprite != null)
+            var sr = _bgObj.AddComponent<SpriteRenderer>();
+            
+            // Try premium paisley image first
+            Sprite paisley = Resources.Load<Sprite>("UI/Premium/bg_paisley");
+            if (paisley != null)
             {
-                float worldHeight = cam.orthographicSize * 2f;
-                float worldWidth = worldHeight * ((float)Screen.width / Screen.height);
-                float spriteW = sr2.sprite.bounds.size.x;
-                float spriteH = sr2.sprite.bounds.size.y;
-                _bgObj.transform.localScale = new Vector3(worldWidth / spriteW, worldHeight / spriteH, 1f);
+                sr.sprite = paisley;
+                sr.color = new Color(1f, 1f, 1f, 0.5f);   // 50% opacity for subtle look
+                Debug.Log("[GameplayTheme] Premium paisley bg loaded!");
             }
+            else
+            {
+                // Fallback: gradient + procedural pattern
+                sr.sprite = UISpriteFactory.CreateGradientSprite(BgMid, BgTop, 64, 512);
+                sr.color = Color.white;
+                Debug.Log("[GameplayTheme] Using fallback gradient");
+            }
+            
+            sr.sortingOrder = -1000;
+            _bgObj.transform.localScale = new Vector3(worldWidth, worldHeight, 1f);
             _bgObj.transform.position = new Vector3(0f, 0f, 5f);
-            Debug.Log("[GameplayTheme] PRODUCTION - space bg");
+
+            // Procedural pattern only if no premium image
+            if (paisley == null)
+            {
+                _patternObj = new GameObject("PaisleyPattern");
+                _patternObj.transform.SetParent(_bgObj.transform, false);
+                BuildPaisleyPattern(worldWidth, worldHeight);
+            }
+        }
+
+        private void BuildPaisleyPattern(float width, float height)
+        {
+            int cols = 5;
+            int rows = 8;
+            float spacing = width / cols;
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    var dot = new GameObject($"P_{r}_{c}");
+                    dot.transform.SetParent(_patternObj.transform, false);
+                    var sr = dot.AddComponent<SpriteRenderer>();
+                    sr.sprite = UISpriteFactory.Create3DSphereSprite(new Color(1f, 1f, 1f, 0.35f), 64);
+                    sr.color = PatternColor;
+                    sr.sortingOrder = -999;
+
+                    float x = -width * 0.5f + (c + 0.5f) * spacing;
+                    if (r % 2 == 1) x += spacing * 0.5f;
+                    float y = -height * 0.5f + (r + 0.5f) * (height / rows);
+
+                    dot.transform.localPosition = new Vector3(x / width, y / height, 0f);
+                    dot.transform.localScale = new Vector3(0.12f, 0.12f, 1f);
+                }
+            }
         }
     }
 }
-

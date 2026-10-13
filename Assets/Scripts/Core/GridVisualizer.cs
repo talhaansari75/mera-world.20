@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using MeraWorld.WordSearch;
 
 namespace MeraWorld.Core
@@ -9,15 +9,15 @@ namespace MeraWorld.Core
         public GameManager GameManager;
         public SelectionManager SelectionManager;
 
-        // Ye 2 values badli hain â€” pehle 0.60f/0.10f the
-        private const float CellSize = 0.78f;
-        private const float CellGap  = 0.10f;
+        // Ye 2 values badli hain Ã¢â‚¬â€ pehle 0.60f/0.10f the
+        private const float CellSize = 0.88f;
+        private const float CellGap  = 0.12f;
         private const float GridOffsetX = 0f;
         private const float GridOffsetY = 0.55f;
 
-        private static readonly Color ProdTileTop    = new Color(0.55f, 0.35f, 0.90f);
-        private static readonly Color ProdTileMid    = new Color(0.28f, 0.14f, 0.62f);
-        private static readonly Color ProdTileBottom = new Color(0.10f, 0.04f, 0.28f);
+        private static readonly Color ProdTileTop    = new Color(0.45f, 0.30f, 0.75f);
+        private static readonly Color ProdTileMid    = new Color(0.28f, 0.15f, 0.55f);
+        private static readonly Color ProdTileBottom = new Color(0.12f, 0.05f, 0.25f);
 
         private static readonly Color TestTileTop    = new Color(1.00f, 0.99f, 0.96f);
         private static readonly Color TestTileMid    = new Color(0.97f, 0.95f, 0.90f);
@@ -31,8 +31,8 @@ namespace MeraWorld.Core
         private static Color PanelTop    { get { return TestModeTheme.IsActive ? TestPanelTop    : ProdPanelTop;    } }
         private static Color PanelBottom { get { return TestModeTheme.IsActive ? TestPanelBottom : ProdPanelBottom; } }
 
-        private static readonly Color ProdPanelTop    = new Color(0.14f, 0.22f, 0.42f);
-        private static readonly Color ProdPanelBottom = new Color(0.05f, 0.08f, 0.20f);
+        private static readonly Color ProdPanelTop    = new Color(0.28f, 0.10f, 0.48f);
+        private static readonly Color ProdPanelBottom = new Color(0.12f, 0.05f, 0.25f);
         private static readonly Color GoldRim     = new Color(1.00f, 0.82f, 0.30f);
 
         private static readonly Color LetterColor       = new Color(1f, 1f, 1f);
@@ -43,6 +43,11 @@ namespace MeraWorld.Core
         private Sprite _panelSprite;
         private Sprite _rimSprite;
         private Sprite _circleSprite;
+        
+        // IDEMPOTENT GUARD: track what we last built
+        
+        
+        
 
         private void Start()
         {
@@ -52,7 +57,10 @@ namespace MeraWorld.Core
                 return;
             }
 
-            _tileSprite   = CreateTileSprite(160, 30);
+            // Try premium tile first
+            Sprite premiumTile = Resources.Load<Sprite>("UI/Premium/tile_glossy");
+            _tileSprite = premiumTile != null ? premiumTile : CreateTileSprite(160, 30);
+            Debug.Log("[GridVisualizer] Tile: " + (premiumTile != null ? "premium" : "fallback"));
             _panelSprite  = CreateGradientRoundedSprite(160, 18, PanelTop, PanelBottom);
             _rimSprite    = CreateRoundedSprite(160, 18);
             _circleSprite = CreateCircleSprite(32);
@@ -60,20 +68,47 @@ namespace MeraWorld.Core
             Invoke(nameof(BuildVisuals), 0.1f);
         }
 
+        private float _lastWatchdogCheck = 0f;
+
+        void LateUpdate()
+        {
+            if (GameManager == null || GameManager.LastGeneratedGrid == null) return;
+            if (Time.unscaledTime < 1f) return; // FIX: startup pe chup raho
+            if (Time.unscaledTime - _lastWatchdogCheck < 0.5f) return;
+            _lastWatchdogCheck = Time.unscaledTime;
+
+            int cellCount = 0;
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                if (transform.GetChild(i).name.StartsWith("Cell_")) cellCount++;
+            }
+
+            if (cellCount == 0)
+            {
+                Debug.LogWarning("[GridVisualizer] WATCHDOG: rebuilding missing cells");
+                BuildVisuals();
+            }
+        }
+
         public void BuildVisuals()
         {
+            var grid = GameManager.LastGeneratedGrid;
+            if (grid == null)
+            {
+                Debug.LogError("[GridVisualizer] LastGeneratedGrid is NULL! Keeping existing cells.");
+                return;
+            }
+
             // Purane grid objects clear karo (scene reload pe leftover)
             for (int i = transform.childCount - 1; i >= 0; i--)
             {
                 var child = transform.GetChild(i);
-                if (child.name.StartsWith("Cell_") || child.name.Contains("Grid") || child.name.Contains("Tile") || child.name.Contains("Letter") || child.name.Contains("Rim") || child.name.Contains("Star") || child.name.Contains("Panel") || child.name.Contains("Gold"))
+                if (child.name.StartsWith("Cell_") || child.name.Contains("Grid") || child.name.Contains("Tile") || child.name.Contains("Letter") || child.name.Contains("Rim") || child.name.Contains("Star") || child.name.Contains("Panel") || child.name.Contains("Gold") || child.name.Contains("Frame") || child.name.Contains("Glow") || child.name.Contains("Shadow") || child.name.Contains("Shine") || child.name.Contains("Ornate") || child.name.Contains("Book") || child.name.Contains("Word"))
                 {
                     Destroy(child.gameObject);
                 }
             }
             Debug.Log("[GridVisualizer] Old grid cleared, rebuilding...");
-            var grid = GameManager.LastGeneratedGrid;
-            if (grid == null) return;
 
             int rows = grid.Rows;
             int cols = grid.Columns;
@@ -108,6 +143,25 @@ namespace MeraWorld.Core
             rimDarkSr.sortingOrder = -11;
             rimDarkObj.transform.localScale = new Vector3(panelW + 0.06f, panelH + 0.06f, 1f);
 
+            // Try premium ornate frame
+            Sprite premiumFrame = Resources.Load<Sprite>("UI/Premium/frame_ornate");
+            var frameObj = new GameObject("OrnateFrame");
+            frameObj.transform.SetParent(transform);
+            frameObj.transform.position = new Vector3(GridOffsetX, GridOffsetY, -0.5f);
+            var frameSr = frameObj.AddComponent<SpriteRenderer>();
+            if (premiumFrame != null)
+            {
+                frameSr.sprite = premiumFrame;
+                frameSr.color = Color.white;
+                frameSr.sortingOrder = 10;   // tiles ke UPAR
+                frameObj.transform.localScale = new Vector3(panelW + 1.3f, panelH + 1.3f, 1f);
+                Debug.Log("[GridVisualizer] Premium ornate frame loaded!");
+            }
+            else
+            {
+                frameObj.SetActive(false);
+            }
+
             var panelObj = new GameObject("GridPanel");
             panelObj.transform.SetParent(transform);
             panelObj.transform.position = new Vector3(GridOffsetX, GridOffsetY, 1f);
@@ -125,11 +179,14 @@ namespace MeraWorld.Core
                     Vector3 pos = new Vector3(
                         originX + c * (CellSize + CellGap) + GridOffsetX,
                         originY - r * (CellSize + CellGap) + GridOffsetY,
-                        0f);
+                        -5f);   // TEST: moved closer to camera
 
                     CreateCellVisual(pos, cell.Letter, r, c);
                 }
             }
+
+            // Grid ko screen ke andar fit karo
+            FitGridToScreen(rows, cols);
 
             Debug.Log($"GridVisualizer: Rendered {rows}x{cols} grid.");
         }
@@ -166,8 +223,12 @@ namespace MeraWorld.Core
             var cellObj = new GameObject($"Cell_{row}_{col}");
             cellObj.transform.SetParent(transform);
             cellObj.transform.position = position;
-            cellObj.transform.localScale = new Vector3(CellSize, CellSize, 1f);
-
+            // Premium tile ka aspect ratio match karo
+            // Sprite ke actual bounds ke hisaab se scale karo (PPU 100/256 kuch bhi ho)
+            float spriteSizeX = (_tileSprite != null && _tileSprite.bounds.size.x > 0.01f) ? _tileSprite.bounds.size.x : 1f;
+            float spriteSizeY = (_tileSprite != null && _tileSprite.bounds.size.y > 0.01f) ? _tileSprite.bounds.size.y : 1f;
+            float targetTileSize = CellSize * 0.92f;
+            cellObj.transform.localScale = new Vector3(targetTileSize / spriteSizeX, targetTileSize / spriteSizeY, 1f);
             var shadowObj = new GameObject("Shadow");
             shadowObj.transform.SetParent(cellObj.transform, false);
             shadowObj.transform.localPosition = new Vector3(0.02f, -0.10f, 0f);
@@ -181,6 +242,16 @@ namespace MeraWorld.Core
             sr.sprite = _tileSprite;
             sr.color = Color.white;
             sr.sortingOrder = 1;
+
+            // Shine highlight (top of tile)
+            var shineObj = new GameObject("Shine");
+            shineObj.transform.SetParent(cellObj.transform, false);
+            var shineSr = shineObj.AddComponent<SpriteRenderer>();
+            shineSr.sprite = _circleSprite;
+            shineSr.color = new Color(1f, 1f, 1f, 0.35f);
+            shineSr.sortingOrder = 2;
+            shineObj.transform.localPosition = new Vector3(0f, 0.25f, -0.05f);
+            shineObj.transform.localScale = new Vector3(0.65f, 0.22f, 1f);
 
             var col2d = cellObj.AddComponent<BoxCollider2D>();
             col2d.size = new Vector2(1f, 1f);
@@ -202,13 +273,13 @@ namespace MeraWorld.Core
             var textShadowObj = new GameObject("LetterShadow");
             textShadowObj.transform.SetParent(cellObj.transform, false);
             textShadowObj.transform.localPosition = new Vector3(0.03f, -0.03f, -0.49f);
-            textShadowObj.transform.localScale = Vector3.one;
+            textShadowObj.transform.localScale = new Vector3(0.9f, 0.9f, 1f);
 
             var tms = textShadowObj.AddComponent<TextMesh>();
             tms.text = letter.ToString();
             tms.color = TestModeTheme.IsActive ? TestModeTheme.BrownShadow : LetterShadowColor;
             tms.fontSize = 100;
-            tms.characterSize = 0.058f;
+            tms.characterSize = 0.075f;
             tms.anchor = TextAnchor.MiddleCenter;
             tms.alignment = TextAlignment.Center;
             tms.fontStyle = FontStyle.Bold;
@@ -230,7 +301,7 @@ namespace MeraWorld.Core
             tm.text = letter.ToString();
             tm.color = TestModeTheme.IsActive ? TestModeTheme.BrownLetter : LetterColor;
             tm.fontSize = 100;
-            tm.characterSize = 0.058f;
+            tm.characterSize = 0.075f;
             tm.anchor = TextAnchor.MiddleCenter;
             tm.alignment = TextAlignment.Center;
             tm.fontStyle = FontStyle.Bold;
@@ -242,6 +313,46 @@ namespace MeraWorld.Core
                 mr.sortingOrder = 10;
                 mr.material = tm.font.material;
             }
+        }
+
+        /// <summary>
+        /// Grid ko screen ke andar fit karo (top bar + bottom UI ke liye jagah chhodkar).
+        /// </summary>
+        private void FitGridToScreen(int rows, int cols)
+        {
+            var cam = Camera.main;
+            if (cam == null) return;
+
+            // Screen size in world units
+            float worldHeight = cam.orthographicSize * 2f;
+            float worldWidth = worldHeight * cam.aspect;
+
+            // Grid ka current size
+            float gridWidth  = cols * (CellSize + CellGap) - CellGap;
+            float gridHeight = rows * (CellSize + CellGap) - CellGap;
+
+            // Top bar ~20%, bottom UI ~25% reserve karo
+            float availableHeight = worldHeight * 0.55f;
+            float availableWidth  = worldWidth * 0.90f;
+
+            // Scale factor calculate karo
+            float scaleX = availableWidth  / gridWidth;
+            float scaleY = availableHeight / gridHeight;
+            float scale  = Mathf.Min(scaleX, scaleY);
+
+            // Sirf tab scale karo jab zaroorat ho
+            if (scale < 1f)
+            {
+                transform.localScale = new Vector3(scale, scale, 1f);
+                Debug.Log($"[GridVisualizer] Grid scaled to {scale:F2} for screen {Screen.width}x{Screen.height}");
+            }
+            else
+            {
+                transform.localScale = Vector3.one;
+            }
+
+            // Grid ko center mein rakho
+            transform.localPosition = Vector3.zero;
         }
 
         private Sprite CreateTileSprite(int size, int radius)
@@ -364,6 +475,26 @@ namespace MeraWorld.Core
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

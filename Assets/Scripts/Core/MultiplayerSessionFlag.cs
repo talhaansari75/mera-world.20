@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using MeraWorld.Core;
 public class MultiplayerSessionFlag : MonoBehaviour
@@ -77,6 +77,9 @@ public class MultiplayerSessionFlag : MonoBehaviour
 
         bool testMode = PlayerPrefs.GetInt("TestMode", 0) == 1;
         bool skipHome = PlayerPrefs.GetInt("SkipHome", 0) == 1;
+        
+        // Sync static field - HomeScreenUI.Start() isko read karega
+        ShouldSkipHome = skipHome;
 
         // 1) HOME SCREEN FORCE HIDE (kyunki HomeScreenUI.Start dobara nahi chalta)
         var home = FindFirstObjectByType<HomeScreenUI>();

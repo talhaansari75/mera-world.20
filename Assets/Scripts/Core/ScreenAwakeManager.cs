@@ -1,46 +1,69 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace MeraWorld.Core
 {
     /// <summary>
-    /// Prevents the phone screen from going to sleep while the game is running.
-    /// Also restores battery-friendly behavior when app is paused/backgrounded.
+    /// Keeps the screen awake during gameplay.
+    /// Allows sleep only on Home screen.
     /// </summary>
     public class ScreenAwakeManager : MonoBehaviour
     {
+        private static ScreenAwakeManager _instance;
+
         void Awake()
         {
-            // Keep screen on during gameplay
-            Screen.sleepTimeout = SleepTimeout.NeverSleep;
-            Debug.Log("[Screen] Sleep timeout disabled - screen will stay on");
-        }
-
-        void OnApplicationPause(bool isPaused)
-        {
-            if (isPaused)
+            if (_instance != null && _instance != this)
             {
-                // App in background - allow normal sleep
-                Screen.sleepTimeout = SleepTimeout.SystemSetting;
-                Debug.Log("[Screen] App paused - sleep timeout restored");
+                Destroy(gameObject);
+                return;
             }
-            else
+            _instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
+        void Start()
+        {
+            // Default: keep awake
+            SetAwake(true);
+        }
+
+        void OnApplicationPause(bool paused)
+        {
+            if (!paused)
             {
-                // App back in foreground - keep screen on
-                Screen.sleepTimeout = SleepTimeout.NeverSleep;
-                Debug.Log("[Screen] App resumed - sleep timeout disabled");
+                // App resumed - restore based on current state
+                bool isHome = HomeScreenUI.IsHomeVisible;
+                SetAwake(!isHome);
             }
         }
 
-        void OnApplicationFocus(bool hasFocus)
+        void OnApplicationFocus(bool focused)
         {
-            if (hasFocus)
-                Screen.sleepTimeout = SleepTimeout.NeverSleep;
+            if (focused)
+            {
+                bool isHome = HomeScreenUI.IsHomeVisible;
+                SetAwake(!isHome);
+            }
         }
 
-        void OnDestroy()
+        public static void SetAwake(bool awake)
         {
-            // Restore system default when this object destroyed
-            Screen.sleepTimeout = SleepTimeout.SystemSetting;
+            Screen.sleepTimeout = awake 
+                ? SleepTimeout.NeverSleep 
+                : SleepTimeout.SystemSetting;
+
+            Debug.Log($"[ScreenAwake] Sleep timeout: {(awake ? "Never Sleep" : "System Setting")}");
+        }
+
+        public static void OnGameplayStarted()
+        {
+            SetAwake(true);
+        }
+
+        public static void OnGameplayEnded()
+        {
+            // Home screen pe allow sleep (battery save)
+            SetAwake(false);
         }
     }
 }

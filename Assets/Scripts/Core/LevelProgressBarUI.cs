@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace MeraWorld.Core
@@ -42,7 +42,7 @@ namespace MeraWorld.Core
             var barObj = new GameObject("BarBg");
             barObj.transform.SetParent(_canvas.transform, false);
             var barImg = barObj.AddComponent<Image>();
-            barImg.color = new Color(0.10f, 0.15f, 0.25f, 0.9f);
+            barImg.color = new Color(0.12f, 0.05f, 0.22f, 0.95f);
             barImg.raycastTarget = false;
 
             var barRt = barObj.GetComponent<RectTransform>();
@@ -55,7 +55,7 @@ namespace MeraWorld.Core
             var fillObj = new GameObject("Fill");
             fillObj.transform.SetParent(barObj.transform, false);
             _fillBar = fillObj.AddComponent<Image>();
-            _fillBar.color = new Color(0.35f, 0.70f, 0.95f);
+            _fillBar.color = new Color(0.55f, 0.25f, 0.85f);
             _fillBar.raycastTarget = false;
 
             var fillRt = fillObj.GetComponent<RectTransform>();

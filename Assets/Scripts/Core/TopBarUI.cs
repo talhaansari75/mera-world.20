@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace MeraWorld.Core
 {
@@ -9,9 +10,12 @@ namespace MeraWorld.Core
         [Header("References")]
         public PlayerProgressManager Progress;
 
+        [Header("Premium TMP Font (auto-loaded)")]
+        public TMP_FontAsset PremiumFont;
+
         private Canvas _canvas;
-        private Text _coinsText;
-        private Text _levelText;
+        private TextMeshProUGUI _coinsText;
+        private TextMeshProUGUI _levelText;
         private RectTransform _coinsRect;
 
         void Start() { Invoke(nameof(BuildUI), 0.2f); }
@@ -19,6 +23,21 @@ namespace MeraWorld.Core
         private void BuildUI()
         {
             if (Progress == null) Progress = PlayerProgressManager.Instance;
+
+            // Load premium font
+            if (PremiumFont == null)
+                PremiumFont = Resources.Load<TMP_FontAsset>("Fonts/Poppins-Bold SDF");
+
+            if (PremiumFont == null)
+            {
+                Debug.LogWarning("[TopBar] Poppins-Bold SDF not found in Resources/Fonts/. Using TMP default.");
+                PremiumFont = TMP_Settings.defaultFontAsset;
+            }
+            else
+            {
+                Debug.Log($"[TopBar] Premium TMP font loaded: {PremiumFont.name}");
+            }
+
             BuildCanvas();
             BuildBackground();
             BuildCoinsDisplay();
@@ -51,12 +70,11 @@ namespace MeraWorld.Core
 
         private void BuildBackground()
         {
-            // 3D top bar background
             var bgObj = new GameObject("TopBarBG");
             bgObj.transform.SetParent(_canvas.transform, false);
 
             var img = bgObj.AddComponent<Image>();
-            img.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.15f, 0.08f, 0.32f), 256, 20);
+            img.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.12f, 0.06f, 0.22f), 256, 20);
             img.type = Image.Type.Sliced;
             img.color = Color.white;
             img.raycastTarget = false;
@@ -68,11 +86,10 @@ namespace MeraWorld.Core
             rt.anchoredPosition = Vector2.zero;
             rt.sizeDelta = new Vector2(0f, 120f);
 
-            // Gold bottom accent line
             var lineObj = new GameObject("GoldLine");
             lineObj.transform.SetParent(bgObj.transform, false);
             var lineImg = lineObj.AddComponent<Image>();
-            lineImg.color = new Color(1f, 0.85f, 0.30f);
+            lineImg.color = new Color(1f, 0.80f, 0.20f);
             lineImg.raycastTarget = false;
             var lineRt = lineObj.GetComponent<RectTransform>();
             lineRt.anchorMin = new Vector2(0f, 0f);
@@ -84,28 +101,37 @@ namespace MeraWorld.Core
 
         private void BuildCoinsDisplay()
         {
-            // 3D coin icon container
             var iconContainer = new GameObject("CoinIconContainer");
             iconContainer.transform.SetParent(_canvas.transform, false);
 
             var containerImg = iconContainer.AddComponent<Image>();
-            containerImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.85f, 0.60f, 0.15f), 128, 40);
-            containerImg.type = Image.Type.Sliced;
-            containerImg.color = Color.white;
+            containerImg.sprite = null;
+            containerImg.color = new Color(0f, 0f, 0f, 0f);
             containerImg.raycastTarget = false;
 
             var cRt = iconContainer.GetComponent<RectTransform>();
             cRt.anchorMin = new Vector2(0f, 1f);
             cRt.anchorMax = new Vector2(0f, 1f);
             cRt.pivot = new Vector2(0f, 0.5f);
-            cRt.anchoredPosition = new Vector2(30f, -60f);
-            cRt.sizeDelta = new Vector2(80f, 80f);
+            cRt.anchoredPosition = new Vector2(50f, -70f);
+            cRt.sizeDelta = new Vector2(140f, 140f);
 
-            // Inner coin
             var coinObj = new GameObject("Coin");
             coinObj.transform.SetParent(iconContainer.transform, false);
             var coinImg = coinObj.AddComponent<Image>();
-            coinImg.sprite = UISpriteFactory.Create3DSphereSprite(new Color(1f, 0.85f, 0.25f), 128);
+
+            Sprite premiumCoin = Resources.Load<Sprite>("UI/Premium/coin_gold");
+            if (premiumCoin != null)
+            {
+                coinImg.sprite = premiumCoin;
+                coinImg.color = new Color(2.0f, 1.8f, 1.2f, 1f);
+                Debug.Log("[TopBar] Premium coin loaded!");
+            }
+            else
+            {
+                coinImg.sprite = UISpriteFactory.Create3DSphereSprite(new Color(1f, 0.85f, 0.25f), 128);
+                coinImg.color = new Color(2.0f, 1.8f, 1.2f, 1f);
+            }
             coinImg.raycastTarget = false;
 
             var coinRt = coinObj.GetComponent<RectTransform>();
@@ -113,14 +139,13 @@ namespace MeraWorld.Core
             coinRt.anchorMax = new Vector2(0.5f, 0.5f);
             coinRt.pivot = new Vector2(0.5f, 0.5f);
             coinRt.anchoredPosition = Vector2.zero;
-            coinRt.sizeDelta = new Vector2(60f, 60f);
+            coinRt.sizeDelta = new Vector2(120f, 120f);
 
-            // Coin text (3D style)
             var textContainer = new GameObject("CoinsContainer");
             textContainer.transform.SetParent(_canvas.transform, false);
 
             var textBg = textContainer.AddComponent<Image>();
-            textBg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.15f, 0.08f, 0.32f), 128, 20);
+            textBg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.18f, 0.10f, 0.32f), 128, 20);
             textBg.type = Image.Type.Sliced;
             textBg.color = Color.white;
             textBg.raycastTarget = false;
@@ -132,21 +157,23 @@ namespace MeraWorld.Core
             tRt.anchoredPosition = new Vector2(120f, -60f);
             tRt.sizeDelta = new Vector2(230f, 70f);
 
+            // ===== TMP COINS TEXT =====
             var textObj = new GameObject("CoinsText");
             textObj.transform.SetParent(textContainer.transform, false);
 
-            _coinsText = textObj.AddComponent<Text>();
+            _coinsText = textObj.AddComponent<TextMeshProUGUI>();
             _coinsText.text = "0";
-            _coinsText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _coinsText.fontSize = 44;
-            _coinsText.fontStyle = FontStyle.Bold;
-            _coinsText.color = new Color(1f, 0.90f, 0.55f);
-            _coinsText.alignment = TextAnchor.MiddleCenter;
+            if (PremiumFont != null) _coinsText.font = PremiumFont;
+            _coinsText.fontSize = 52;
+            _coinsText.fontStyle = FontStyles.Bold;
+            _coinsText.color = new Color(1f, 0.92f, 0.55f);
+            _coinsText.alignment = TextAlignmentOptions.Center;
             _coinsText.raycastTarget = false;
+            _coinsText.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
 
-            var shadow = textObj.AddComponent<Shadow>();
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.55f);
-            shadow.effectDistance = new Vector2(2f, -2f);
+            // Outline (TMP built-in — no Shadow component needed!)
+            _coinsText.outlineWidth = 0.18f;
+            _coinsText.outlineColor = new Color32(60, 20, 0, 255);
 
             _coinsRect = textObj.GetComponent<RectTransform>();
             _coinsRect.anchorMin = Vector2.zero;
@@ -157,12 +184,11 @@ namespace MeraWorld.Core
 
         private void BuildLevelDisplay()
         {
-            // 3D level container
             var container = new GameObject("LevelContainer");
             container.transform.SetParent(_canvas.transform, false);
 
             var containerImg = container.AddComponent<Image>();
-            containerImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.65f, 0.45f, 0.15f), 128, 20);
+            containerImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.45f, 0.25f, 0.70f), 128, 20);
             containerImg.type = Image.Type.Sliced;
             containerImg.color = Color.white;
             containerImg.raycastTarget = false;
@@ -174,21 +200,31 @@ namespace MeraWorld.Core
             rt.anchoredPosition = new Vector2(-30f, -60f);
             rt.sizeDelta = new Vector2(280f, 70f);
 
+            // ===== TMP LEVEL TEXT =====
             var textObj = new GameObject("LevelText");
             textObj.transform.SetParent(container.transform, false);
 
-            _levelText = textObj.AddComponent<Text>();
+            _levelText = textObj.AddComponent<TextMeshProUGUI>();
             _levelText.text = "LEVEL 1";
-            _levelText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _levelText.fontSize = 38;
-            _levelText.fontStyle = FontStyle.Bold;
-            _levelText.color = Color.white;
-            _levelText.alignment = TextAnchor.MiddleCenter;
+            if (PremiumFont != null) _levelText.font = PremiumFont;
+            _levelText.fontSize = 46;
+            _levelText.fontStyle = FontStyles.Bold;
+            _levelText.alignment = TextAlignmentOptions.Center;
             _levelText.raycastTarget = false;
+            _levelText.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
 
-            var shadow = textObj.AddComponent<Shadow>();
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.65f);
-            shadow.effectDistance = new Vector2(2f, -2f);
+            // ===== GOLD GRADIENT — top bright, bottom darker =====
+            _levelText.enableVertexGradient = true;
+            _levelText.colorGradient = new VertexGradient(
+                new Color(1.0f, 0.98f, 0.60f),   // Top-left: bright gold
+                new Color(1.0f, 0.98f, 0.60f),   // Top-right: bright gold
+                new Color(0.90f, 0.55f, 0.10f),  // Bottom-left: darker gold
+                new Color(0.90f, 0.55f, 0.10f)   // Bottom-right: darker gold
+            );
+
+            // Outline for 3D depth
+            _levelText.outlineWidth = 0.22f;
+            _levelText.outlineColor = new Color32(70, 25, 0, 255);
 
             var trt = textObj.GetComponent<RectTransform>();
             trt.anchorMin = Vector2.zero;
@@ -209,7 +245,6 @@ namespace MeraWorld.Core
         {
             float duration = 0.25f;
             float elapsed = 0f;
-
             while (elapsed < duration)
             {
                 elapsed += Time.unscaledDeltaTime;

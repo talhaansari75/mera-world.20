@@ -50,7 +50,7 @@ namespace MeraWorld.Core
             container.transform.SetParent(_canvas.transform, false);
 
             var containerImg = container.AddComponent<Image>();
-            containerImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.15f, 0.08f, 0.32f), 128, 20);
+            containerImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.20f, 0.08f, 0.38f), 128, 20);
             containerImg.type = Image.Type.Sliced;
             containerImg.color = Color.white;
             containerImg.raycastTarget = false;
@@ -70,7 +70,7 @@ namespace MeraWorld.Core
             _timerText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             _timerText.fontSize = 36;
             _timerText.fontStyle = FontStyle.Bold;
-            _timerText.color = new Color(0.85f, 0.90f, 1f);
+            _timerText.color = new Color(1f, 0.90f, 0.55f);
             _timerText.alignment = TextAnchor.MiddleCenter;
             _timerText.raycastTarget = false;
 
@@ -96,7 +96,7 @@ namespace MeraWorld.Core
             _timerText.text = $"{minutes}:{seconds:00}";
 
             if (elapsed < 60f)
-                _timerText.color = new Color(0.85f, 0.90f, 1f);
+                _timerText.color = new Color(1f, 0.90f, 0.55f);
             else if (elapsed < 120f)
                 _timerText.color = new Color(1f, 0.85f, 0.35f);
             else
@@ -112,3 +112,7 @@ namespace MeraWorld.Core
         }
     }
 }
+
+
+
+

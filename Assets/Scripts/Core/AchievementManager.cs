@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -29,10 +29,27 @@ namespace MeraWorld.Core
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            transform.parent = null;
-            DontDestroyOnLoad(gameObject);
+
+            if (transform.parent != null)
+                transform.parent = null;
+
+            // Defer persistence - prevents Unity DontDestroyOnLoad assertion
+            Invoke(nameof(MakePersistent), 0f);
 
             LoadFromPlayerPrefs();
+        }
+
+        private static bool _persistentApplied = false;
+        private void MakePersistent()
+        {
+            if (_persistentApplied) return;
+            _persistentApplied = true;
+            if (this == null || gameObject == null) return;
+            try
+            {
+                DontDestroyOnLoad(gameObject);
+            }
+            catch (System.Exception) { /* already persistent */ }
         }
 
         // ---------------------------------------------------------------

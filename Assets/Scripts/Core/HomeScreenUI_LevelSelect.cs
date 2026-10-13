@@ -8,6 +8,10 @@ namespace MeraWorld.Core
     {
         private GameObject _levelGridParent;
 
+        [Header("DEBUG - Testing only")]
+        [Tooltip("TRUE = saare levels unlocked. FALSE = normal progression.")]
+        public bool DebugUnlockAllLevels = false;
+
         private void BuildLevelSelectCanvas()
         {
             var canvasObj = new GameObject("LevelSelectCanvas");
@@ -37,7 +41,7 @@ namespace MeraWorld.Core
             CreateText(_levelSelectCanvas.transform, "SELECT LEVEL",
                 new Vector2(0f, 830f), 70, GOLD, FontStyle.Bold, true);
 
-            CreateSmallButton(_levelSelectCanvas.transform, "◀ BACK",
+            CreateSmallButton(_levelSelectCanvas.transform, "ÃƒÂ¢Ã¢â‚¬â€Ã¢â€šÂ¬ BACK",
                 new Vector2(-380f, 830f), new Color(0.5f, 0.5f, 0.55f), OnBackToHome);
 
             _levelSelectCanvas.gameObject.SetActive(false);
@@ -65,7 +69,11 @@ namespace MeraWorld.Core
             grid.padding = new RectOffset(30, 30, 30, 30);
 
             int highest = Progress != null ? Progress.HighestLevelUnlocked : 1;
+
+            // DEBUG: unlock all for testing
+            if (DebugUnlockAllLevels) highest = 9999;
             int totalLevels = Mathf.Max(highest + 10, 100);
+            if (DebugUnlockAllLevels) totalLevels = 100;
 
             for (int i = 1; i <= totalLevels; i++)
             {
@@ -150,11 +158,44 @@ namespace MeraWorld.Core
                 PlayerPrefs.Save();
             }
 
-            _skipHomeForThisSession = true;
-            ShowGameplay();
+            Debug.Log($"Loading Level {level}...");
 
-            Debug.Log($"➡️ Loading Level {level}...");
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            // Show premium loading overlay, then reveal gameplay
+            if (LoadingScreenUI.Instance != null)
+            {
+                LoadingScreenUI.Instance.Show(1.5f, () =>
+                {
+                    ReloadGameplayForCurrentLevel(level);
+                    ShowGameplay();
+                    Debug.Log($"[HomeScreen] Level {level} gameplay revealed");
+                });
+            }
+            else
+            {
+                ReloadGameplayForCurrentLevel(level);
+                ShowGameplay();
+            }
+        }
+
+        /// <summary>
+        /// Level Select se direct level kholne pe grid + word list + selection reload karo.
+        /// WinScreenUI.DoNextLevelTransition() jaisa hi chain hai.
+        /// </summary>
+        private void ReloadGameplayForCurrentLevel(int level)
+        {
+            
+
+            var gm = FindFirstObjectByType<GameManager>();
+            if (gm != null) gm.ReloadFromProgress();
+
+            var gv = FindFirstObjectByType<GridVisualizer>();
+            if (gv != null) gv.BuildVisuals();
+
+            var wl = FindFirstObjectByType<WordListUI>();
+            if (wl != null) wl.ForceRebuild();
+
+            var sm = FindFirstObjectByType<SelectionManager>();
+            if (sm != null) sm.ResetProgress();
         }
     }
 }

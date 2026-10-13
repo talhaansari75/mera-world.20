@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,8 +14,8 @@ namespace MeraWorld.Core
         public GameManager GameManager;
 
         [Header("Colors")]
-        public Color SelectedColor = new Color(0.95f, 0.85f, 0.30f, 0.70f);
-        public Color FoundColor = new Color(0.40f, 0.85f, 0.40f, 0.85f);
+        public Color SelectedColor = new Color(1.00f, 0.85f, 0.25f, 1.00f);
+        public Color FoundColor = new Color(1.00f, 0.78f, 0.15f, 1.00f);
 
         [Header("Rewards")]
         public int CoinsPerWord = 5;
@@ -57,9 +57,50 @@ namespace MeraWorld.Core
 
         void Start()
         {
+            // Auto-find GameManager if not set in Inspector
+            if (GameManager == null)
+                GameManager = FindFirstObjectByType<GameManager>();
             _cam = Camera.main;
             if (GameManager != null)
                 _grid = GameManager.LastGeneratedGrid;
+        }
+
+        /// <summary>
+        /// Reset all progress for Restart (in-place, no scene reload).
+        /// </summary>
+        public void ResetProgress()
+        {
+            _selection.Clear();
+            _foundWords.Clear();
+            _colorIndex = 0;
+            _isDragging = false;
+
+            // FIX: Multiple GameManagers ho sakte hain. GridVisualizer ka
+            // GameManager sabse reliable hai (kyunki wo actual grid rebuild karta hai).
+            GameManager freshGM = null;
+            var gv = FindFirstObjectByType<GridVisualizer>();
+            if (gv != null && gv.GameManager != null) freshGM = gv.GameManager;
+
+            // Fallback: highest CurrentLevel wala GameManager
+            if (freshGM == null)
+            {
+                var allGMs = FindObjectsByType<GameManager>(FindObjectsSortMode.None);
+                int bestLevel = -1;
+                foreach (var g in allGMs)
+                    if (g != null && g.CurrentLevel > bestLevel) { bestLevel = g.CurrentLevel; freshGM = g; }
+            }
+
+            if (freshGM != null)
+            {
+                GameManager = freshGM;
+                _grid = GameManager.LastGeneratedGrid;
+                Debug.Log($"[SelectionManager] ResetProgress FIXED: GM.id={GameManager.GetInstanceID()} level={GameManager.CurrentLevel} grid={(_grid == null ? "NULL" : "OK(" + _grid.PlacedWords.Count + ")")}");
+            }
+            else
+            {
+                _grid = null;
+                Debug.LogWarning("[SelectionManager] ResetProgress: koi valid GameManager nahi mila!");
+            }
         }
 
         void Update()
@@ -174,22 +215,93 @@ namespace MeraWorld.Core
 
         private void Validate()
         {
-            Debug.Log("[SelectionManager] Validate() called, selection count = " + _selection.Count);
+            // Refresh grid if stale (level change ke baad zaroori)
+            if (GameManager != null && (_grid == null || _grid != GameManager.LastGeneratedGrid))
+            {
+                _grid = GameManager.LastGeneratedGrid;
+                Debug.Log("[SelectionManager] Grid refreshed");
+            }
             foreach (var t in _selection)
                 Debug.Log("[SelectionManager] Tile: " + t.Row + "," + t.Column + " = " + t.Letter);
+            string placedStr = "NULL";
+            bool sameGrid = false;
+            int placedCount = -1;
+            if (_grid != null && _grid.PlacedWords != null) {
+                var sbP = new System.Text.StringBuilder();
+                foreach (var pw in _grid.PlacedWords) sbP.Append(pw).Append("|");
+                placedStr = sbP.ToString();
+                placedCount = _grid.PlacedWords.Count;
+            }
+            if (GameManager != null && GameManager.LastGeneratedGrid != null) {
+                sameGrid = (_grid == GameManager.LastGeneratedGrid);
+            }
+            
             if (_grid == null) Debug.Log("[SelectionManager] GRID IS NULL!");
             if (_grid == null) { ClearSelection(); return; }
 
-            var cells = new List<GridCell>();
-            foreach (var t in _selection)
+            var sb = new System.Text.StringBuilder();
+            foreach (var t in _selection) sb.Append(t.Letter);
+            string word = sb.ToString();
+            
+
+            // ROBUST: GameManager.Words se seedha check (WordValidator bypass)
+            string checkWord = NormalizeWord(word ?? "");
             {
-                var cell = _grid.GetCell(t.Row, t.Column);
-                if (cell != null) cells.Add(cell);
+                int smCount = FindObjectsByType<SelectionManager>(FindObjectsSortMode.None).Length;
+                int gmCount = FindObjectsByType<GameManager>(FindObjectsSortMode.None).Length;
+                string gridW = (_grid != null && _grid.PlacedWords != null) ? (_grid.PlacedWords.Count + " items [" + string.Join(",", _grid.PlacedWords) + "]") : "NULL";
+                string gmW = (GameManager != null && GameManager.Words != null) ? (GameManager.Words.Count + " items [" + string.Join(",", GameManager.Words) + "]") : "NULL";
+                int gridId = (_grid != null) ? _grid.GetHashCode() : -1;
+                int lastGridId = (GameManager != null && GameManager.LastGeneratedGrid != null) ? GameManager.LastGeneratedGrid.GetHashCode() : -1;
             }
-
-            var word = WordValidator.ExtractWord(cells);
-
-            if (word == null || !WordValidator.IsPlacedWord(_grid, cells))
+            {
+                int smCount = FindObjectsByType<SelectionManager>(FindObjectsSortMode.None).Length;
+                int gmCount = FindObjectsByType<GameManager>(FindObjectsSortMode.None).Length;
+                string gridW = (_grid != null && _grid.PlacedWords != null) ? (_grid.PlacedWords.Count + " items [" + string.Join(",", _grid.PlacedWords) + "]") : "NULL";
+                string gmW = (GameManager != null && GameManager.Words != null) ? (GameManager.Words.Count + " items [" + string.Join(",", GameManager.Words) + "]") : "NULL";
+                int gridId = (_grid != null) ? _grid.GetHashCode() : -1;
+                int lastGridId = (GameManager != null && GameManager.LastGeneratedGrid != null) ? GameManager.LastGeneratedGrid.GetHashCode() : -1;
+            }
+            bool isValid = false;
+            if (!string.IsNullOrEmpty(checkWord) && _grid != null && _grid.PlacedWords != null)
+            {
+                foreach (var w in _grid.PlacedWords)
+                {
+                    if (NormalizeWord(w) == checkWord) { isValid = true; break; }
+                }
+            }
+            if (!isValid && GameManager != null && GameManager.Words != null)
+            {
+                foreach (var w in GameManager.Words)
+                {
+                    if (NormalizeWord(w) == checkWord) { isValid = true; break; }
+                }
+            }
+            // FINAL SAFETY NET: Agar abhi bhi false hai, to SAARE GameManagers
+            // aur unke LastGeneratedGrid dhundho. Duplicate GM issue bypass karo.
+            if (!isValid)
+            {
+                var allGMs = FindObjectsByType<GameManager>(FindObjectsSortMode.None);
+                foreach (var gm in allGMs)
+                {
+                    if (gm == null) continue;
+                    if (gm.Words != null)
+                    {
+                        foreach (var w in gm.Words)
+                            if (NormalizeWord(w) == checkWord) { isValid = true; break; }
+                    }
+                    if (isValid) break;
+                    if (gm.LastGeneratedGrid != null && gm.LastGeneratedGrid.PlacedWords != null)
+                    {
+                        foreach (var w in gm.LastGeneratedGrid.PlacedWords)
+                            if (NormalizeWord(w) == checkWord) { isValid = true; break; }
+                    }
+                    if (isValid) break;
+                }
+                if (isValid) Debug.LogWarning("[SelectionManager] SAFETY NET: word validated via alternate GameManager");
+            }
+            
+            if (!isValid)
             {
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayWordInvalid();
                 if (VibrationManager.Instance != null) VibrationManager.Instance.VibrateMedium();
@@ -230,10 +342,20 @@ namespace MeraWorld.Core
                 AchievementManager.Instance.AddProgress("word_master", 1);
             }
 
-            OnWordFound?.Invoke(word);
+            // FIX: Tile order ki jagah ORIGINAL word pass karo (FUTURE, not ERUTUF)
+            string matchedWord = word;
+            if (_grid != null && _grid.PlacedWords != null)
+            {
+                foreach (var w in _grid.PlacedWords)
+                {
+                    if (NormalizeWord(w) == normalized) { matchedWord = w; break; }
+                }
+            }
+            
+            OnWordFound?.Invoke(matchedWord);
 
-            Debug.Log($"[SelectionManager] COMPLETION CHECK: found={_foundWords.Count} total={GameManager.Words.Count}");
-            if (GameManager != null && _foundWords.Count >= GameManager.Words.Count)
+            Debug.Log($"[SelectionManager] COMPLETION CHECK: found={_foundWords.Count} total={_grid.PlacedWords.Count}");
+            if (_grid != null && _foundWords.Count >= _grid.PlacedWords.Count)
             {
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayLevelComplete();
                 if (VibrationManager.Instance != null) VibrationManager.Instance.VibrateHeavy();
@@ -370,5 +492,6 @@ namespace MeraWorld.Core
         }
     }
 }
+
 
 

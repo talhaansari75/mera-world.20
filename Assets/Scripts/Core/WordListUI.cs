@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -95,7 +95,7 @@ namespace MeraWorld.Core
             var panelImg = panelObj.AddComponent<Image>();
             var panelColor = MeraWorld.Core.TestModeTheme.IsActive 
                 ? new Color(0.95f, 0.92f, 0.85f) 
-                : new Color(0.22f, 0.10f, 0.45f);
+                : new Color(0.15f, 0.08f, 0.28f);
             panelImg.sprite = UISpriteFactory.Create3DButtonSprite(panelColor, 256, 40);
             panelImg.type = Image.Type.Sliced;
             panelImg.color = Color.white;
@@ -119,7 +119,7 @@ namespace MeraWorld.Core
             var titleBg = titleObj.AddComponent<Image>();
             var titleColor = MeraWorld.Core.TestModeTheme.IsActive 
                    ? new Color(0.90f, 0.75f, 0.45f) 
-                   : new Color(0.85f, 0.60f, 0.15f);
+                   : new Color(0.95f, 0.75f, 0.25f);
             titleBg.sprite = UISpriteFactory.Create3DButtonSprite(titleColor, 128, 30);
             titleBg.type = Image.Type.Sliced;
             titleBg.color = Color.white;
@@ -192,7 +192,7 @@ namespace MeraWorld.Core
             var bgImg = bgObj.AddComponent<Image>();
             var pillColor = MeraWorld.Core.TestModeTheme.IsActive 
                   ? new Color(0.95f, 0.92f, 0.85f) 
-                  : new Color(0.30f, 0.15f, 0.55f);
+                  : new Color(0.20f, 0.10f, 0.35f);
             bgImg.sprite = UISpriteFactory.Create3DButtonSprite(pillColor, 128, 20);
             bgImg.type = Image.Type.Sliced;
             bgImg.color = Color.white;
@@ -244,14 +244,14 @@ namespace MeraWorld.Core
             // NEW: Check if Text/BG are valid
             if (_wordTexts.TryGetValue(word, out var text))
             {
-                text.text = "âœ“ " + word;
+                text.text = "[OK] " + word;
                 text.color = MeraWorld.Core.TestModeTheme.IsActive ? new Color(0.10f, 0.55f, 0.20f) : new Color(0.60f, 1f, 0.60f);
             }
 
             // Change background to green
             if (_wordBackgrounds.TryGetValue(word, out var bg))
             {
-                bg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.20f, 0.55f, 0.30f), 128, 20);
+                bg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.20f, 0.65f, 0.30f), 128, 20);
                 bg.type = Image.Type.Sliced;
             }
 
@@ -266,6 +266,7 @@ namespace MeraWorld.Core
         }
     }
 }
+
 
 
 
