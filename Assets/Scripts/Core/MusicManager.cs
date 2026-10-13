@@ -23,6 +23,8 @@ namespace MeraWorld.Core
 
         void Start()
         {
+            MusicVolume = PlayerPrefs.GetFloat("Audio_MusicVolume", 0.6f);
+
             _musicSource = gameObject.AddComponent<AudioSource>();
             _musicSource.loop = true;
             _musicSource.volume = MusicVolume;
@@ -114,6 +116,14 @@ namespace MeraWorld.Core
             MusicVolume = Mathf.Clamp01(volume);
             if (_musicSource != null)
                 _musicSource.volume = MusicVolume;
+            PlayerPrefs.SetFloat("Audio_MusicVolume", MusicVolume);
+            PlayerPrefs.Save();
+        }
+
+        public void SetMuted(bool muted)
+        {
+            if (_musicSource != null)
+                _musicSource.volume = muted ? 0f : MusicVolume;
         }
     }
 }

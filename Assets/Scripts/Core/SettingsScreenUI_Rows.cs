@@ -224,5 +224,100 @@ namespace MeraWorld.Core
             tr.offsetMax = Vector2.zero;
             return b;
         }
+
+        // ===== SLIDER ROW (0-100%) =====
+        private void BuildSliderRow(string label, string prefKey, float defaultValue, UnityEngine.Events.UnityAction<float> onChange)
+        {
+            var row = new GameObject("Row_" + prefKey, typeof(RectTransform));
+            row.transform.SetParent(_scrollContent, false);
+            row.GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 150f);
+            var le = row.AddComponent<LayoutElement>();
+            le.minHeight = 150f; le.preferredHeight = 150f;
+
+            var bg = row.AddComponent<Image>();
+            bg.sprite = UISpriteFactory.Create3DButtonSprite(ROW_BG, 256, 30);
+            bg.type = Image.Type.Sliced;
+            bg.color = Color.white;
+
+            // Label
+            var lbl = MakeText(row.transform, label, new Vector2(-340f, 35f), 28, TEXT_GOLD);
+            lbl.alignment = TextAnchor.MiddleLeft;
+            lbl.fontStyle = FontStyle.Bold;
+            var o = lbl.gameObject.AddComponent<Outline>();
+            o.effectColor = new Color(0f, 0f, 0f, 0.9f);
+            o.effectDistance = new Vector2(2f, -2f);
+            lbl.rectTransform.anchorMin = new Vector2(0f, 0.5f);
+            lbl.rectTransform.anchorMax = new Vector2(0.5f, 1f);
+            lbl.rectTransform.offsetMin = new Vector2(30f, 0f);
+            lbl.rectTransform.offsetMax = Vector2.zero;
+
+            // Value text (right side)
+            float initVal = PlayerPrefs.GetFloat(prefKey, defaultValue);
+            var valTxt = MakeText(row.transform, Mathf.RoundToInt(initVal * 100) + "%", new Vector2(370f, 35f), 26, Color.white);
+            valTxt.alignment = TextAnchor.MiddleRight;
+            valTxt.fontStyle = FontStyle.Bold;
+            valTxt.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            valTxt.rectTransform.anchorMax = new Vector2(1f, 1f);
+            valTxt.rectTransform.offsetMin = Vector2.zero;
+            valTxt.rectTransform.offsetMax = new Vector2(-30f, 0f);
+
+            // Slider background track
+            var trackObj = new GameObject("Track", typeof(RectTransform));
+            trackObj.transform.SetParent(row.transform, false);
+            var trackImg = trackObj.AddComponent<Image>();
+            trackImg.sprite = UISpriteFactory.Create3DButtonSprite(TRACK_BG, 256, 20);
+            trackImg.type = Image.Type.Sliced;
+            trackImg.color = Color.white;
+            var trt = trackObj.GetComponent<RectTransform>();
+            trt.anchorMin = new Vector2(0f, 0f);
+            trt.anchorMax = new Vector2(1f, 0.5f);
+            trt.offsetMin = new Vector2(35f, 15f);
+            trt.offsetMax = new Vector2(-35f, -10f);
+
+            // Fill
+            var fillObj = new GameObject("FillArea", typeof(RectTransform));
+            fillObj.transform.SetParent(trackObj.transform, false);
+            var frt = fillObj.GetComponent<RectTransform>();
+            frt.anchorMin = Vector2.zero;
+            frt.anchorMax = Vector2.one;
+            frt.offsetMin = new Vector2(8f, 8f);
+            frt.offsetMax = new Vector2(-8f, -8f);
+
+            var fill = new GameObject("Fill", typeof(RectTransform));
+            fill.transform.SetParent(fillObj.transform, false);
+            var fillImg = fill.AddComponent<Image>();
+            fillImg.sprite = UISpriteFactory.Create3DButtonSprite(SLIDER_FILL, 128, 15);
+            fillImg.type = Image.Type.Sliced;
+            fillImg.color = Color.white;
+            fillImg.raycastTarget = false;
+            var fillRt = fill.GetComponent<RectTransform>();
+            fillRt.anchorMin = new Vector2(0f, 0f);
+            fillRt.anchorMax = new Vector2(initVal, 1f);
+            fillRt.offsetMin = Vector2.zero;
+            fillRt.offsetMax = Vector2.zero;
+
+            // Slider component
+            var slider = row.AddComponent<Slider>();
+            slider.targetGraphic = trackImg;
+            slider.fillRect = fillRt;
+            slider.direction = Slider.Direction.LeftToRight;
+            slider.minValue = 0f;
+            slider.maxValue = 1f;
+            slider.value = initVal;
+            slider.transition = Selectable.Transition.None;
+
+            string capturedKey = prefKey;
+            float capturedDefault = defaultValue;
+            UnityEngine.Events.UnityAction<float> capturedChange = onChange;
+            var capturedVal = valTxt;
+
+            slider.onValueChanged.AddListener((v) =>
+            {
+                PlayerPrefs.SetFloat(capturedKey, v);
+                PlayerPrefs.Save();
+                capturedVal.text = Mathf.RoundToInt(v * 100) + "%";
+                capturedChange?.Invoke(v);
+            });
+        }
     }
 }

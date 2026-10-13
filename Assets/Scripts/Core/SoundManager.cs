@@ -9,6 +9,8 @@ namespace MeraWorld.Core
 
         [Range(0f, 1f)] public float SfxVolume = 0.5f;
 
+        private const string KEY_SFX_VOL = "Audio_SFXVolume";
+
         private AudioSource _source;
 
         void Awake()
@@ -19,6 +21,9 @@ namespace MeraWorld.Core
                 return;
             }
             Instance = this;
+
+            // Load saved volume from PlayerPrefs
+            SfxVolume = PlayerPrefs.GetFloat(KEY_SFX_VOL, 0.8f);
 
             _source = gameObject.AddComponent<AudioSource>();
             _source.playOnAwake = false;
@@ -93,6 +98,19 @@ namespace MeraWorld.Core
         private void PlayStarSecond()
         {
             PlayTone(1568f, 0.20f, 0.35f);
+        }
+
+        public void SetVolume(float v)
+        {
+            SfxVolume = Mathf.Clamp01(v);
+            if (_source != null) _source.volume = SfxVolume;
+            PlayerPrefs.SetFloat(KEY_SFX_VOL, SfxVolume);
+            PlayerPrefs.Save();
+        }
+
+        public void SetMuted(bool muted)
+        {
+            if (_source != null) _source.volume = muted ? 0f : SfxVolume;
         }
 
         private void PlayTone(float frequency, float duration, float volume)

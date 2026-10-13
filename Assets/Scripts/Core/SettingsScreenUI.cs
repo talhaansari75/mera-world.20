@@ -185,6 +185,7 @@ namespace MeraWorld.Core
             bool loggedIn = PlayerPrefs.GetInt(KEY_LOGGED_IN, 0) == 1;
             string provider = PlayerPrefs.GetString(KEY_PROVIDER, "");
 
+            // ═══════════ ACCOUNT ═══════════
             BuildSection("ACCOUNT");
             if (loggedIn)
             {
@@ -199,38 +200,47 @@ namespace MeraWorld.Core
             BuildActionRow("Tutorial", "PLAY", GREEN, OnPlayTutorial);
             BuildActionRow("Practice Mode", "PLAY", GREEN, OnPracticeMode);
 
-            BuildSection("SOCIAL");
-            bool followedInsta = PlayerPrefs.GetInt(KEY_FOLLOWED_INSTA, 0) == 1;
-            bool likedFb = PlayerPrefs.GetInt(KEY_LIKED_FB, 0) == 1;
+            // ═══════════ AUDIO ═══════════
+            BuildSection("AUDIO");
+            float musicVol = MusicManager.Instance != null ? MusicManager.Instance.MusicVolume : 0.6f;
+            float sfxVol = SoundManager.Instance != null ? SoundManager.Instance.SfxVolume : 0.8f;
+            BuildSliderRow("Music", KEY_MUSIC, musicVol, OnMusicVolumeChanged);
+            BuildSliderRow("Sound FX", KEY_SFX, sfxVol, OnSFXVolumeChanged);
+            BuildToggleRow("Vibration", KEY_VIBRATION, 1, OnVibrationToggle);
 
-            BuildActionRow(
-                followedInsta ? "Instagram (Done)" : "Follow Instagram  +10",
-                followedInsta ? "DONE" : "FOLLOW",
-                followedInsta ? GREY : GREEN,
-                OnInstagram);
-
-            BuildActionRow(
-                likedFb ? "Facebook Page (Done)" : "Like Facebook Page  +10",
-                likedFb ? "DONE" : "LIKE",
-                likedFb ? GREY : GREEN,
-                OnFacebookLike);
-
-            BuildSection("GAME OPTIONS");
+            // ═══════════ GAMEPLAY ═══════════
+            BuildSection("GAMEPLAY");
             string langLabel = PlayerPrefs.GetInt(KEY_LANGUAGE, 0) == 0 ? "ENGLISH" : "URDU";
             BuildActionRow("Language", langLabel, GREEN, OnLanguageChange);
-            BuildToggleRow("Sound Effects", KEY_SFX, 1, OnSfxToggle);
-            BuildToggleRow("Vibration", KEY_VIBRATION, 1, OnVibrationToggle);
-            BuildToggleRow("Notifications", KEY_NOTIFICATIONS, 1, OnNotificationsToggle);
+            string themeLabel = PlayerPrefs.GetString(KEY_THEME, "Classic").ToUpper();
+            BuildActionRow("Theme", themeLabel, BLUE, OnThemeChange);
+            BuildToggleRow("Auto-Hint", KEY_AUTO_HINT, 0, OnAutoHintToggle);
+            BuildToggleRow("Show Timer", KEY_SHOW_TIMER, 1, OnShowTimerToggle);
 
-            BuildSection("INFO");
+            // ═══════════ NOTIFICATIONS ═══════════
+            BuildSection("NOTIFICATIONS");
+            BuildToggleRow("Daily Reminder", KEY_NOTIFICATIONS, 1, OnNotificationsToggle);
+
+            // ═══════════ SUPPORT US ═══════════
+            BuildSection("SUPPORT US");
+            BuildActionRow("Rate Us", "RATE", GOLD, OnRateUs);
+            BuildActionRow("Share App", "SHARE", BLUE, OnShareApp);
             BuildActionRow("More Games", "VIEW", BLUE, OnMoreGames);
-            BuildActionRow("Help & Support", "VIEW", GREEN, OnHelpSupport);
-            BuildActionRow("Terms & Conditions", "VIEW", GREEN, OnTerms);
+
+            // ═══════════ LEGAL ═══════════
+            BuildSection("LEGAL");
             BuildActionRow("Privacy Policy", "VIEW", GREEN, OnPrivacy);
-            BuildActionRow("Delete Account", "DELETE", RED, OnDeleteAccount);
+            BuildActionRow("Terms of Service", "VIEW", GREEN, OnTerms);
+            BuildActionRow("Help & Support", "VIEW", GREEN, OnHelpSupport);
             BuildActionRow("Credits", "VIEW", GREEN, OnCredits);
 
-            BuildInfoRow("Version", "1.0.0");
+            // ═══════════ DANGER ZONE ═══════════
+            BuildSection("DANGER ZONE");
+            BuildActionRow("Reset Progress", "RESET", RED, OnResetProgress);
+            BuildActionRow("Delete Account", "DELETE", RED, OnDeleteAccount);
+
+            // ═══════════ INFO ═══════════
+            BuildInfoRow("Version", "1.1.0");
             BuildInfoRow("User Id", GetUserId());
         }
 
