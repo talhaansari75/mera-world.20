@@ -43,11 +43,16 @@ Thumbs.db
 # IMPORTANT: _archive/ ko ignore nahi karna
 !_archive/
 !_archive/**
-# Unity backups
+
+# Backups (all patterns)
 *.bak
+*.bak.meta
 *.before_*
+*.before_*.meta
 *.broken*
 *~
-backup.cmd 
-restore.cmd 
-sel.txt 
+backup.cmd
+restore.cmd
+sel.txt
+*.json.backup
+*.json.backup.meta
