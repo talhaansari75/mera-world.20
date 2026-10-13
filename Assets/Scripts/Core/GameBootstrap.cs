@@ -175,7 +175,7 @@ namespace MeraWorld.Core
                 Debug.Log("[Bootstrap] MultiplayerMenuUI hidden");
 
             // GameplayCosmicTheme force rebuild (DontDestroyOnLoad fix)
-            var theme = FindFirstObjectByType<GameplayCosmicTheme>();
+            var theme = FindFirstObjectByType<GameplayCosmicTheme>(); if (theme == null) { var themeGo = new GameObject("[GameplayCosmicTheme]"); themeGo.transform.SetParent(transform, false); theme = themeGo.AddComponent<GameplayCosmicTheme>(); Debug.Log("[Bootstrap] GameplayCosmicTheme CREATED"); }
             if (theme != null)
             {
                 theme.BuildBackground();
@@ -244,18 +244,10 @@ namespace MeraWorld.Core
             }
 
             // Diagnostic dump
-            if (FindFirstObjectByType<SceneDiagnosticDump>() == null)
-            {
-                var diagGo = new GameObject("[SceneDiagnosticDump]");
-                diagGo.AddComponent<SceneDiagnosticDump>();
-            }
+            // REMOVED: SceneDiagnosticDump (was debug only)
 
             // Sprite tracker
-            if (FindFirstObjectByType<SpriteTracker>() == null)
-            {
-                var trackerGo = new GameObject("[SpriteTracker]");
-                trackerGo.AddComponent<SpriteTracker>();
-            }
+            // REMOVED: SpriteTracker (was debug only)
 
             // Grid persistence fix — cells must survive scene reload
             if (FindFirstObjectByType<GridPersistenceFix>() == null)

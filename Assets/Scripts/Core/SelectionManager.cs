@@ -126,9 +126,9 @@ namespace MeraWorld.Core
             if (_cam == null || _grid == null) return;
 
             // ---- Input ----
-            bool pressed = Input.GetMouseButton(0);
-            bool down = Input.GetMouseButtonDown(0);
-            bool up = Input.GetMouseButtonUp(0);
+            bool pressed = (Input.touchCount > 0) ? (Input.GetTouch(0).phase != TouchPhase.Ended && Input.GetTouch(0).phase != TouchPhase.Canceled) : Input.GetMouseButton(0);
+            bool down = (Input.touchCount > 0) ? (Input.GetTouch(0).phase == TouchPhase.Began) : Input.GetMouseButtonDown(0);
+            bool up = (Input.touchCount > 0) ? (Input.GetTouch(0).phase == TouchPhase.Ended || Input.GetTouch(0).phase == TouchPhase.Canceled) : Input.GetMouseButtonUp(0);
 
             if (down)
             {

@@ -387,7 +387,7 @@ namespace MeraWorld.Core
 
                 // FIX: SelectionManager Old Input use karta hai.
                 // StandaloneInputModule (Old) force karo taaki phone touch chale.
-                es.AddComponent(typeof(UnityEngine.EventSystems.StandaloneInputModule));
+                var sim = es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>(); sim.forceModuleActive = true; es.GetComponent<UnityEngine.EventSystems.EventSystem>().pixelDragThreshold = 0;
                 Debug.Log("[HomeScreen] EventSystem created with StandaloneInputModule");
             }
         }

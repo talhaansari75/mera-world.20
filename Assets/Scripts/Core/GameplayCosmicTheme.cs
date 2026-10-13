@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace MeraWorld.Core
 {
@@ -18,11 +18,13 @@ namespace MeraWorld.Core
 
         public void BuildBackground()
         {
+            Debug.Log("[GameplayTheme] === BuildBackground CALLED ===");
             if (_bgObj != null) Destroy(_bgObj);
             if (_patternObj != null) Destroy(_patternObj);
 
             var cam = Camera.main;
-            if (cam == null) return;
+            if (cam == null) { Debug.LogError("[GameplayTheme] CAMERA IS NULL!"); return; }
+            Debug.Log("[GameplayTheme] Camera: " + cam.name + " | clearFlags=" + cam.clearFlags);
 
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = BgDeep;
@@ -36,6 +38,7 @@ namespace MeraWorld.Core
             
             // Try premium paisley image first
             Sprite paisley = Resources.Load<Sprite>("UI/Premium/bg_paisley");
+            Debug.Log("[GameplayTheme] Paisley sprite: " + (paisley != null ? "LOADED" : "NULL"));
             if (paisley != null)
             {
                 sr.sprite = paisley;
@@ -50,9 +53,10 @@ namespace MeraWorld.Core
                 Debug.Log("[GameplayTheme] Using fallback gradient");
             }
             
-            sr.sortingOrder = -1000;
+            sr.sortingOrder = -100;
             _bgObj.transform.localScale = new Vector3(worldWidth, worldHeight, 1f);
             _bgObj.transform.position = new Vector3(0f, 0f, 5f);
+            Debug.Log("[GameplayTheme] BG created: pos=" + _bgObj.transform.position + " scale=" + _bgObj.transform.localScale + " sortingOrder=" + sr.sortingOrder + " color=" + sr.color);
 
             // Procedural pattern only if no premium image
             if (paisley == null)
@@ -78,7 +82,7 @@ namespace MeraWorld.Core
                     var sr = dot.AddComponent<SpriteRenderer>();
                     sr.sprite = UISpriteFactory.Create3DSphereSprite(new Color(1f, 1f, 1f, 0.35f), 64);
                     sr.color = PatternColor;
-                    sr.sortingOrder = -999;
+                    sr.sortingOrder = -99;
 
                     float x = -width * 0.5f + (c + 0.5f) * spacing;
                     if (r % 2 == 1) x += spacing * 0.5f;

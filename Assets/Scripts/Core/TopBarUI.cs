@@ -124,13 +124,13 @@ namespace MeraWorld.Core
             if (premiumCoin != null)
             {
                 coinImg.sprite = premiumCoin;
-                coinImg.color = new Color(2.0f, 1.8f, 1.2f, 1f);
+                coinImg.color = new Color(1f, 0.95f, 0.75f, 1f);
                 Debug.Log("[TopBar] Premium coin loaded!");
             }
             else
             {
                 coinImg.sprite = UISpriteFactory.Create3DSphereSprite(new Color(1f, 0.85f, 0.25f), 128);
-                coinImg.color = new Color(2.0f, 1.8f, 1.2f, 1f);
+                coinImg.color = new Color(1f, 0.95f, 0.75f, 1f);
             }
             coinImg.raycastTarget = false;
 

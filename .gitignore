@@ -56,3 +56,6 @@ restore.cmd
 sel.txt
 *.json.backup
 *.json.backup.meta
+
+# Performance test framework
+Assets/Resources/PerformanceTestRun*.json*

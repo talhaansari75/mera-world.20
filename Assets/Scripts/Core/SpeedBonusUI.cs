@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace MeraWorld.Core
 {
@@ -12,7 +13,7 @@ namespace MeraWorld.Core
 
         private Canvas _canvas;
         private float _lastWordTime = -10f;
-        private const string KEY_LABEL = "SpeedBonus";
+        private TMP_FontAsset _premiumFont;
 
         void Start()
         {
@@ -24,6 +25,9 @@ namespace MeraWorld.Core
         {
             if (SelectionManager == null)
                 SelectionManager = FindFirstObjectByType<SelectionManager>();
+
+            _premiumFont = Resources.Load<TMP_FontAsset>("Fonts/Poppins-Bold SDF");
+            if (_premiumFont == null) _premiumFont = TMP_Settings.defaultFontAsset;
 
             BuildCanvas();
 
@@ -53,12 +57,11 @@ namespace MeraWorld.Core
             float delta = now - _lastWordTime;
             _lastWordTime = now;
 
-            // If found under 4 seconds - speed bonus
             if (delta < 4f && delta > 0.5f)
             {
                 int bonus = 3;
                 if (Progress != null) Progress.AddCoins(bonus);
-                ShowBonus($"FAST +{bonus}");
+                ShowBonus("PERFECT!  +" + bonus);
             }
         }
 
@@ -70,40 +73,80 @@ namespace MeraWorld.Core
 
         private IEnumerator BonusRoutine(string message)
         {
-            var obj = new GameObject(KEY_LABEL);
+            var obj = new GameObject("SpeedBonusPopup");
             obj.transform.SetParent(_canvas.transform, false);
 
-            var txt = obj.AddComponent<Text>();
-            txt.text = message;
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = 50;
-            txt.fontStyle = FontStyle.Bold;
-            txt.color = new Color(0.30f, 1f, 0.50f);
-            txt.alignment = TextAnchor.MiddleCenter;
-            txt.raycastTarget = false;
-
-            var outline = obj.AddComponent<Outline>();
-            outline.effectColor = new Color(0f, 0f, 0f, 0.75f);
-            outline.effectDistance = new Vector2(2f, -2f);
+            // Premium 3D gold button sprite as background
+            var bg = obj.AddComponent<Image>();
+            bg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(1f, 0.82f, 0.30f), 256, 30);
+            bg.type = Image.Type.Sliced;
+            bg.color = Color.white;
+            bg.raycastTarget = false;
 
             var rt = obj.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(0f, -100f);
-            rt.sizeDelta = new Vector2(500f, 100f);
+            rt.anchoredPosition = new Vector2(0f, 200f);
+            rt.sizeDelta = new Vector2(700f, 140f);
 
-            float duration = 1.0f;
+            // Text
+            var txtObj = new GameObject("Label");
+            txtObj.transform.SetParent(obj.transform, false);
+            var txt = txtObj.AddComponent<TextMeshProUGUI>();
+            txt.text = message;
+            if (_premiumFont != null) txt.font = _premiumFont;
+            txt.fontSize = 72;
+            txt.fontStyle = FontStyles.Bold;
+            txt.alignment = TextAlignmentOptions.Center;
+            txt.raycastTarget = false;
+            txt.enableVertexGradient = true;
+            txt.colorGradient = new VertexGradient(
+                new Color(1f, 1f, 1f),
+                new Color(1f, 1f, 1f),
+                new Color(1f, 0.85f, 0.4f),
+                new Color(1f, 0.85f, 0.4f)
+            );
+            txt.outlineWidth = 0.25f;
+            txt.outlineColor = new Color32(80, 30, 0, 255);
+
+            var trt = txtObj.GetComponent<RectTransform>();
+            trt.anchorMin = Vector2.zero;
+            trt.anchorMax = Vector2.one;
+            trt.offsetMin = Vector2.zero;
+            trt.offsetMax = Vector2.zero;
+
+            // Fade in with bounce
+            var cg = obj.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+
+            float duration = 1.4f;
             float elapsed = 0f;
-            Vector2 start = new Vector2(0f, -100f);
-            Vector2 end = new Vector2(0f, -300f);
 
             while (elapsed < duration)
             {
                 elapsed += Time.unscaledDeltaTime;
                 float t = elapsed / duration;
-                rt.anchoredPosition = Vector2.Lerp(start, end, t);
-                var c = txt.color; c.a = 1f - t; txt.color = c;
+
+                // Pop in
+                if (t < 0.15f)
+                {
+                    float pop = t / 0.15f;
+                    cg.alpha = pop;
+                    rt.localScale = Vector3.Lerp(Vector3.one * 0.5f, Vector3.one * 1.15f, pop);
+                }
+                else if (t < 0.25f)
+                {
+                    float settle = (t - 0.15f) / 0.10f;
+                    rt.localScale = Vector3.Lerp(Vector3.one * 1.15f, Vector3.one, settle);
+                }
+                else if (t > 0.7f)
+                {
+                    float fade = (t - 0.7f) / 0.3f;
+                    cg.alpha = 1f - fade;
+                    rt.anchoredPosition = new Vector2(0f, Mathf.Lerp(200f, 350f, fade));
+                }
+
                 yield return null;
             }
 
