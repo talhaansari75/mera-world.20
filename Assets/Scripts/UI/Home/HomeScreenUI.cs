@@ -30,6 +30,8 @@ namespace MeraWorld.Core
         private static readonly Color GREEN = new Color(0.25f, 0.65f, 0.35f);
         private static readonly Color BLUE = new Color(0.25f, 0.45f, 0.85f);
 
+        private Image _homeBgImage;   // for live theme refresh
+
         private static Color GetPaletteColor(string which, float alpha)
         {
             var pal = (ThemeManager.Instance != null)
@@ -71,6 +73,24 @@ namespace MeraWorld.Core
             Invoke(nameof(Setup), 0.2f);
         }
 
+        void OnEnable()
+        {
+            ThemeManager.OnThemeChanged += OnThemeChangedRefresh;
+        }
+
+        void OnDisable()
+        {
+            ThemeManager.OnThemeChanged -= OnThemeChangedRefresh;
+        }
+
+        private void OnThemeChangedRefresh()
+        {
+            if (_homeBgImage != null && gameObject.activeInHierarchy)
+            {
+                _homeBgImage.sprite = UISpriteFactory.CreateGradientSprite(BG_BOTTOM, BG_TOP, 32, 256);
+                Debug.Log("[Home] Live theme refresh applied");
+            }
+        }
         private void Setup()
         {
             Debug.Log("[HomeScreen] ***** SETUP called ***** _showGameplayOnSetup=" + _showGameplayOnSetup);
@@ -116,6 +136,7 @@ namespace MeraWorld.Core
             bgImg.type = Image.Type.Simple;
             bgImg.color = Color.white;
             bgImg.raycastTarget = false;
+            _homeBgImage = bgImg;   // save for live refresh
             var bgRt = bgObj.GetComponent<RectTransform>();
             bgRt.anchorMin = Vector2.zero;
             bgRt.anchorMax = Vector2.one;
