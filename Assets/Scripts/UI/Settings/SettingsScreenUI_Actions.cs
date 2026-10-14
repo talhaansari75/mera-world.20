@@ -91,7 +91,7 @@ namespace MeraWorld.Core
         private void OnThemeChange()
         {
             string current = PlayerPrefs.GetString(KEY_THEME, "Classic");
-            string[] themes = new string[] { "Classic", "Cosmic", "Ocean", "Sunset", "Forest" };
+            string[] themes = new string[] { "Classic", "Cosmic", "Ocean", "Sunset", "Forest", "Neon", "Ice", "Cherry", "Midnight" };
             ShowDropdown("SELECT THEME", themes, current, OnThemeSelected);
         }
 

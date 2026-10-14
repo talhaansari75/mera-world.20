@@ -27,6 +27,10 @@ namespace MeraWorld.Core
                 case "Ocean":  return Ocean();
                 case "Sunset": return Sunset();
                 case "Forest": return Forest();
+                case "Neon":     return Neon();
+                case "Ice":      return Ice();
+                case "Cherry":   return Cherry();
+                case "Midnight": return Midnight();
                 default:       return Classic();
             }
         }
@@ -112,5 +116,81 @@ namespace MeraWorld.Core
                 AccentColor = new Color(0.95f, 0.90f, 0.45f)
             };
         }
-    }
+ 
+
+        // Cyberpunk: black + neon magenta + cyan
+        public static ThemeColors Neon()
+        {
+            return new ThemeColors
+            {
+                CameraBg = new Color(0.02f, 0.00f, 0.05f),
+                BgDeep   = new Color(0.02f, 0.00f, 0.05f),
+                BgMid    = new Color(0.15f, 0.00f, 0.25f),
+                BgTop    = new Color(0.35f, 0.00f, 0.50f),
+                TileTop    = new Color(1.00f, 0.20f, 0.80f),
+                TileMid    = new Color(0.70f, 0.00f, 0.90f),
+                TileBottom = new Color(0.20f, 0.00f, 0.35f),
+                RimColor   = new Color(0.00f, 1.00f, 1.00f),
+                PanelTop    = new Color(0.50f, 0.00f, 0.70f),
+                PanelBottom = new Color(0.15f, 0.00f, 0.25f),
+                AccentColor = new Color(0.00f, 1.00f, 1.00f)
+            };
+        }
+
+        // Frozen: light blue + white + ice
+        public static ThemeColors Ice()
+        {
+            return new ThemeColors
+            {
+                CameraBg = new Color(0.60f, 0.75f, 0.90f),
+                BgDeep   = new Color(0.60f, 0.75f, 0.90f),
+                BgMid    = new Color(0.75f, 0.88f, 0.98f),
+                BgTop    = new Color(0.88f, 0.95f, 1.00f),
+                TileTop    = new Color(0.95f, 1.00f, 1.00f),
+                TileMid    = new Color(0.65f, 0.85f, 1.00f),
+                TileBottom = new Color(0.35f, 0.55f, 0.75f),
+                RimColor   = new Color(1.00f, 1.00f, 1.00f),
+                PanelTop    = new Color(0.80f, 0.92f, 1.00f),
+                PanelBottom = new Color(0.45f, 0.65f, 0.85f),
+                AccentColor = new Color(0.20f, 0.55f, 0.90f)
+            };
+        }
+
+        // Cherry blossom: pink + magenta
+        public static ThemeColors Cherry()
+        {
+            return new ThemeColors
+            {
+                CameraBg = new Color(0.25f, 0.05f, 0.15f),
+                BgDeep   = new Color(0.25f, 0.05f, 0.15f),
+                BgMid    = new Color(0.55f, 0.15f, 0.30f),
+                BgTop    = new Color(0.80f, 0.35f, 0.55f),
+                TileTop    = new Color(1.00f, 0.65f, 0.80f),
+                TileMid    = new Color(0.85f, 0.35f, 0.60f),
+                TileBottom = new Color(0.45f, 0.10f, 0.30f),
+                RimColor   = new Color(1.00f, 0.90f, 0.95f),
+                PanelTop    = new Color(0.70f, 0.25f, 0.45f),
+                PanelBottom = new Color(0.35f, 0.08f, 0.20f),
+                AccentColor = new Color(1.00f, 0.75f, 0.85f)
+            };
+        }
+
+        // Elegant: black + silver + gold
+        public static ThemeColors Midnight()
+        {
+            return new ThemeColors
+            {
+                CameraBg = new Color(0.02f, 0.02f, 0.04f),
+                BgDeep   = new Color(0.02f, 0.02f, 0.04f),
+                BgMid    = new Color(0.08f, 0.08f, 0.15f),
+                BgTop    = new Color(0.15f, 0.15f, 0.25f),
+                TileTop    = new Color(0.85f, 0.85f, 0.90f),
+                TileMid    = new Color(0.50f, 0.50f, 0.60f),
+                TileBottom = new Color(0.15f, 0.15f, 0.22f),
+                RimColor   = new Color(1.00f, 0.90f, 0.60f),
+                PanelTop    = new Color(0.25f, 0.25f, 0.35f),
+                PanelBottom = new Color(0.08f, 0.08f, 0.15f),
+                AccentColor = new Color(1.00f, 0.90f, 0.60f)
+            };
+        }   }
 }
