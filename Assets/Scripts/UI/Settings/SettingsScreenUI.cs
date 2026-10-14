@@ -19,6 +19,25 @@ namespace MeraWorld.Core
         private Text _infoTitle, _infoMsg;
 
         private GameObject _toastObj;
+
+        void OnEnable()
+        {
+            ThemeManager.OnThemeChanged += OnThemeChangedRefresh;
+        }
+
+        void OnDisable()
+        {
+            ThemeManager.OnThemeChanged -= OnThemeChangedRefresh;
+        }
+
+        private void OnThemeChangedRefresh()
+        {
+            if (_scrollContent != null && gameObject.activeInHierarchy)
+            {
+                BuildAllRows();
+                Debug.Log("[Settings] Live theme refresh applied");
+            }
+        }
         private Text _toastText;
 
         void Awake()
