@@ -113,8 +113,6 @@ namespace MeraWorld.Core
             rootRt.sizeDelta = new Vector2(110f, 110f);
 
             // Only show during gameplay (not home)
-            var checker = _buttonRoot.AddComponent<PauseButtonVisibility>();
-            checker.Target = _buttonRoot;
         }
 
         private void BuildToast()

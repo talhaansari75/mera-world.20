@@ -21,7 +21,6 @@ namespace MeraWorld.Core
         public bool CreateLoadingScreenUI = true;
         public bool CreateSpriteMaterialFixer = true;
         public bool CreateGlobalLight2D = true;
-        public bool DisableGameplayPausePanel = true;
 
         [Header("Debug")]
         public bool LogSetup = true;
@@ -210,16 +209,6 @@ namespace MeraWorld.Core
                 if (LogSetup) Debug.Log($"[Bootstrap] ButtonJuice applied to {added} buttons");
             }
 
-            // === Disable duplicate pause panel ===
-            if (DisableGameplayPausePanel)
-            {
-                var dup = FindFirstObjectByType<GameplayPausePanel>();
-                if (dup != null)
-                {
-                    Destroy(dup.gameObject);
-                    if (LogSetup) Debug.Log("[Bootstrap] GameplayPausePanel destroyed (using PauseMenuUI)");
-                }
-            }
 
             // Create Global Light 2D for lit sprites
             if (CreateGlobalLight2D)

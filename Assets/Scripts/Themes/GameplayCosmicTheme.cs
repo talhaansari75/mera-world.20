@@ -47,7 +47,7 @@ namespace MeraWorld.Core
             if (paisley != null)
             {
                 sr.sprite = paisley;
-                sr.color = new Color(1f, 1f, 1f, 0.5f);   // 50% opacity for subtle look
+                sr.color = new Color(BgMid.r, BgMid.g, BgMid.b, 0.5f);   // theme-tinted 50% opacity
                 Debug.Log("[GameplayTheme] Premium paisley bg loaded!");
             }
             else
