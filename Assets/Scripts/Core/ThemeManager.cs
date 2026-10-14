@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Collections.Generic;
+using System;
 
 namespace MeraWorld.Core
 {
@@ -7,35 +7,32 @@ namespace MeraWorld.Core
     {
         public static ThemeManager Instance { get; private set; }
 
-        public List<GameTheme> allThemes = new List<GameTheme>();
-        public GameTheme CurrentTheme { get; private set; }
+        public static event Action OnThemeChanged;
 
-        private const string THEME_KEY = "SelectedTheme";
+        public string CurrentTheme { get; private set; } = "Classic";
+
+        private const string THEME_KEY = "Settings_Theme";
 
         void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
 
-            int saved = PlayerPrefs.GetInt(THEME_KEY, 0);
-            if (allThemes.Count > 0)
-            {
-                saved = Mathf.Clamp(saved, 0, allThemes.Count - 1);
-                CurrentTheme = allThemes[saved];
-            }
-            Debug.Log($"[Theme] Loaded: {(CurrentTheme != null ? CurrentTheme.themeName : "None")}");
+            CurrentTheme = PlayerPrefs.GetString(THEME_KEY, "Classic");
+            Debug.Log("[Theme] Loaded: " + CurrentTheme);
         }
 
-        public void SelectTheme(int index)
+        public void SelectTheme(string themeName)
         {
-            if (index < 0 || index >= allThemes.Count) return;
-            CurrentTheme = allThemes[index];
-            PlayerPrefs.SetInt(THEME_KEY, index);
+            if (string.IsNullOrEmpty(themeName)) return;
+            CurrentTheme = themeName;
+            PlayerPrefs.SetString(THEME_KEY, themeName);
             PlayerPrefs.Save();
+            Debug.Log("[Theme] Selected: " + themeName);
 
-            // ApplyTheme disabled
-
-            Debug.Log($"[Theme] Selected: {CurrentTheme.themeName}");
+            OnThemeChanged?.Invoke();
         }
+
+        public ThemeColors Colors => ThemePalette.Get(CurrentTheme);
     }
 }

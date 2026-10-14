@@ -36,6 +36,7 @@ namespace MeraWorld.Core
             BuildConfirmDialog();
             BuildInfoPopup();
             BuildToast();
+            BuildDropdownPopup();
             RefreshUI();
         }
 

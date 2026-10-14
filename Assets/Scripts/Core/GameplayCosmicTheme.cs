@@ -7,11 +7,16 @@ namespace MeraWorld.Core
         private GameObject _bgObj;
         private GameObject _patternObj;
 
-        // Fallback colors
-        private static readonly Color BgDeep = new Color(0.10f, 0.03f, 0.22f);
-        private static readonly Color BgMid  = new Color(0.18f, 0.06f, 0.35f);
-        private static readonly Color BgTop  = new Color(0.24f, 0.08f, 0.45f);
-        private static readonly Color PatternColor = new Color(0.55f, 0.25f, 0.80f, 0.30f);
+        // Colors come from ThemePalette (dynamic)
+        private Color BgDeep { get { return ThemePalette.Get(GetCurrentThemeName()).BgDeep; } }
+        private Color BgMid  { get { return ThemePalette.Get(GetCurrentThemeName()).BgMid; } }
+        private Color BgTop  { get { return ThemePalette.Get(GetCurrentThemeName()).BgTop; } }
+        private Color PatternColor { get { return new Color(1f, 1f, 1f, 0.15f); } }
+
+        private string GetCurrentThemeName()
+        {
+            return ThemeManager.Instance != null ? ThemeManager.Instance.CurrentTheme : "Classic";
+        }
 
         void Start() { Invoke(nameof(BuildBackground), 0.05f); }
         void OnEnable() { Invoke(nameof(BuildBackground), 0.1f); }

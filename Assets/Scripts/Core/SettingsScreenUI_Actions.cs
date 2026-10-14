@@ -28,7 +28,23 @@ namespace MeraWorld.Core
         private void OnPracticeMode() { PlayerPrefs.SetInt("GameMode_Practice", 1); PlayerPrefs.Save(); ShowToast("Starting Practice Mode..."); Invoke(nameof(Hide), 1.2f); }
         // (OnInstagram removed - moved to Home screen)
         // (OnFacebookLike removed - moved to Home screen)
-        private void OnLanguageChange() { int cur = PlayerPrefs.GetInt(KEY_LANGUAGE, 0); int next = cur == 0 ? 1 : 0; PlayerPrefs.SetInt(KEY_LANGUAGE, next); PlayerPrefs.Save(); ShowToast(next == 0 ? "Language: English" : "Language: Urdu"); RefreshUI(); }
+        private void OnLanguageChange()
+        {
+            int cur = PlayerPrefs.GetInt(KEY_LANGUAGE, 0);
+            string current = cur == 0 ? "English" : "Urdu";
+            string[] langs = new string[] { "English", "Urdu", "Hindi", "Arabic" };
+            ShowDropdown("SELECT LANGUAGE", langs, current, OnLanguageSelected);
+        }
+
+        private void OnLanguageSelected(string lang)
+        {
+            int idx = lang == "English" ? 0 : (lang == "Urdu" ? 1 : (lang == "Hindi" ? 2 : 3));
+            PlayerPrefs.SetInt(KEY_LANGUAGE, idx);
+            PlayerPrefs.SetString("Settings_LanguageName", lang);
+            PlayerPrefs.Save();
+            ShowToast("Language: " + lang);
+            RefreshUI();
+        }
         private void OnSfxToggle() { bool isOn = PlayerPrefs.GetInt(KEY_SFX, 1) == 1; if (AudioManager.Instance != null) AudioManager.Instance.SetSFXMuted(!isOn); ShowToast(isOn ? "Sound Effects ON" : "Sound Effects OFF"); }
         private void OnVibrationToggle() { bool isOn = PlayerPrefs.GetInt(KEY_VIBRATION, 1) == 1; if (isOn && Application.isMobilePlatform) { try { Handheld.Vibrate(); } catch { } } ShowToast(isOn ? "Vibration ON" : "Vibration OFF"); }
         private void OnNotificationsToggle() { bool isOn = PlayerPrefs.GetInt(KEY_NOTIFICATIONS, 1) == 1; ShowToast(isOn ? "Notifications ON" : "Notifications OFF"); }
@@ -74,11 +90,31 @@ namespace MeraWorld.Core
         // ═══════════ GAMEPLAY ═══════════
         private void OnThemeChange()
         {
-            string cur = PlayerPrefs.GetString(KEY_THEME, "Classic");
-            string next = cur == "Classic" ? "Cosmic" : (cur == "Cosmic" ? "Ocean" : "Classic");
-            PlayerPrefs.SetString(KEY_THEME, next);
+            string current = PlayerPrefs.GetString(KEY_THEME, "Classic");
+            string[] themes = new string[] { "Classic", "Cosmic", "Ocean", "Sunset", "Forest" };
+            ShowDropdown("SELECT THEME", themes, current, OnThemeSelected);
+        }
+
+        private void OnThemeSelected(string theme)
+        {
+            PlayerPrefs.SetString(KEY_THEME, theme);
             PlayerPrefs.Save();
-            ShowToast("Theme: " + next);
+
+            // Apply theme to game visuals
+            if (ThemeManager.Instance != null)
+                ThemeManager.Instance.SelectTheme(theme);
+
+            // Rebuild cosmic background with new colors
+            var cosmicTheme = FindFirstObjectByType<GameplayCosmicTheme>();
+            if (cosmicTheme != null)
+                cosmicTheme.BuildBackground();
+
+            // Rebuild grid with new tile colors
+            var grid = FindFirstObjectByType<GridVisualizer>();
+            if (grid != null)
+                grid.BuildVisuals();
+
+            ShowToast("Theme: " + theme);
             RefreshUI();
         }
 

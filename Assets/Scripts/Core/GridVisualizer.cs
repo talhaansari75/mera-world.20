@@ -15,9 +15,11 @@ namespace MeraWorld.Core
         private const float GridOffsetX = 0f;
         private const float GridOffsetY = 0.55f;
 
-        private static readonly Color ProdTileTop    = new Color(0.45f, 0.30f, 0.75f);
-        private static readonly Color ProdTileMid    = new Color(0.28f, 0.15f, 0.55f);
-        private static readonly Color ProdTileBottom = new Color(0.12f, 0.05f, 0.25f);
+        // Dynamic from theme palette
+        private static string CurrentThemeName { get { return ThemeManager.Instance != null ? ThemeManager.Instance.CurrentTheme : "Classic"; } }
+        private static Color ProdTileTop    { get { return ThemePalette.Get(CurrentThemeName).TileTop; } }
+        private static Color ProdTileMid    { get { return ThemePalette.Get(CurrentThemeName).TileMid; } }
+        private static Color ProdTileBottom { get { return ThemePalette.Get(CurrentThemeName).TileBottom; } }
 
         private static readonly Color TestTileTop    = new Color(1.00f, 0.99f, 0.96f);
         private static readonly Color TestTileMid    = new Color(0.97f, 0.95f, 0.90f);
@@ -33,7 +35,7 @@ namespace MeraWorld.Core
 
         private static readonly Color ProdPanelTop    = new Color(0.28f, 0.10f, 0.48f);
         private static readonly Color ProdPanelBottom = new Color(0.12f, 0.05f, 0.25f);
-        private static readonly Color GoldRim     = new Color(1.00f, 0.82f, 0.30f);
+        private static Color GoldRim     { get { return ThemePalette.Get(CurrentThemeName).RimColor; } }
 
         private static readonly Color LetterColor       = new Color(1f, 1f, 1f);
         private static readonly Color LetterShadowColor = new Color(0f, 0f, 0f, 0.55f);
