@@ -24,11 +24,24 @@ namespace MeraWorld.Core
 
                 private bool _showGameplayOnSetup = false;
 
-        private static readonly Color BG_TOP = new Color(0.16f, 0.08f, 0.34f);
-        private static readonly Color BG_BOTTOM = new Color(0.02f, 0.02f, 0.08f);
+        private static Color BG_TOP => GetPaletteColor("BgTop", 1f);
+        private static Color BG_BOTTOM => GetPaletteColor("BgDeep", 1f);
         private static readonly Color GOLD = new Color(1f, 0.85f, 0.30f);
         private static readonly Color GREEN = new Color(0.25f, 0.65f, 0.35f);
         private static readonly Color BLUE = new Color(0.25f, 0.45f, 0.85f);
+
+        private static Color GetPaletteColor(string which, float alpha)
+        {
+            var pal = (ThemeManager.Instance != null)
+                ? ThemePalette.Get(ThemeManager.Instance.CurrentTheme)
+                : ThemePalette.Get("Classic");
+            Color c;
+            if (which == "BgTop") c = pal.BgTop;
+            else if (which == "BgDeep") c = pal.BgDeep;
+            else c = pal.AccentColor;
+            c.a = alpha;
+            return c;
+        }
 
         void Start()
         {

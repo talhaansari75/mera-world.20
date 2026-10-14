@@ -32,13 +32,26 @@ namespace MeraWorld.Core
         private const string URL_PRIVACY = "https://meraworld.game/privacy";
 
         // COLORS
-        private static readonly Color ROW_BG = new Color(0.10f, 0.08f, 0.25f, 0.92f);
-        private static readonly Color ROW_BG_PREMIUM = new Color(0.15f, 0.10f, 0.35f, 1f);
-        private static readonly Color HEADER_BG = new Color(0.80f, 0.55f, 0.15f, 1f);
+        private static Color ROW_BG => GetPaletteColor("PanelBottom", 0.92f);
+        private static Color ROW_BG_PREMIUM => GetPaletteColor("PanelTop", 0.95f);
+        private static Color HEADER_BG => GetPaletteColor("AccentColor", 1f);
         private static readonly Color GREEN = new Color(0.25f, 0.75f, 0.30f);
         private static readonly Color BLUE = new Color(0.20f, 0.45f, 0.90f);
         private static readonly Color RED = new Color(0.85f, 0.20f, 0.20f);
         private static readonly Color GREY = new Color(0.3f, 0.3f, 0.35f);
+
+        private static Color GetPaletteColor(string which, float alpha)
+        {
+            var pal = (ThemeManager.Instance != null)
+                ? ThemePalette.Get(ThemeManager.Instance.CurrentTheme)
+                : ThemePalette.Get("Classic");
+            Color c;
+            if (which == "PanelTop") c = pal.PanelTop;
+            else if (which == "PanelBottom") c = pal.PanelBottom;
+            else c = pal.AccentColor;
+            c.a = alpha;
+            return c;
+        }
         private static readonly Color GOLD = new Color(1f, 0.85f, 0.35f);
         private static readonly Color TEXT_GOLD = new Color(1f, 0.85f, 0.35f);
         private static readonly Color TRACK_BG = new Color(0.08f, 0.05f, 0.20f, 1f);
