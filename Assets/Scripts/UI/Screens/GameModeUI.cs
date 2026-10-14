@@ -143,6 +143,10 @@ namespace MeraWorld.Core
             PlayerPrefs.SetInt("SkipHome", 1);
             PlayerPrefs.Save();
 
+            // FIX: Hide panel before scene reload
+            // (SceneManager.LoadScene is deferred - panel would stay visible)
+            Hide();
+
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
