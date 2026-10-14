@@ -175,14 +175,27 @@ namespace MeraWorld.Core
 
         private void OnBuyTier(RewardTier tier)
         {
-            // Grant coins directly (simulating ad watched)
+            // Hide free coins panel while ad plays
+            if (Ads != null && Ads.CanShowRewarded())
+            {
+                _panel.SetActive(false);
+                Ads.ShowRewarded(tier.Coins);
+                Debug.Log("[AdReward] Ad requested for " + tier.Coins + " coins");
+                return;
+            }
+
+            // On cooldown - show remaining time
+            if (Ads != null)
+            {
+                int wait = Ads.GetRewardedCooldownRemaining();
+                Debug.Log("[AdReward] Cooldown active: " + wait + "s left");
+                return;
+            }
+
+            // Fallback: no AdsManager - direct grant
             if (Progress != null) Progress.AddCoins(tier.Coins);
-
-            if (SoundManager.Instance != null)
-                SoundManager.Instance.PlayCoinCollect();
-
-            Debug.Log($"[AdReward] Earned {tier.Coins} coins");
-            Hide();
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayCoinCollect();
+            Debug.Log("[AdReward] Direct grant (no ads): " + tier.Coins + " coins");
         }
 
         public void Show() { if (_panel != null) _panel.SetActive(true); }
