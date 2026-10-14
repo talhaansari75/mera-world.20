@@ -18,3 +18,5 @@ namespace MeraWorld.Data
         public int starThreshold3 = 18;
     }
 }
+
+// Migration test comment
