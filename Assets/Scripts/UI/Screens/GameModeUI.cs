@@ -145,9 +145,22 @@ namespace MeraWorld.Core
 
             // FIX: Hide panel before scene reload
             // (SceneManager.LoadScene is deferred - panel would stay visible)
+            // NEW SAFE APPROACH: No scene reload (avoids DOTween crash)
             Hide();
 
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            var home = FindFirstObjectByType<HomeScreenUI>();
+            if (home != null)
+            {
+                var gm = FindFirstObjectByType<GameManager>();
+                int lvl = gm != null ? gm.CurrentLevel : 1;
+                home.StartLevel(lvl);
+                Debug.Log("[Mode] Soft reload triggered");
+            }
+            else
+            {
+                Debug.LogWarning("[Mode] HomeScreenUI null — fallback reload");
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
         }
 
         public void Show() { if (_panel != null) _panel.SetActive(true); }

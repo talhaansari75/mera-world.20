@@ -149,7 +149,7 @@ namespace MeraWorld.Core
             _homeCanvas.gameObject.SetActive(true);
         }
 
-        private void StartLevel(int level)
+        public void StartLevel(int level)
         {
             if (Progress != null) Progress.SetCurrentLevel(level);
             else

@@ -203,6 +203,65 @@ namespace MeraWorld.Core
             CreatePremiumCategoryButton("LEVELS", "icon_theme", new Vector2(-xSpacing, centerY - ySpacing), OnLevelsClicked);
             CreatePremiumCategoryButton("PROGRESS", "icon_progress",
                 new Vector2(xSpacing, centerY - ySpacing), () => OpenCategory("progress"));
+
+            // GAME MODES — wide button above grid
+            CreateModeBanner(new Vector2(0f, centerY + ySpacing * 0.85f), OnModesClicked);
+        }
+
+        private void CreateModeBanner(Vector2 pos, UnityEngine.Events.UnityAction onClick)
+        {
+            var rootObj = new GameObject("ModeBanner");
+            rootObj.transform.SetParent(_homeCanvas.transform, false);
+            var rt = rootObj.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = new Vector2(880f, 140f);
+
+            var bgImg = rootObj.AddComponent<Image>();
+            bgImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.55f, 0.30f, 0.85f), 256, 40);
+            bgImg.type = Image.Type.Sliced;
+            bgImg.color = Color.white;
+            bgImg.raycastTarget = true;
+
+            var btn = rootObj.AddComponent<Button>();
+            btn.onClick.AddListener(onClick);
+
+            var labelObj = new GameObject("Label");
+            labelObj.transform.SetParent(rootObj.transform, false);
+            var txt = labelObj.AddComponent<Text>();
+            txt.text = "GAME MODES";
+            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.fontSize = 48;
+            txt.fontStyle = FontStyle.Bold;
+            txt.color = Color.white;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.raycastTarget = false;
+            var sh = labelObj.AddComponent<Shadow>();
+            sh.effectColor = new Color(0f, 0f, 0f, 0.6f);
+            sh.effectDistance = new Vector2(2f, -2f);
+            var lrt = labelObj.GetComponent<RectTransform>();
+            lrt.anchorMin = Vector2.zero;
+            lrt.anchorMax = Vector2.one;
+            lrt.offsetMin = Vector2.zero;
+            lrt.offsetMax = Vector2.zero;
+
+            Debug.Log("[Home] GAME MODES banner created at " + pos);
+        }
+
+        private void OnModesClicked()
+        {
+            Debug.Log("[Home] GAME MODES clicked");
+            var ui = FindFirstObjectByType<GameModeUI>(FindObjectsInactive.Include);
+            if (ui != null)
+            {
+                ui.Show();
+            }
+            else
+            {
+                Debug.LogWarning("[Home] GameModeUI not found!");
+            }
         }
 
         private void CreatePremiumCategoryButton(string label, string iconName,
