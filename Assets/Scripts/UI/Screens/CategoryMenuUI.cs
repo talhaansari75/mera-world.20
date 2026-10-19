@@ -115,6 +115,8 @@ namespace MeraWorld.Core
                         OnClick = () => OpenPanel<AchievementsUI>("AWARDS"), RequiresOnline = false });
                     list.Add(new MenuItem { Label = "STATS", Color = new Color(0.30f, 0.65f, 0.80f),
                         OnClick = () => OpenPanel<StatisticsUI>("STATS"), RequiresOnline = false });
+                    list.Add(new MenuItem { Label = "DAILY", Color = new Color(0.85f, 0.45f, 0.25f),
+                        OnClick = () => OpenPanel<DailyChallengeUI>("DAILY"), RequiresOnline = false });
                     list.Add(new MenuItem { Label = "MISSIONS", Color = new Color(0.30f, 0.55f, 0.85f),
                         OnClick = () => OpenPanel<MissionsSystem>("MISSIONS"), RequiresOnline = false });
                     list.Add(new MenuItem { Label = "WORLDS", Color = new Color(0.50f, 0.70f, 0.95f),

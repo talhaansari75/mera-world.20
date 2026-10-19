@@ -75,7 +75,7 @@ namespace MeraWorld.Core
             cardObj.transform.SetParent(_panel.transform, false);
 
             var cardImg = cardObj.AddComponent<Image>();
-            cardImg.color = new Color(0.55f, 0.20f, 0.55f);
+            cardImg.color = (ThemeManager.Instance != null ? ThemeManager.Instance.Colors.PanelTop : ThemePalette.Get("Classic").PanelTop);
 
             var cardRt = cardObj.GetComponent<RectTransform>();
             cardRt.anchorMin = new Vector2(0.5f, 0.5f);
@@ -85,13 +85,14 @@ namespace MeraWorld.Core
             cardRt.sizeDelta = new Vector2(900f, 700f);
 
             CreateText(cardObj.transform, "DAILY CHALLENGE", new Vector2(0f, 250f), 70,
-                new Color(1f, 0.90f, 0.55f), FontStyle.Bold);
+                (ThemeManager.Instance != null ? ThemeManager.Instance.Colors.AccentColor : ThemePalette.Get("Classic").AccentColor), FontStyle.Bold);
 
+            // FIXED: Text Color is now dark so it's visible on light themes
             CreateText(cardObj.transform, "Complete today's challenge\nand earn 500 coins + 1 star!",
-                new Vector2(0f, 100f), 36, Color.white, FontStyle.Normal);
+                new Vector2(0f, 100f), 36, new Color(0.15f, 0.15f, 0.20f), FontStyle.Normal);
 
             CreateText(cardObj.transform, GetTimerText(), new Vector2(0f, 0f), 28,
-                new Color(0.90f, 0.90f, 1f), FontStyle.Normal);
+                new Color(0.20f, 0.20f, 0.25f), FontStyle.Normal);
 
             CreateButton(cardObj.transform, "PLAY NOW", new Vector2(0f, -160f),
                 new Vector2(500f, 130f), new Color(0.25f, 0.75f, 0.35f), OnPlayClicked);
@@ -132,39 +133,61 @@ namespace MeraWorld.Core
             return lastDate != today;
         }
 
+        public void Show()
+        {
+            if (_panel != null) _panel.SetActive(true);
+        }
+
         private void OnPlayClicked()
         {
             if (Sound != null) Sound.PlayButtonClick();
 
-            string today = DateTime.UtcNow.ToString("yyyy-MM-dd");
-            PlayerPrefs.SetString(KEY_LAST_CHALLENGE, today);
+            // Check if reward is available
+            bool canClaim = CanPlayToday();
 
-            int streak = PlayerPrefs.GetInt(KEY_CHALLENGE_STREAK, 0);
-
-            string yesterday = DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-dd");
-            string lastDate = PlayerPrefs.GetString(KEY_LAST_CHALLENGE, "");
-
-            if (lastDate == yesterday) streak++;
-            else streak = 1;
-
-            PlayerPrefs.SetInt(KEY_CHALLENGE_STREAK, streak);
-            PlayerPrefs.Save();
-
-            if (Progress != null)
+            if (canClaim)
             {
-                Progress.AddCoins(500);
-                Progress.AddStars(1);
-            }
+                string lastDate = PlayerPrefs.GetString(KEY_LAST_CHALLENGE, "");
+                string yesterday = DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-dd");
+                string today = DateTime.UtcNow.ToString("yyyy-MM-dd");
 
-            Debug.Log($"[DailyChallenge] Played! Streak: {streak}, +500 coins");
+                int streak = PlayerPrefs.GetInt(KEY_CHALLENGE_STREAK, 0);
+                if (lastDate == yesterday) streak++;
+                else if (lastDate != today) streak = 1;
+
+                PlayerPrefs.SetString(KEY_LAST_CHALLENGE, today);
+                PlayerPrefs.SetInt(KEY_CHALLENGE_STREAK, streak);
+                PlayerPrefs.Save();
+
+                if (Progress != null)
+                {
+                    Progress.AddCoins(500);
+                    Progress.AddStars(1);
+                }
+
+                Debug.Log($"[DailyChallenge] Played! Streak: {streak}, +500 coins");
+            }
+            else
+            {
+                Debug.Log("[DailyChallenge] Reward already claimed today. Playing without extra reward.");
+            }
 
             _panel.SetActive(false);
 
-            PlayerPrefs.SetInt("SkipHome", 1);
+            // FIX: ALWAYS start the game (even if reward is claimed)
             PlayerPrefs.SetInt("CurrentLevel", 1);
             PlayerPrefs.Save();
 
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            var home = FindFirstObjectByType<HomeScreenUI>();
+            if (home != null)
+            {
+                home.StartLevel(1);
+                Debug.Log("[DailyChallenge] Soft reload to Level 1");
+            }
+            else
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
         }
 
         private void OnDismiss()
