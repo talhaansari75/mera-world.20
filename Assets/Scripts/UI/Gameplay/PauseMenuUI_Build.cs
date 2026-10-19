@@ -39,7 +39,7 @@ namespace MeraWorld.Core
             else
             {
                 img.sprite = UISpriteFactory.Create3DButtonSprite(
-                    new Color(1f, 0.85f, 0.30f), 256, 20);
+                    (ThemeManager.Instance != null ? ThemeManager.Instance.Colors.AccentColor : ThemePalette.Get("Classic").AccentColor), 256, 20);
                 img.type = Image.Type.Sliced;
                 img.color = Color.white;
             }
@@ -113,7 +113,7 @@ namespace MeraWorld.Core
             borderObj.transform.SetParent(centerPanel.transform, false);
             var borderImg = borderObj.AddComponent<Image>();
             borderImg.sprite = UISpriteFactory.Create3DButtonSprite(
-                new Color(0.85f, 0.55f, 0.10f), 512, 30);
+                (ThemeManager.Instance != null ? ThemeManager.Instance.Colors.AccentColor : ThemePalette.Get("Classic").AccentColor), 512, 30);
             borderImg.type = Image.Type.Sliced;
             borderImg.raycastTarget = false;
 
@@ -128,7 +128,7 @@ namespace MeraWorld.Core
             panelObj.transform.SetParent(centerPanel.transform, false);
             var panelImg = panelObj.AddComponent<Image>();
             panelImg.sprite = UISpriteFactory.Create3DButtonSprite(
-                new Color(0.10f, 0.04f, 0.20f), 512, 30);
+                (ThemeManager.Instance != null ? ThemeManager.Instance.Colors.PanelTop : ThemePalette.Get("Classic").PanelTop), 512, 30);
             panelImg.type = Image.Type.Sliced;
             panelImg.raycastTarget = false;
 
