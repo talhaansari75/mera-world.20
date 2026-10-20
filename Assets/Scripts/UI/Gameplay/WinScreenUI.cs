@@ -72,6 +72,7 @@ namespace MeraWorld.Core
 
         private void ShowWinScreen()
         {
+            HapticManager.Double(); // JUICE: Win Vibration
             if (_panel == null) return;
 
             float elapsed = Time.time - _levelStartTime;

@@ -5,6 +5,7 @@ namespace MeraWorld.Core
     [DefaultExecutionOrder(-100)]
     public class SoundManager : MonoBehaviour
     {
+        private float _wordFoundPitch = 1f;
         public static SoundManager Instance { get; private set; }
 
         [Range(0f, 1f)] public float SfxVolume = 0.5f;
@@ -38,16 +39,17 @@ namespace MeraWorld.Core
             PlayTone(1200f, 0.05f, 0.25f);
         }
 
-        public void PlayWordFound()
+        public void PlayWordFound(float pitchMultiplier = 1f)
         {
+            _wordFoundPitch = pitchMultiplier;
             // Two-tone chime
-            PlayTone(880f, 0.10f, 0.35f);
+            PlayTone(880f * pitchMultiplier, 0.10f, 0.35f);
             Invoke(nameof(PlayWordFoundSecond), 0.10f);
         }
 
         private void PlayWordFoundSecond()
         {
-            PlayTone(1320f, 0.15f, 0.35f);
+            PlayTone(1320f * _wordFoundPitch, 0.15f, 0.35f);
         }
 
         public void PlayWordInvalid()
