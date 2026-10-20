@@ -329,7 +329,21 @@ namespace MeraWorld.Core
 
             if (PlayerProgressManager.Instance != null)
             {
-                PlayerProgressManager.Instance.AddCoins(CoinsPerWord);
+                int earnedCoins = CoinsPerWord;
+                bool hasGolden = false;
+                bool hasBomb = false;
+                foreach(var t in _selection) 
+                {
+                    if (t.Type == LetterTile.TileType.Golden) hasGolden = true;
+                    if (t.Type == LetterTile.TileType.Bomb) hasBomb = true;
+                }
+                
+                if (hasGolden) earnedCoins *= 2;
+                if (hasBomb) earnedCoins = 0;
+
+                PlayerProgressManager.Instance.AddCoins(earnedCoins);
+                if (hasGolden) Debug.Log("[SpecialTiles] Golden Tile used! 2x Coins!");
+                if (hasBomb) Debug.Log("[SpecialTiles] Bomb Tile used! 0 Coins!");
                 PlayerProgressManager.Instance.AddWordFound();
             }
 

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using DG.Tweening;
 
 namespace MeraWorld.Core
@@ -8,6 +8,9 @@ namespace MeraWorld.Core
         public int Row;
         public int Column;
         public char Letter;
+
+        public enum TileType { Normal, Golden, Bomb }
+        public TileType Type = TileType.Normal;
 
         [HideInInspector] public SelectionManager Manager;
 
@@ -97,7 +100,7 @@ namespace MeraWorld.Core
             transform.localScale = _originalScale;
             transform.localRotation = Quaternion.identity;
 
-            // Bright golden color â€” VISIBLE
+            // Bright golden color — VISIBLE
             _renderer.DOKill();
             _renderer.color = SelectedTint;
             _renderer.DOColor(SelectedGlow, 0.5f)
@@ -220,5 +223,20 @@ namespace MeraWorld.Core
             if (_renderer != null) _renderer.DOKill();
             if (_glowRenderer != null) _glowRenderer.DOKill();
         }
-    }
+
+        public void SetSpecialType(TileType type)
+        {
+            Type = type;
+            if (_renderer == null) _renderer = GetComponent<SpriteRenderer>();
+            if (_renderer == null) return;
+
+            if (type == TileType.Golden)
+            {
+                _renderer.color = new Color(1f, 0.90f, 0.40f); // Bright Gold
+            }
+            else if (type == TileType.Bomb)
+            {
+                _renderer.color = new Color(1f, 0.40f, 0.40f); // Danger Red
+            }
+        }    }
 }

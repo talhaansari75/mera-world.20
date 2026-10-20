@@ -272,6 +272,12 @@ namespace MeraWorld.Core
                     new Color(0.35f, 0.95f, 0.55f, 0.98f));
             }
 
+            // --- SPECIAL TILES SPAWN ---
+            int specialRoll = UnityEngine.Random.Range(0, 100);
+            if (specialRoll < 4) tile.SetSpecialType(LetterTile.TileType.Golden); // 4% chance
+            else if (specialRoll < 8) tile.SetSpecialType(LetterTile.TileType.Bomb); // 4% chance
+            // ---------------------------
+
             var textShadowObj = new GameObject("LetterShadow");
             textShadowObj.transform.SetParent(cellObj.transform, false);
             textShadowObj.transform.localPosition = new Vector3(0.03f, -0.03f, -0.49f);
