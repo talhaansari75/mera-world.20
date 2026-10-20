@@ -11,6 +11,7 @@ namespace MeraWorld.Core
         public bool CreateTopBarUI = true;
         public bool CreateHintButtonUI = true;
         public bool CreateWinScreenUI = true;
+        public bool CreateBossLevelUI = true;
         public bool CreateLevelTimerUI = true;
         public bool CreateBotRaceMode = true;
         public bool CreateStreakButtonUI = true;
@@ -126,6 +127,7 @@ namespace MeraWorld.Core
                     if (LogSetup) Debug.Log("[Bootstrap] WinScreenUI wired");
                 }
             }
+            if (CreateBossLevelUI) EnsureComponent<BossLevelUI>("BossLevelUI");
             if (CreateLevelTimerUI) EnsureComponent<LevelTimerUI>("LevelTimerUI");
             if (CreateStreakButtonUI) EnsureComponent<StreakButtonUI>("StreakButtonUI");
             if (CreateDOTweenInitializer) EnsureComponent<DOTweenInitializer>("DOTweenInitializer");

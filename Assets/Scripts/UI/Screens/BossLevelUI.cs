@@ -99,19 +99,23 @@ namespace MeraWorld.Core
             rt.localScale = Vector3.one;
         }
 
-        private void CheckBossLevel() { var gm = FindFirstObjectByType<GameManager>(); if (gm == null) return; int currentLevel = gm.CurrentLevel; if (!BossLevelManager.IsBossLevel(currentLevel)) return; ShowBossLevel(currentLevel); }
+        public void CheckBossLevel() { var gm = FindFirstObjectByType<GameManager>(); if (gm == null) return; int currentLevel = gm.CurrentLevel; if (!BossLevelManager.IsBossLevel(currentLevel)) return; ShowBossLevel(currentLevel); }
 
         public void Hide() { if (_panel != null) _panel.SetActive(false); }
 
         private void OnFightClicked()
         {
             if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-            Hide();
+                        Hide();
             int level = PlayerPrefs.GetInt("CurrentLevel", 1);
-            if (PlayerProgressManager.Instance != null)
-                PlayerProgressManager.Instance.AddCoins(BossLevelManager.GetBossReward(level));
-            UnityEngine.SceneManagement.SceneManager.LoadScene(
-                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+            Debug.Log("[Boss] Fight started for Level " + level);
+            
+            // FIX: Soft reload instead of scene reload to avoid DOTween crash
+            var home = FindFirstObjectByType<HomeScreenUI>();
+            if (home != null)
+            {
+                home.StartLevel(level);
+            }
         }
 
         private Text MakeText(string s, Vector2 p, int sz, Color c)
