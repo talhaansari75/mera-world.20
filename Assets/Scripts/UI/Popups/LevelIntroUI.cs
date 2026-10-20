@@ -61,7 +61,7 @@ namespace MeraWorld.Core
             var topLine = new GameObject("TopLine");
             topLine.transform.SetParent(_banner.transform, false);
             var tlImg = topLine.AddComponent<Image>();
-            tlImg.color = new Color(1f, 0.85f, 0.30f);
+            tlImg.color = (ThemeManager.Instance != null ? ThemeManager.Instance.Colors.AccentColor : ThemePalette.Get("Classic").AccentColor);
             var tlRt = topLine.GetComponent<RectTransform>();
             tlRt.anchorMin = new Vector2(0f, 1f);
             tlRt.anchorMax = new Vector2(1f, 1f);
@@ -72,7 +72,7 @@ namespace MeraWorld.Core
             var bottomLine = new GameObject("BottomLine");
             bottomLine.transform.SetParent(_banner.transform, false);
             var blImg = bottomLine.AddComponent<Image>();
-            blImg.color = new Color(1f, 0.85f, 0.30f);
+            blImg.color = (ThemeManager.Instance != null ? ThemeManager.Instance.Colors.AccentColor : ThemePalette.Get("Classic").AccentColor);
             var blRt = bottomLine.GetComponent<RectTransform>();
             blRt.anchorMin = new Vector2(0f, 0f);
             blRt.anchorMax = new Vector2(1f, 0f);
@@ -89,7 +89,7 @@ namespace MeraWorld.Core
             lvlTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             lvlTxt.fontSize = 100;
             lvlTxt.fontStyle = FontStyle.Bold;
-            lvlTxt.color = new Color(1f, 0.85f, 0.30f);
+            lvlTxt.color = (ThemeManager.Instance != null ? ThemeManager.Instance.Colors.AccentColor : ThemePalette.Get("Classic").AccentColor);
             lvlTxt.alignment = TextAnchor.MiddleCenter;
             lvlTxt.raycastTarget = false;
 

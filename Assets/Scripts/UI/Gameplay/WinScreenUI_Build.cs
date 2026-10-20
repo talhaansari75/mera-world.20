@@ -49,7 +49,7 @@ namespace MeraWorld.Core
             centerPanel.transform.SetParent(parent, false);
 
             var panelImg = centerPanel.AddComponent<Image>();
-            panelImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.10f, 0.04f, 0.20f), 512, 30);
+            panelImg.sprite = UISpriteFactory.Create3DButtonSprite((ThemeManager.Instance != null ? ThemeManager.Instance.Colors.PanelTop : ThemePalette.Get("Classic").PanelTop), 512, 30);
             panelImg.type = Image.Type.Sliced;
             panelImg.color = Color.white;
 
@@ -63,7 +63,7 @@ namespace MeraWorld.Core
             var borderObj = new GameObject("GoldBorder");
             borderObj.transform.SetParent(centerPanel.transform, false);
             var borderImg = borderObj.AddComponent<Image>();
-            borderImg.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.85f, 0.55f, 0.10f), 512, 30);
+            borderImg.sprite = UISpriteFactory.Create3DButtonSprite((ThemeManager.Instance != null ? ThemeManager.Instance.Colors.AccentColor : ThemePalette.Get("Classic").AccentColor), 512, 30);
             borderImg.type = Image.Type.Sliced;
             borderImg.raycastTarget = false;
 

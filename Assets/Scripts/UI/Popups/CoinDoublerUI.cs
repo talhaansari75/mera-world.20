@@ -70,7 +70,7 @@ namespace MeraWorld.Core
             cardObj.transform.SetParent(_panel.transform, false);
 
             var cardImg = cardObj.AddComponent<Image>();
-            cardImg.color = new Color(0.15f, 0.30f, 0.55f);
+            cardImg.color = (ThemeManager.Instance != null ? ThemeManager.Instance.Colors.PanelTop : ThemePalette.Get("Classic").PanelTop);
 
             var cardRt = cardObj.GetComponent<RectTransform>();
             cardRt.anchorMin = new Vector2(0.5f, 0.5f);
@@ -80,7 +80,7 @@ namespace MeraWorld.Core
             cardRt.sizeDelta = new Vector2(800f, 600f);
 
             CreateText(cardObj.transform, "DOUBLE YOUR COINS!", new Vector2(0f, 200f), 55,
-                new Color(1f, 0.85f, 0.30f), FontStyle.Bold);
+                (ThemeManager.Instance != null ? ThemeManager.Instance.Colors.AccentColor : ThemePalette.Get("Classic").AccentColor), FontStyle.Bold);
             CreateText(cardObj.transform, "Watch a short ad to\nDOUBLE your last reward!",
                 new Vector2(0f, 50f), 32, Color.white, FontStyle.Normal);
 
