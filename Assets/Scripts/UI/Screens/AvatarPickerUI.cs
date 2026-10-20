@@ -10,6 +10,8 @@ namespace MeraWorld.Core
         private GameObject _gridParent;
 
         private const string KEY_AVATAR = "SelectedAvatar";
+        private const string KEY_OWNED_PREFIX = "AvatarOwned_";
+        private static readonly int[] AvatarPrices = { 0, 100, 200, 300, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000 };
 
         private static readonly Color[] AvatarColors = {
             new Color(0.30f, 0.65f, 0.95f),
@@ -119,13 +121,30 @@ namespace MeraWorld.Core
 
         private void OnAvatarSelected(int index)
         {
+            int price = AvatarPrices[index];
+            bool isOwned = PlayerPrefs.GetInt(KEY_OWNED_PREFIX + index, index == 0 ? 1 : 0) == 1;
+
+            if (!isOwned)
+            {
+                int currentCoins = PlayerProgressManager.Instance != null ? PlayerProgressManager.Instance.Coins : 0;
+                if (currentCoins >= price)
+                {
+                    PlayerProgressManager.Instance.AddCoins(-price);
+                    PlayerPrefs.SetInt(KEY_OWNED_PREFIX + index, 1);
+                    PlayerPrefs.Save();
+                    Debug.Log($"[Avatar] Purchased avatar {index} for {price} coins!");
+                }
+                else
+                {
+                    Debug.LogWarning($"[Avatar] Not enough coins for avatar {index}. Need {price}, have {currentCoins}");
+                    return;
+                }
+            }
+
             PlayerPrefs.SetInt(KEY_AVATAR, index);
             PlayerPrefs.Save();
-
-            if (SoundManager.Instance != null)
-                SoundManager.Instance.PlayWordFound();
-
-            Debug.Log($"[Avatar] Selected {index}");
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayWordFound();
+            Debug.Log($"[Avatar] Equipped {index}");
             BuildAvatarCards();
         }
 

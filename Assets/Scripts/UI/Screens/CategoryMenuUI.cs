@@ -111,6 +111,8 @@ namespace MeraWorld.Core
                     break;
 
                 case "progress":
+                    list.Add(new MenuItem { Label = "PROFILE", Color = new Color(0.75f, 0.45f, 0.85f),
+                        OnClick = () => OpenPanel<ProfileUI>("PROFILE"), RequiresOnline = false });
                     list.Add(new MenuItem { Label = "AWARDS", Color = new Color(0.85f, 0.40f, 0.55f),
                         OnClick = () => OpenPanel<AchievementsUI>("AWARDS"), RequiresOnline = false });
                     list.Add(new MenuItem { Label = "STATS", Color = new Color(0.30f, 0.65f, 0.80f),

@@ -127,7 +127,11 @@ namespace MeraWorld.Core
                     if (LogSetup) Debug.Log("[Bootstrap] WinScreenUI wired");
                 }
             }
-            if (CreateBossLevelUI) EnsureComponent<BossLevelUI>("BossLevelUI");
+                        if (CreateBossLevelUI) EnsureComponent<BossLevelUI>("BossLevelUI");
+            
+            // Ensure Profile & Avatar exist
+            EnsureComponent<ProfileUI>("ProfileUI");
+            EnsureComponent<AvatarPickerUI>("AvatarPickerUI");
             if (CreateLevelTimerUI) EnsureComponent<LevelTimerUI>("LevelTimerUI");
             if (CreateStreakButtonUI) EnsureComponent<StreakButtonUI>("StreakButtonUI");
             if (CreateDOTweenInitializer) EnsureComponent<DOTweenInitializer>("DOTweenInitializer");
