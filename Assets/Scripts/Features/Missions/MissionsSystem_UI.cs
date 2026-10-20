@@ -43,6 +43,9 @@ namespace MeraWorld.Core
             CreateSmallButton(_panel.transform, "< BACK", new Vector2(-380f, 830f),
                 new Color(0.5f, 0.5f, 0.55f), OnBack);
 
+            // STREAK DISPLAY
+            CreateText(_panel.transform, "DAILY STREAK: " + CurrentStreak + " DAYS", new Vector2(0f, 730f), 30, new Color(1f, 0.5f, 0.2f), FontStyle.Bold);
+
             CreateText(_panel.transform, "DAILY MISSIONS", new Vector2(0f, 650f), 40,
                 new Color(1f, 0.90f, 0.55f), FontStyle.Bold);
 

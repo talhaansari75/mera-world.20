@@ -20,12 +20,14 @@ namespace MeraWorld.Core
         public static MissionsSystem Instance { get; private set; }
 
         public event Action<Mission> OnMissionCompleted;
+        public int CurrentStreak => PlayerPrefs.GetInt(KEY_STREAK, 0);
 
         private Canvas _canvas;
         private GameObject _panel;
 
         private const string KEY_DAILY_DATE = "Missions_DailyDate";
         private const string KEY_WEEKLY_WEEK = "Missions_WeeklyWeek";
+        private const string KEY_STREAK = "Missions_Streak";
         private const string KEY_PROGRESS_PREFIX = "Mission_";
 
         void Awake()
@@ -47,6 +49,20 @@ namespace MeraWorld.Core
             if (lastDaily != today)
             {
                 PlayerPrefs.SetString(KEY_DAILY_DATE, today);
+
+                // --- STREAK LOGIC ---
+                string yesterday = DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-dd");
+                int streak = PlayerPrefs.GetInt(KEY_STREAK, 0);
+                if (string.IsNullOrEmpty(lastDaily)) streak = 1;
+                else if (lastDaily == yesterday) streak++;
+                else streak = 1;
+                
+                PlayerPrefs.SetInt(KEY_STREAK, streak);
+                Debug.Log($"[Missions] Streak updated to {streak} days");
+                
+                if (streak == 3) { PlayerProgressManager.Instance.AddCoins(100); Debug.Log("[Missions] 3-Day Streak Reward: +100 coins!"); }
+                else if (streak == 7) { PlayerProgressManager.Instance.AddCoins(300); Debug.Log("[Missions] 7-Day Streak Reward: +300 coins!"); }
+                // --------------------
                 foreach (var m in DailyMissions)
                     PlayerPrefs.DeleteKey(KEY_PROGRESS_PREFIX + m.Id);
                 PlayerPrefs.Save();
