@@ -17,6 +17,7 @@ namespace MeraWorld.Core
         private bool _isCountdown = false;
         private float _timeLimit = -1f;
         private string _lastMode = "";
+        private Image _redVignette;
 
         void Start()
         {
@@ -60,6 +61,19 @@ namespace MeraWorld.Core
             scaler.matchWidthOrHeight = 0.5f;
             canvasObj.AddComponent<GraphicRaycaster>();
 
+            // RED VIGNETTE (Danger Warning)
+            var vigObj = new GameObject("RedVignette");
+            vigObj.transform.SetParent(_canvas.transform, false);
+            _redVignette = vigObj.AddComponent<Image>();
+            _redVignette.color = new Color(1f, 0f, 0f, 0f); // Transparent initially
+            _redVignette.raycastTarget = false;
+            var vRt = vigObj.GetComponent<RectTransform>();
+            vRt.anchorMin = Vector2.zero;
+            vRt.anchorMax = Vector2.one;
+            vRt.offsetMin = Vector2.zero;
+            vRt.offsetMax = Vector2.zero;
+
+            // Timer Container
             var container = new GameObject("TimerContainer");
             container.transform.SetParent(_canvas.transform, false);
             var containerImg = container.AddComponent<Image>();
@@ -129,10 +143,22 @@ namespace MeraWorld.Core
                 else if (remaining > 10f) _timerText.color = new Color(1f, 0.85f, 0.35f);
                 else _timerText.color = new Color(1f, 0.35f, 0.35f);
 
+                // JUICE: Red Vignette
+                if (_redVignette != null)
+                {
+                    if (remaining <= 10f && remaining > 0f)
+                    {
+                        float pulse = Mathf.PingPong(Time.time * 2f, 1f);
+                        _redVignette.color = new Color(1f, 0f, 0f, Mathf.Lerp(0f, 0.3f, pulse));
+                    }
+                    else { _redVignette.color = new Color(1f, 0f, 0f, 0f); }
+                }
+
                 if (remaining <= 0f && !_stopped)
                 {
                     _stopped = true;
-                    Debug.Log("[Timer] TIME UP - time attack failed");
+                    Debug.Log("[Timer] TIME UP - triggering time attack fail");
+                    JuiceEffects.ShakeCamera(0.5f, 1f); // BIG Shake
                     OnTimeAttackFail();
                 }
             }
@@ -141,6 +167,7 @@ namespace MeraWorld.Core
                 int minutes = Mathf.FloorToInt(elapsed / 60f);
                 int seconds = Mathf.FloorToInt(elapsed % 60f);
                 _timerText.text = $"{minutes}:{seconds:00}";
+
                 if (elapsed < 60f) _timerText.color = new Color(1f, 0.90f, 0.55f);
                 else if (elapsed < 120f) _timerText.color = new Color(1f, 0.85f, 0.35f);
                 else _timerText.color = new Color(1f, 0.5f, 0.4f);

@@ -342,6 +342,23 @@ namespace MeraWorld.Core
                 if (hasBomb) earnedCoins = 0;
 
                 PlayerProgressManager.Instance.AddCoins(earnedCoins);
+
+                // JUICE: Haptics
+                if (hasBomb) HapticManager.Heavy();
+                else if (hasGolden) HapticManager.Double();
+                else HapticManager.Light();
+
+                // JUICE: Visual Effects
+                if (hasBomb) {
+                    JuiceEffects.ShakeCamera(0.4f, 0.5f);
+                } else {
+                    // SAFE: Use selection[0] if available, else use screen center
+                    Vector3 burstPos = Camera.main.transform.position + Camera.main.transform.forward * 5f;
+                    if (_selection != null && _selection.Count > 0)
+                        burstPos = _selection[0].transform.position;
+                    JuiceEffects.PlayWordBurst(burstPos, hasGolden ? new Color(1f, 0.85f, 0.3f) : Color.cyan);
+                    if (hasGolden) JuiceEffects.ShakeCamera(0.2f, 0.1f);
+                }
                 if (hasGolden) Debug.Log("[SpecialTiles] Golden Tile used! 2x Coins!");
                 if (hasBomb) Debug.Log("[SpecialTiles] Bomb Tile used! 0 Coins!");
                 PlayerProgressManager.Instance.AddWordFound();
