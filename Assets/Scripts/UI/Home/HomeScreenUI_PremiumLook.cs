@@ -172,7 +172,7 @@ namespace MeraWorld.Core
             playRt.sizeDelta = new Vector2(950f, 400f);
 
             // JUICE: PLAY button continuous pulse
-            playObj.transform.DOScale(Vector3.one * 1.05f, 1.2f).SetLoops(-1, DG.Tweening.LoopType.Yoyo).SetEase(DG.Tweening.Ease.InOutSine);
+            playObj.transform.DOScale(Vector3.one * 1.02f, 1.2f).SetLoops(-1, DG.Tweening.LoopType.Yoyo).SetEase(DG.Tweening.Ease.InOutSine);
 
             var textObj = new GameObject("PlayText");
             textObj.transform.SetParent(playObj.transform, false);
@@ -209,7 +209,7 @@ namespace MeraWorld.Core
                 new Vector2(xSpacing, centerY - ySpacing), () => OpenCategory("progress"));
 
             // GAME MODES — wide button above grid
-            CreateModeBanner(new Vector2(0f, centerY + ySpacing * 0.85f), OnModesClicked);
+            CreateModeBanner(new Vector2(0f, centerY + ySpacing * 0.6f), OnModesClicked);
 
             // JUICE: Staggered Bounce for Category Buttons
             int idx = 0;
