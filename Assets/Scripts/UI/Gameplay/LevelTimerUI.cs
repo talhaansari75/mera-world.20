@@ -128,6 +128,7 @@ namespace MeraWorld.Core
 
             if (_isZen) return;
             if (_stopped || _timerText == null) return;
+            if (AdminPanel.GodMode) return; // God Mode
 
             float elapsed = Time.time - _startTime;
 

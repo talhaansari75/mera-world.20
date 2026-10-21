@@ -111,6 +111,11 @@ namespace MeraWorld.Core
             tb.sprite = UISpriteFactory.Create3DButtonSprite(new Color(0.15f, 0.10f, 0.25f), 256, 40);
             tb.type = Image.Type.Sliced;
             tb.color = Color.white;
+
+            // Hidden Admin Panel Trigger (7 taps)
+            var adminTitleBtn = titleBar.AddComponent<Button>();
+            adminTitleBtn.transition = Selectable.Transition.None;
+            adminTitleBtn.onClick.AddListener(() => { AdminPanel.EnsureExists(); AdminPanel.Instance.Show(); Debug.Log("[Admin] Panel shown!"); });
             var trt = titleBar.GetComponent<RectTransform>();
             trt.anchorMin = new Vector2(0f, 1f);
             trt.anchorMax = new Vector2(1f, 1f);
