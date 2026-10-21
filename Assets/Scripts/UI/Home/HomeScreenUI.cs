@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using DG.Tweening;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
@@ -313,6 +314,14 @@ namespace MeraWorld.Core
         {
             IsHomeVisible = true;
             _homeCanvas.gameObject.SetActive(true);
+
+            // JUICE: Home Entrance Animation
+            _homeCanvas.transform.localScale = Vector3.one * 0.95f;
+            _homeCanvas.transform.DOScale(Vector3.one, 0.4f).SetEase(DG.Tweening.Ease.OutBack);
+            var cg = _homeCanvas.GetComponent<CanvasGroup>();
+            if (cg == null) cg = _homeCanvas.gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            cg.DOFade(1f, 0.3f);
             _levelSelectCanvas.gameObject.SetActive(false);
         }
 

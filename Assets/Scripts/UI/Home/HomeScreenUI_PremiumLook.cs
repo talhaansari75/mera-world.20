@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using DG.Tweening;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
@@ -170,6 +171,9 @@ namespace MeraWorld.Core
             playRt.anchoredPosition = new Vector2(0f, 100f);
             playRt.sizeDelta = new Vector2(950f, 400f);
 
+            // JUICE: PLAY button continuous pulse
+            playObj.transform.DOScale(Vector3.one * 1.05f, 1.2f).SetLoops(-1, DG.Tweening.LoopType.Yoyo).SetEase(DG.Tweening.Ease.InOutSine);
+
             var textObj = new GameObject("PlayText");
             textObj.transform.SetParent(playObj.transform, false);
             var txt = textObj.AddComponent<Text>();
@@ -206,6 +210,18 @@ namespace MeraWorld.Core
 
             // GAME MODES — wide button above grid
             CreateModeBanner(new Vector2(0f, centerY + ySpacing * 0.85f), OnModesClicked);
+
+            // JUICE: Staggered Bounce for Category Buttons
+            int idx = 0;
+            foreach (Transform child in _homeCanvas.transform)
+            {
+                if (child.name.StartsWith("CatBtn_") || child.name == "ModeBanner")
+                {
+                    child.localScale = Vector3.zero;
+                    child.DOScale(Vector3.one, 0.4f).SetDelay(0.1f * idx).SetEase(DG.Tweening.Ease.OutBack);
+                    idx++;
+                }
+            }
         }
 
         private void CreateModeBanner(Vector2 pos, UnityEngine.Events.UnityAction onClick)
