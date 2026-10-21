@@ -80,7 +80,10 @@ namespace MeraWorld.Core
             _panel.transform.SetParent(_canvas.transform, false);
 
             var bg = _panel.AddComponent<Image>();
-            bg.sprite = Resources.Load<Sprite>("UI/HomeScreen/Backgrounds/bg_space");
+            // Premium Deep Navy Gradient
+            // Solid Deep Navy Background
+            bg.sprite = null;
+            bg.color = new Color(13f/255f, 27f/255f, 42f/255f, 1f);
             bg.color = Color.white;
             bg.type = Image.Type.Simple;
             bg.preserveAspect = false;

@@ -16,7 +16,7 @@ namespace MeraWorld.Core
             var bg = obj.AddComponent<Image>();
             bg.sprite = UISpriteFactory.Create3DButtonSprite(HEADER_BG, 256, 40);
             bg.type = Image.Type.Sliced;
-            bg.color = Color.white;
+            bg.color = new Color(0.1f, 0.15f, 0.25f, 1f); // Solid Navy
 
             var t = MakeText(obj.transform, title, Vector2.zero, 44, Color.white);
             t.fontStyle = FontStyle.Bold;
@@ -38,9 +38,14 @@ namespace MeraWorld.Core
             le.minHeight = 130f; le.preferredHeight = 130f;
 
             var bg = row.AddComponent<Image>();
-            bg.sprite = UISpriteFactory.Create3DButtonSprite(ROW_BG, 256, 30);
+            // Glassmorphism Background
+            bg.sprite = null; // Solid color
             bg.type = Image.Type.Sliced;
-            bg.color = Color.white;
+            bg.color = new Color(0.1f, 0.15f, 0.25f, 1f); // Solid Navy
+
+            var outline = row.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 1f, 1f, 0.4f);
+            outline.effectDistance = new Vector2(1f, -1f);
 
             var lbl = MakeText(row.transform, label, new Vector2(-220f, 0f), 30, TEXT_GOLD);
             lbl.alignment = TextAnchor.MiddleLeft;
@@ -70,9 +75,14 @@ namespace MeraWorld.Core
             le.minHeight = 130f; le.preferredHeight = 130f;
 
             var bg = row.AddComponent<Image>();
-            bg.sprite = UISpriteFactory.Create3DButtonSprite(ROW_BG, 256, 30);
+            // Glassmorphism Background
+            bg.sprite = null; // Solid color
             bg.type = Image.Type.Sliced;
-            bg.color = Color.white;
+            bg.color = new Color(0.1f, 0.15f, 0.25f, 1f); // Solid Navy
+
+            var outline = row.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 1f, 1f, 0.4f);
+            outline.effectDistance = new Vector2(1f, -1f);
 
             var lbl = MakeText(row.transform, label, new Vector2(-220f, 0f), 30, TEXT_GOLD);
             lbl.alignment = TextAnchor.MiddleLeft;
@@ -144,9 +154,14 @@ namespace MeraWorld.Core
             le.minHeight = 110f; le.preferredHeight = 110f;
 
             var bg = row.AddComponent<Image>();
-            bg.sprite = UISpriteFactory.Create3DButtonSprite(ROW_BG, 256, 30);
+            // Glassmorphism Background
+            bg.sprite = null; // Solid color
             bg.type = Image.Type.Sliced;
-            bg.color = Color.white;
+            bg.color = new Color(0.1f, 0.15f, 0.25f, 1f); // Solid Navy
+
+            var outline = row.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 1f, 1f, 0.4f);
+            outline.effectDistance = new Vector2(1f, -1f);
 
             var lbl = MakeText(row.transform, label, new Vector2(-220f, 0f), 28, TEXT_GOLD);
             lbl.alignment = TextAnchor.MiddleLeft;
@@ -235,9 +250,14 @@ namespace MeraWorld.Core
             le.minHeight = 150f; le.preferredHeight = 150f;
 
             var bg = row.AddComponent<Image>();
-            bg.sprite = UISpriteFactory.Create3DButtonSprite(ROW_BG, 256, 30);
+            // Glassmorphism Background
+            bg.sprite = null; // Solid color
             bg.type = Image.Type.Sliced;
-            bg.color = Color.white;
+            bg.color = new Color(0.1f, 0.15f, 0.25f, 1f); // Solid Navy
+
+            var outline = row.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 1f, 1f, 0.4f);
+            outline.effectDistance = new Vector2(1f, -1f);
 
             // Label
             var lbl = MakeText(row.transform, label, new Vector2(-340f, 35f), 28, TEXT_GOLD);

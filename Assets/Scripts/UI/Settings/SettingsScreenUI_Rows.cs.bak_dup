@@ -1,0 +1,351 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace MeraWorld.Core
+{
+    public partial class SettingsScreenUI
+    {
+        private void BuildSection(string title)
+        {
+            var obj = new GameObject("Section_" + title, typeof(RectTransform));
+            obj.transform.SetParent(_scrollContent, false);
+            obj.GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 90f);
+            var le = obj.AddComponent<LayoutElement>();
+            le.minHeight = 90f; le.preferredHeight = 90f;
+
+            var bg = obj.AddComponent<Image>();
+            bg.sprite = UISpriteFactory.Create3DButtonSprite(HEADER_BG, 256, 40);
+            bg.type = Image.Type.Sliced;
+            bg.color = Color.white;
+
+            var t = MakeText(obj.transform, title, Vector2.zero, 44, Color.white);
+            t.fontStyle = FontStyle.Bold;
+            var o = t.gameObject.AddComponent<Outline>();
+            o.effectColor = new Color(0.3f, 0.1f, 0f, 1f);
+            o.effectDistance = new Vector2(2f, -2f);
+            t.rectTransform.anchorMin = Vector2.zero;
+            t.rectTransform.anchorMax = Vector2.one;
+            t.rectTransform.offsetMin = Vector2.zero;
+            t.rectTransform.offsetMax = Vector2.zero;
+        }
+
+        private void BuildActionRow(string label, string btnText, Color btnColor, UnityEngine.Events.UnityAction onClick)
+        {
+            var row = new GameObject("Row_" + label, typeof(RectTransform));
+            row.transform.SetParent(_scrollContent, false);
+            row.GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 130f);
+            var le = row.AddComponent<LayoutElement>();
+            le.minHeight = 130f; le.preferredHeight = 130f;
+
+            var bg = row.AddComponent<Image>();
+            // Glassmorphism Background
+            bg.sprite = UISpriteFactory.CreateRoundedSprite(Color.white, 128, 24);
+            bg.type = Image.Type.Sliced;
+            bg.color = new Color(0.1f, 0.15f, 0.25f, 0.85f); // Deep Navy Glass
+
+            var outline = row.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 1f, 1f, 0.4f);
+            outline.effectDistance = new Vector2(1f, -1f);
+            bg.type = Image.Type.Sliced;
+            bg.color = Color.white;
+
+            var lbl = MakeText(row.transform, label, new Vector2(-220f, 0f), 30, TEXT_GOLD);
+            lbl.alignment = TextAnchor.MiddleLeft;
+            lbl.fontStyle = FontStyle.Bold;
+            var o = lbl.gameObject.AddComponent<Outline>();
+            o.effectColor = new Color(0f, 0f, 0f, 0.9f);
+            o.effectDistance = new Vector2(2f, -2f);
+            lbl.rectTransform.anchorMin = new Vector2(0f, 0f);
+            lbl.rectTransform.anchorMax = new Vector2(0.6f, 1f);
+            lbl.rectTransform.offsetMin = new Vector2(30f, 0f);
+            lbl.rectTransform.offsetMax = Vector2.zero;
+
+            var btn = MakeButton(row.transform, btnText, new Vector2(270f, 0f), new Vector2(320f, 90f), btnColor);
+            btn.onClick.AddListener(() =>
+            {
+                PlayClick();
+                onClick?.Invoke();
+            });
+        }
+
+        private void BuildToggleRow(string label, string prefKey, int defaultValue, UnityEngine.Events.UnityAction onToggle)
+        {
+            var row = new GameObject("Row_" + prefKey, typeof(RectTransform));
+            row.transform.SetParent(_scrollContent, false);
+            row.GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 130f);
+            var le = row.AddComponent<LayoutElement>();
+            le.minHeight = 130f; le.preferredHeight = 130f;
+
+            var bg = row.AddComponent<Image>();
+            // Glassmorphism Background
+            bg.sprite = UISpriteFactory.CreateRoundedSprite(Color.white, 128, 24);
+            bg.type = Image.Type.Sliced;
+            bg.color = new Color(0.1f, 0.15f, 0.25f, 0.85f); // Deep Navy Glass
+
+            var outline = row.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 1f, 1f, 0.4f);
+            outline.effectDistance = new Vector2(1f, -1f);
+            bg.type = Image.Type.Sliced;
+            bg.color = Color.white;
+
+            var lbl = MakeText(row.transform, label, new Vector2(-220f, 0f), 30, TEXT_GOLD);
+            lbl.alignment = TextAnchor.MiddleLeft;
+            lbl.fontStyle = FontStyle.Bold;
+            var o = lbl.gameObject.AddComponent<Outline>();
+            o.effectColor = new Color(0f, 0f, 0f, 0.9f);
+            o.effectDistance = new Vector2(2f, -2f);
+            lbl.rectTransform.anchorMin = new Vector2(0f, 0f);
+            lbl.rectTransform.anchorMax = new Vector2(0.6f, 1f);
+            lbl.rectTransform.offsetMin = new Vector2(30f, 0f);
+            lbl.rectTransform.offsetMax = Vector2.zero;
+
+            var toggleBg = new GameObject("ToggleBg", typeof(RectTransform));
+            toggleBg.transform.SetParent(row.transform, false);
+            var tbImg = toggleBg.AddComponent<Image>();
+            int initVal = PlayerPrefs.GetInt(prefKey, defaultValue);
+            tbImg.sprite = UISpriteFactory.Create3DButtonSprite(initVal == 1 ? GREEN : GREY, 128, 40);
+            tbImg.type = Image.Type.Sliced;
+            tbImg.color = Color.white;
+
+            var tbrt = toggleBg.GetComponent<RectTransform>();
+            tbrt.anchorMin = new Vector2(1f, 0.5f);
+            tbrt.anchorMax = new Vector2(1f, 0.5f);
+            tbrt.pivot = new Vector2(1f, 0.5f);
+            tbrt.anchoredPosition = new Vector2(-30f, 0f);
+            tbrt.sizeDelta = new Vector2(160f, 80f);
+
+            var labelObj = new GameObject("Lbl", typeof(RectTransform));
+            labelObj.transform.SetParent(toggleBg.transform, false);
+            var labelText = labelObj.AddComponent<Text>();
+            labelText.text = initVal == 1 ? "ON" : "OFF";
+            labelText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            labelText.fontSize = 30;
+            labelText.fontStyle = FontStyle.Bold;
+            labelText.color = Color.white;
+            labelText.alignment = TextAnchor.MiddleCenter;
+            labelText.raycastTarget = false;
+            var lrt = labelObj.GetComponent<RectTransform>();
+            lrt.anchorMin = Vector2.zero;
+            lrt.anchorMax = Vector2.one;
+            lrt.offsetMin = Vector2.zero;
+            lrt.offsetMax = Vector2.zero;
+
+            var btn = toggleBg.AddComponent<Button>();
+            string capturedKey = prefKey;
+            int capturedDefault = defaultValue;
+            UnityEngine.Events.UnityAction capturedToggle = onToggle;
+
+            btn.onClick.AddListener(() =>
+            {
+                PlayClick();
+                int cur = PlayerPrefs.GetInt(capturedKey, capturedDefault);
+                int next = cur == 1 ? 0 : 1;
+                PlayerPrefs.SetInt(capturedKey, next);
+                PlayerPrefs.Save();
+                tbImg.sprite = UISpriteFactory.Create3DButtonSprite(next == 1 ? GREEN : GREY, 128, 40);
+                tbImg.type = Image.Type.Sliced;
+                labelText.text = next == 1 ? "ON" : "OFF";
+                capturedToggle?.Invoke();
+            });
+        }
+
+        private void BuildInfoRow(string label, string value)
+        {
+            var row = new GameObject("Info_" + label, typeof(RectTransform));
+            row.transform.SetParent(_scrollContent, false);
+            row.GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 110f);
+            var le = row.AddComponent<LayoutElement>();
+            le.minHeight = 110f; le.preferredHeight = 110f;
+
+            var bg = row.AddComponent<Image>();
+            // Glassmorphism Background
+            bg.sprite = UISpriteFactory.CreateRoundedSprite(Color.white, 128, 24);
+            bg.type = Image.Type.Sliced;
+            bg.color = new Color(0.1f, 0.15f, 0.25f, 0.85f); // Deep Navy Glass
+
+            var outline = row.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 1f, 1f, 0.4f);
+            outline.effectDistance = new Vector2(1f, -1f);
+            bg.type = Image.Type.Sliced;
+            bg.color = Color.white;
+
+            var lbl = MakeText(row.transform, label, new Vector2(-220f, 0f), 28, TEXT_GOLD);
+            lbl.alignment = TextAnchor.MiddleLeft;
+            lbl.fontStyle = FontStyle.Bold;
+            var o = lbl.gameObject.AddComponent<Outline>();
+            o.effectColor = new Color(0f, 0f, 0f, 0.9f);
+            o.effectDistance = new Vector2(2f, -2f);
+            lbl.rectTransform.anchorMin = new Vector2(0f, 0f);
+            lbl.rectTransform.anchorMax = new Vector2(0.4f, 1f);
+            lbl.rectTransform.offsetMin = new Vector2(30f, 0f);
+            lbl.rectTransform.offsetMax = Vector2.zero;
+
+            var val = MakeText(row.transform, value, new Vector2(200f, 0f), 22, new Color(1f, 0.95f, 0.75f));
+            val.alignment = TextAnchor.MiddleRight;
+            val.rectTransform.anchorMin = new Vector2(0.4f, 0f);
+            val.rectTransform.anchorMax = new Vector2(1f, 1f);
+            val.rectTransform.offsetMin = Vector2.zero;
+            val.rectTransform.offsetMax = new Vector2(-30f, 0f);
+        }
+
+        private Text MakeText(Transform parent, string s, Vector2 pos, int sz, Color c)
+        {
+            var o = new GameObject("T", typeof(RectTransform));
+            o.transform.SetParent(parent, false);
+            var t = o.AddComponent<Text>();
+            t.text = s;
+            t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            t.fontSize = sz;
+            t.fontStyle = FontStyle.Bold;
+            t.color = c;
+            t.alignment = TextAnchor.MiddleCenter;
+            t.raycastTarget = false;
+            var r = o.GetComponent<RectTransform>();
+            r.anchorMin = new Vector2(0.5f, 0.5f);
+            r.anchorMax = new Vector2(0.5f, 0.5f);
+            r.pivot = new Vector2(0.5f, 0.5f);
+            r.anchoredPosition = pos;
+            r.sizeDelta = new Vector2(700f, 80f);
+            return t;
+        }
+
+        private Button MakeButton(Transform parent, string s, Vector2 pos, Vector2 size, Color c)
+        {
+            var o = new GameObject("Btn_" + s, typeof(RectTransform));
+            o.transform.SetParent(parent, false);
+            var img = o.AddComponent<Image>();
+            img.sprite = UISpriteFactory.Create3DButtonSprite(c, 256, 40);
+            img.type = Image.Type.Sliced;
+            img.color = Color.white;
+            var b = o.AddComponent<Button>();
+            var r = o.GetComponent<RectTransform>();
+            r.anchorMin = new Vector2(0.5f, 0.5f);
+            r.anchorMax = new Vector2(0.5f, 0.5f);
+            r.pivot = new Vector2(0.5f, 0.5f);
+            r.anchoredPosition = pos;
+            r.sizeDelta = size;
+
+            var t = new GameObject("L", typeof(RectTransform));
+            t.transform.SetParent(o.transform, false);
+            var tx = t.AddComponent<Text>();
+            tx.text = s;
+            tx.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            tx.fontSize = 32;
+            tx.fontStyle = FontStyle.Bold;
+            tx.color = Color.white;
+            tx.alignment = TextAnchor.MiddleCenter;
+            tx.raycastTarget = false;
+            var shadow = t.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.7f);
+            shadow.effectDistance = new Vector2(2f, -2f);
+            var tr = t.GetComponent<RectTransform>();
+            tr.anchorMin = Vector2.zero;
+            tr.anchorMax = Vector2.one;
+            tr.offsetMin = Vector2.zero;
+            tr.offsetMax = Vector2.zero;
+            return b;
+        }
+
+        // ===== SLIDER ROW (0-100%) =====
+        private void BuildSliderRow(string label, string prefKey, float defaultValue, UnityEngine.Events.UnityAction<float> onChange)
+        {
+            var row = new GameObject("Row_" + prefKey, typeof(RectTransform));
+            row.transform.SetParent(_scrollContent, false);
+            row.GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 150f);
+            var le = row.AddComponent<LayoutElement>();
+            le.minHeight = 150f; le.preferredHeight = 150f;
+
+            var bg = row.AddComponent<Image>();
+            // Glassmorphism Background
+            bg.sprite = UISpriteFactory.CreateRoundedSprite(Color.white, 128, 24);
+            bg.type = Image.Type.Sliced;
+            bg.color = new Color(0.1f, 0.15f, 0.25f, 0.85f); // Deep Navy Glass
+
+            var outline = row.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 1f, 1f, 0.4f);
+            outline.effectDistance = new Vector2(1f, -1f);
+            bg.type = Image.Type.Sliced;
+            bg.color = Color.white;
+
+            // Label
+            var lbl = MakeText(row.transform, label, new Vector2(-340f, 35f), 28, TEXT_GOLD);
+            lbl.alignment = TextAnchor.MiddleLeft;
+            lbl.fontStyle = FontStyle.Bold;
+            var o = lbl.gameObject.AddComponent<Outline>();
+            o.effectColor = new Color(0f, 0f, 0f, 0.9f);
+            o.effectDistance = new Vector2(2f, -2f);
+            lbl.rectTransform.anchorMin = new Vector2(0f, 0.5f);
+            lbl.rectTransform.anchorMax = new Vector2(0.5f, 1f);
+            lbl.rectTransform.offsetMin = new Vector2(30f, 0f);
+            lbl.rectTransform.offsetMax = Vector2.zero;
+
+            // Value text (right side)
+            float initVal = PlayerPrefs.GetFloat(prefKey, defaultValue);
+            var valTxt = MakeText(row.transform, Mathf.RoundToInt(initVal * 100) + "%", new Vector2(370f, 35f), 26, Color.white);
+            valTxt.alignment = TextAnchor.MiddleRight;
+            valTxt.fontStyle = FontStyle.Bold;
+            valTxt.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            valTxt.rectTransform.anchorMax = new Vector2(1f, 1f);
+            valTxt.rectTransform.offsetMin = Vector2.zero;
+            valTxt.rectTransform.offsetMax = new Vector2(-30f, 0f);
+
+            // Slider background track
+            var trackObj = new GameObject("Track", typeof(RectTransform));
+            trackObj.transform.SetParent(row.transform, false);
+            var trackImg = trackObj.AddComponent<Image>();
+            trackImg.sprite = UISpriteFactory.Create3DButtonSprite(TRACK_BG, 256, 20);
+            trackImg.type = Image.Type.Sliced;
+            trackImg.color = Color.white;
+            var trt = trackObj.GetComponent<RectTransform>();
+            trt.anchorMin = new Vector2(0f, 0f);
+            trt.anchorMax = new Vector2(1f, 0.5f);
+            trt.offsetMin = new Vector2(35f, 15f);
+            trt.offsetMax = new Vector2(-35f, -10f);
+
+            // Fill
+            var fillObj = new GameObject("FillArea", typeof(RectTransform));
+            fillObj.transform.SetParent(trackObj.transform, false);
+            var frt = fillObj.GetComponent<RectTransform>();
+            frt.anchorMin = Vector2.zero;
+            frt.anchorMax = Vector2.one;
+            frt.offsetMin = new Vector2(8f, 8f);
+            frt.offsetMax = new Vector2(-8f, -8f);
+
+            var fill = new GameObject("Fill", typeof(RectTransform));
+            fill.transform.SetParent(fillObj.transform, false);
+            var fillImg = fill.AddComponent<Image>();
+            fillImg.sprite = UISpriteFactory.Create3DButtonSprite(SLIDER_FILL, 128, 15);
+            fillImg.type = Image.Type.Sliced;
+            fillImg.color = Color.white;
+            fillImg.raycastTarget = false;
+            var fillRt = fill.GetComponent<RectTransform>();
+            fillRt.anchorMin = new Vector2(0f, 0f);
+            fillRt.anchorMax = new Vector2(initVal, 1f);
+            fillRt.offsetMin = Vector2.zero;
+            fillRt.offsetMax = Vector2.zero;
+
+            // Slider component
+            var slider = row.AddComponent<Slider>();
+            slider.targetGraphic = trackImg;
+            slider.fillRect = fillRt;
+            slider.direction = Slider.Direction.LeftToRight;
+            slider.minValue = 0f;
+            slider.maxValue = 1f;
+            slider.value = initVal;
+            slider.transition = Selectable.Transition.None;
+
+            string capturedKey = prefKey;
+            float capturedDefault = defaultValue;
+            UnityEngine.Events.UnityAction<float> capturedChange = onChange;
+            var capturedVal = valTxt;
+
+            slider.onValueChanged.AddListener((v) =>
+            {
+                PlayerPrefs.SetFloat(capturedKey, v);
+                PlayerPrefs.Save();
+                capturedVal.text = Mathf.RoundToInt(v * 100) + "%";
+                capturedChange?.Invoke(v);
+            });
+        }
+    }
+}
