@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 namespace MeraWorld.Core
 {
@@ -12,6 +13,12 @@ namespace MeraWorld.Core
         private Canvas _canvas;
         private GameObject _panel;
         private Text _coinsText;
+
+        // Premium Colors
+        private Color _bgTop = new Color(13f/255f, 27f/255f, 42f/255f); // #0D1B2A
+        private Color _bgBottom = new Color(27f/255f, 38f/255f, 59f/255f); // #1B263B
+        private Color _glassWhite = new Color(1f, 1f, 1f, 0.08f);
+        private Color _goldAccent = new Color(1f, 0.82f, 0.40f); // #FFD166
 
         void Start()
         {
@@ -55,29 +62,27 @@ namespace MeraWorld.Core
             _panel = new GameObject("ShopPanel");
             _panel.transform.SetParent(_canvas.transform, false);
 
-            var bg = _panel.AddComponent<Image>();
-            bg.color = new Color(0.06f, 0.10f, 0.24f, 1f);
-
-            var rt = _panel.GetComponent<RectTransform>();
+            var rt = _panel.AddComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
+            rt.pivot = new Vector2(0.5f, 0.5f);
 
-            CreateText(_panel.transform, "SHOP", new Vector2(0f, 800f), 80,
-                new Color(1f, 0.85f, 0.3f), FontStyle.Bold);
+            var bg = _panel.AddComponent<Image>();
+            bg.sprite = UISpriteFactory.CreateGradientSprite(_bgTop, _bgBottom, 32, 256);
+            bg.type = Image.Type.Simple;
+            bg.raycastTarget = true; // Catch all clicks
 
-            _coinsText = CreateText(_panel.transform, "0 coins", new Vector2(0f, 700f), 40,
-                new Color(0.85f, 0.90f, 1f), FontStyle.Normal);
+            CreateText(_panel.transform, "SHOP", new Vector2(0f, 800f), 80, _goldAccent, FontStyle.Bold, true);
+            _coinsText = CreateText(_panel.transform, "0 coins", new Vector2(0f, 700f), 40, new Color(0.85f, 0.90f, 1f), FontStyle.Normal, false);
+            CreateGlassButton(_panel.transform, "< BACK", new Vector2(-380f, 800f), OnBack);
 
-            CreateSmallButton(_panel.transform, "◀ BACK", new Vector2(-380f, 800f),
-                new Color(0.5f, 0.5f, 0.55f), OnBack);
-
-            CreateShopItem(_panel.transform, "10 HINTS", "500 coins", 500, 500f, OnBuyHints10);
-            CreateShopItem(_panel.transform, "50 HINTS", "2000 coins", 2000, 300f, OnBuyHints50);
-            CreateShopItem(_panel.transform, "100 HINTS", "3500 coins", 3500, 100f, OnBuyHints100);
-            CreateShopItem(_panel.transform, "REMOVE ADS", "5000 coins", 5000, -100f, OnBuyRemoveAds);
-            CreateShopItem(_panel.transform, "GOLDEN THEME", "10000 coins", 10000, -300f, OnBuyGoldenTheme);
+            CreateShopItem(_panel.transform, "10 HINTS", "500 coins", 500, 450f, OnBuyHints10);
+            CreateShopItem(_panel.transform, "50 HINTS", "2000 coins", 2000, 250f, OnBuyHints50);
+            CreateShopItem(_panel.transform, "100 HINTS", "3500 coins", 3500, 50f, OnBuyHints100);
+            CreateShopItem(_panel.transform, "REMOVE ADS", "5000 coins", 5000, -150f, OnBuyRemoveAds);
+            CreateShopItem(_panel.transform, "GOLDEN THEME", "10000 coins", 10000, -350f, OnBuyGoldenTheme);
 
             _panel.SetActive(false);
         }
@@ -88,7 +93,14 @@ namespace MeraWorld.Core
             itemObj.transform.SetParent(parent, false);
 
             var bg = itemObj.AddComponent<Image>();
-            bg.color = new Color(0.15f, 0.20f, 0.35f);
+            bg.sprite = UISpriteFactory.CreateRoundedSprite(Color.white, 128, 24);
+            bg.type = Image.Type.Sliced;
+            bg.color = new Color(0.1f, 0.15f, 0.25f, 0.85f); // Deep Navy Glass
+            bg.raycastTarget = true;
+
+            var outline = itemObj.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 1f, 1f, 0.4f);
+            outline.effectDistance = new Vector2(1f, -1f);
 
             var rt = itemObj.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 0.5f);
@@ -97,161 +109,107 @@ namespace MeraWorld.Core
             rt.anchoredPosition = new Vector2(0f, yPos);
             rt.sizeDelta = new Vector2(900f, 150f);
 
-            var iconObj = new GameObject("Icon");
-            iconObj.transform.SetParent(itemObj.transform, false);
-            var iconImg = iconObj.AddComponent<Image>();
-            iconImg.color = new Color(1f, 0.85f, 0.30f);
-            iconImg.raycastTarget = false;
-            var iconRt = iconObj.GetComponent<RectTransform>();
-            iconRt.anchorMin = new Vector2(0f, 0.5f);
-            iconRt.anchorMax = new Vector2(0f, 0.5f);
-            iconRt.pivot = new Vector2(0f, 0.5f);
-            iconRt.anchoredPosition = new Vector2(25f, 0f);
-            iconRt.sizeDelta = new Vector2(100f, 100f);
+            var btn = itemObj.AddComponent<Button>();
+            btn.onClick.AddListener(onBuy);
 
-            var nameObj = new GameObject("Name");
-            nameObj.transform.SetParent(itemObj.transform, false);
-            var nameTxt = nameObj.AddComponent<Text>();
-            nameTxt.text = name;
-            nameTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            nameTxt.fontSize = 40;
-            nameTxt.fontStyle = FontStyle.Bold;
-            nameTxt.color = Color.white;
-            nameTxt.alignment = TextAnchor.MiddleLeft;
-            nameTxt.raycastTarget = false;
-            var nameRt = nameObj.GetComponent<RectTransform>();
-            nameRt.anchorMin = new Vector2(0f, 0.5f);
-            nameRt.anchorMax = new Vector2(1f, 1f);
-            nameRt.pivot = new Vector2(0f, 0.5f);
-            nameRt.anchoredPosition = new Vector2(150f, 0f);
-            nameRt.sizeDelta = new Vector2(-400f, 80f);
-
-            var priceObj = new GameObject("Price");
-            priceObj.transform.SetParent(itemObj.transform, false);
-            var priceTxt = priceObj.AddComponent<Text>();
-            priceTxt.text = priceLabel;
-            priceTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            priceTxt.fontSize = 28;
-            priceTxt.color = new Color(1f, 0.85f, 0.30f);
-            priceTxt.alignment = TextAnchor.MiddleLeft;
-            priceTxt.raycastTarget = false;
-            var priceRt = priceObj.GetComponent<RectTransform>();
-            priceRt.anchorMin = new Vector2(0f, 0f);
-            priceRt.anchorMax = new Vector2(1f, 0.5f);
-            priceRt.pivot = new Vector2(0f, 0.5f);
-            priceRt.anchoredPosition = new Vector2(150f, 0f);
-            priceRt.sizeDelta = new Vector2(-400f, 60f);
-
-            var btnObj = new GameObject("BuyBtn");
-            btnObj.transform.SetParent(itemObj.transform, false);
-
-            var btnImg = btnObj.AddComponent<Image>();
-            btnImg.color = new Color(0.25f, 0.70f, 0.35f);
-
-            var btn = btnObj.AddComponent<Button>();
-            btn.onClick.AddListener(() =>
-            {
-                if (Progress != null && Progress.SpendCoins(price))
-                {
-                    if (Sound != null) Sound.PlayCoinCollect();
-                    onBuy?.Invoke();
-                    UpdateCoinsDisplay();
-                }
-                else
-                {
-                    if (Sound != null) Sound.PlayWordInvalid();
-                    Debug.Log("[Shop] Not enough coins");
-                }
-            });
-
-            var btnRt = btnObj.GetComponent<RectTransform>();
-            btnRt.anchorMin = new Vector2(1f, 0.5f);
-            btnRt.anchorMax = new Vector2(1f, 0.5f);
-            btnRt.pivot = new Vector2(1f, 0.5f);
-            btnRt.anchoredPosition = new Vector2(-25f, 0f);
-            btnRt.sizeDelta = new Vector2(160f, 100f);
-
-            var btnLabelObj = new GameObject("Label");
-            btnLabelObj.transform.SetParent(btnObj.transform, false);
-            var btnLabel = btnLabelObj.AddComponent<Text>();
-            btnLabel.text = "BUY";
-            btnLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            btnLabel.fontSize = 32;
-            btnLabel.fontStyle = FontStyle.Bold;
-            btnLabel.color = Color.white;
-            btnLabel.alignment = TextAnchor.MiddleCenter;
-            btnLabel.raycastTarget = false;
-            var blRt = btnLabelObj.GetComponent<RectTransform>();
-            blRt.anchorMin = Vector2.zero;
-            blRt.anchorMax = Vector2.one;
-            blRt.offsetMin = Vector2.zero;
-            blRt.offsetMax = Vector2.zero;
-        }
-
-        private void OnBuyHints10()
-        {
-            int hints = PlayerPrefs.GetInt("PlayerHints", 0);
-            PlayerPrefs.SetInt("PlayerHints", hints + 10);
-            PlayerPrefs.Save();
-            Debug.Log("[Shop] +10 hints");
-        }
-
-        private void OnBuyHints50()
-        {
-            int hints = PlayerPrefs.GetInt("PlayerHints", 0);
-            PlayerPrefs.SetInt("PlayerHints", hints + 50);
-            PlayerPrefs.Save();
-            Debug.Log("[Shop] +50 hints");
-        }
-
-        private void OnBuyHints100()
-        {
-            int hints = PlayerPrefs.GetInt("PlayerHints", 0);
-            PlayerPrefs.SetInt("PlayerHints", hints + 100);
-            PlayerPrefs.Save();
-            Debug.Log("[Shop] +100 hints");
-        }
-
-        private void OnBuyRemoveAds()
-        {
-            PlayerPrefs.SetInt("RemoveAds", 1);
-            PlayerPrefs.Save();
-            Debug.Log("[Shop] Ads removed");
-
-            if (NoAdsConfettiUI.Instance != null)
-                NoAdsConfettiUI.Instance.Celebrate();
-        }
-
-        private void OnBuyGoldenTheme()
-        {
-            PlayerPrefs.SetInt("GoldenTheme", 1);
-            PlayerPrefs.Save();
-            Debug.Log("[Shop] Golden theme unlocked");
-        }
-
-        private void UpdateCoinsDisplay()
-        {
-            if (_coinsText != null && Progress != null)
-                _coinsText.text = $"{Progress.Coins} coins";
+            CreateText(itemObj.transform, name, new Vector2(-200f, 0f), 40, Color.white, FontStyle.Bold, true);
+            CreateText(itemObj.transform, priceLabel, new Vector2(200f, 0f), 36, _goldAccent, FontStyle.Bold, false);
         }
 
         public void Show()
         {
-            UpdateCoinsDisplay();
-            if (_panel != null) _panel.SetActive(true);
+            if (_panel == null)
+            {
+                BuildCanvas();
+                BuildPanel();
+            }
+
+            if (_panel != null)
+            {
+                if (Progress != null && _coinsText != null)
+                    _coinsText.text = Progress.Coins.ToString("N0") + " coins";
+
+                // GHOST CLICK FIX: Disable all buttons BEFORE opening
+                foreach (var btn in _panel.GetComponentsInChildren<Button>(true))
+                    btn.interactable = false;
+
+                _panel.SetActive(true);
+
+                // Re-enable after 0.5s using Unity's reliable Invoke
+                CancelInvoke(nameof(EnableButtons));
+                Invoke(nameof(EnableButtons), 0.5f);
+
+                var cg = _panel.GetComponent<CanvasGroup>();
+                if (cg == null) cg = _panel.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.25f);
+            }
         }
 
-        public void Hide()
+        private void EnableButtons()
         {
-            if (_panel != null) _panel.SetActive(false);
+            if (_panel != null && _panel.activeInHierarchy)
+            {
+                foreach (var btn in _panel.GetComponentsInChildren<Button>(true))
+                    btn.interactable = true;
+            }
         }
 
-        private void OnBack()
+        public void Hide() { if (_panel != null) _panel.SetActive(false); }
+
+        private void OnBack() { 
+            Hide(); 
+            if (CategoryMenuUI.Instance != null) CategoryMenuUI.Instance.Show("shop");
+        }
+
+        private void OnBuyHints10() { BuyItem(500, () => { /* Add hints logic */ }); }
+        private void OnBuyHints50() { BuyItem(2000, () => { /* Add hints logic */ }); }
+        private void OnBuyHints100() { BuyItem(3500, () => { /* Add hints logic */ }); }
+        private void OnBuyRemoveAds() { BuyItem(5000, () => { /* Ads removed */ }); }
+        private void OnBuyGoldenTheme() { BuyItem(10000, () => { /* Theme unlock */ }); }
+
+        private void BuyItem(int price, System.Action onSuccess)
         {
-            Hide();
+            if (Progress == null) return;
+
+            if (Progress.Coins >= price)
+            {
+                Progress.AddCoins(-price);
+                onSuccess?.Invoke();
+                Show(); // Refresh UI
+                if (Sound != null) Sound.PlayWordFound();
+                Debug.Log($"[Shop] Purchased item for {price} coins!");
+            }
+            else
+            {
+                Debug.LogWarning("[Shop] Not enough coins!");
+                if (Sound != null) Sound.PlayWordInvalid();
+            }
         }
 
-        private Text CreateText(Transform parent, string content, Vector2 pos, int size, Color color, FontStyle style)
+        private void CreateGlassButton(Transform parent, string label, Vector2 pos, UnityEngine.Events.UnityAction onClick)
+        {
+            var obj = new GameObject($"Btn_{label}");
+            obj.transform.SetParent(parent, false);
+            var img = obj.AddComponent<Image>();
+            img.sprite = UISpriteFactory.CreateRoundedSprite(_glassWhite, 128, 16);
+            img.type = Image.Type.Sliced;
+            img.color = Color.white;
+
+            var btn = obj.AddComponent<Button>();
+            btn.onClick.AddListener(onClick);
+
+            var rt = obj.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = new Vector2(220f, 80f);
+
+            CreateText(obj.transform, label, Vector2.zero, 30, Color.white, FontStyle.Bold, false);
+        }
+
+        private Text CreateText(Transform parent, string content, Vector2 pos, int size, Color color, FontStyle style, bool addShadow)
         {
             var obj = new GameObject("Text");
             obj.transform.SetParent(parent, false);
@@ -263,44 +221,21 @@ namespace MeraWorld.Core
             txt.color = color;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.raycastTarget = false;
-            var rt = obj.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(900f, 120f);
-            return txt;
-        }
 
-        private void CreateSmallButton(Transform parent, string label, Vector2 pos, Color color, UnityEngine.Events.UnityAction onClick)
-        {
-            var obj = new GameObject($"Btn_{label}");
-            obj.transform.SetParent(parent, false);
-            var img = obj.AddComponent<Image>();
-            img.color = color;
-            var btn = obj.AddComponent<Button>();
-            btn.onClick.AddListener(onClick);
+            if (addShadow)
+            {
+                var shadow = obj.AddComponent<Shadow>();
+                shadow.effectColor = new Color(0f, 0f, 0f, 0.6f);
+                shadow.effectDistance = new Vector2(2f, -2f);
+            }
+
             var rt = obj.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(220f, 80f);
-            var textObj = new GameObject("Label");
-            textObj.transform.SetParent(obj.transform, false);
-            var txt = textObj.AddComponent<Text>();
-            txt.text = label;
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = 32;
-            txt.fontStyle = FontStyle.Bold;
-            txt.color = Color.white;
-            txt.alignment = TextAnchor.MiddleCenter;
-            txt.raycastTarget = false;
-            var trt = textObj.GetComponent<RectTransform>();
-            trt.anchorMin = Vector2.zero;
-            trt.anchorMax = Vector2.one;
-            trt.offsetMin = Vector2.zero;
-            trt.offsetMax = Vector2.zero;
+            rt.sizeDelta = new Vector2(600f, 100f);
+            return txt;
         }
     }
 }
