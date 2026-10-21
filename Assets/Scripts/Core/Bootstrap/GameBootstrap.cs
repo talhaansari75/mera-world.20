@@ -135,7 +135,7 @@ namespace MeraWorld.Core
             if (CreateLevelTimerUI) EnsureComponent<LevelTimerUI>("LevelTimerUI");
             if (CreateStreakButtonUI) EnsureComponent<StreakButtonUI>("StreakButtonUI");
             if (CreateDOTweenInitializer) EnsureComponent<DOTweenInitializer>("DOTweenInitializer");
-            EnsureComponent<AdminPanel>("AdminPanel");
+            // AdminPanel is created on-demand by SettingsScreenUI
 
             // Post Processing FX
             if (CreateGameplayPostFX)

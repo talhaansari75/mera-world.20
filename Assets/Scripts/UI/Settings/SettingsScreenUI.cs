@@ -115,7 +115,7 @@ namespace MeraWorld.Core
             // Hidden Admin Panel Trigger (7 taps)
             var adminTitleBtn = titleBar.AddComponent<Button>();
             adminTitleBtn.transition = Selectable.Transition.None;
-            adminTitleBtn.onClick.AddListener(() => { AdminPanel.EnsureExists(); AdminPanel.Instance.Show(); Debug.Log("[Admin] Panel shown!"); });
+            adminTitleBtn.onClick.AddListener(() => { AdminPanel.EnsureExists(); AdminPanel.TryUnlock(); });
             var trt = titleBar.GetComponent<RectTransform>();
             trt.anchorMin = new Vector2(0f, 1f);
             trt.anchorMax = new Vector2(1f, 1f);
